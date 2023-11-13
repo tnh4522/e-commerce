@@ -36,7 +36,7 @@ function Login() {
             setError(errorSubmit);
         } else {
             setError('');
-            axios.post('http://localhost:8080/api/user/login', getInput)
+            axios.post('https://intense-inlet-71668-b76c23b36694.herokuapp.com/api/user/login', getInput)
                 .then(res => {
                     localStorage.setItem('user', JSON.stringify(res.data));
                     navigate('/');

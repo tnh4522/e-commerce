@@ -6,7 +6,7 @@ function ManageBlogs() {
     const [users, setUsers] = useState({});
     const [blogs, setBlogs] = useState([]);
     useEffect(() => {
-        axios.get('http://localhost:8080/api/user/list')
+        axios.get('https://intense-inlet-71668-b76c23b36694.herokuapp.com/api/user/list')
         .then(function (response) {
             setUsers(response.data);
         })
@@ -15,7 +15,7 @@ function ManageBlogs() {
         });
     }, []);
     useEffect(() => {
-        axios.get('http://localhost:8080/api/blog/list')
+        axios.get('https://intense-inlet-71668-b76c23b36694.herokuapp.com/api/blog/list')
         .then(function (response) {
             setBlogs(response.data);
         })
@@ -50,7 +50,7 @@ function ManageBlogs() {
     function deleteBlog(e) {
         const id = e.target.id;
         if(window.confirm('Are you sure you want to delete this blog?')){
-            axios.delete(`http://localhost:8080/api/blog/${id}`)
+            axios.delete(`https://intense-inlet-71668-b76c23b36694.herokuapp.com/api/blog/${id}`)
             .then(function (response) {
                 if (response.status === 200) {
                     e.target.parentNode.parentNode.remove();

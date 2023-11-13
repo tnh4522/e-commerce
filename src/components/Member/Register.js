@@ -77,7 +77,7 @@ function Register() {
                 avatar: getInput.file ? getInput.file.name : '',
                 level: getInput.level
             }
-            axios.post('http://localhost:8080/api/user/register', formData)
+            axios.post('https://intense-inlet-71668-b76c23b36694.herokuapp.com/api/user/register', formData)
                 .then(res => {
                     navigate('/login');
                     alert('Register success!');

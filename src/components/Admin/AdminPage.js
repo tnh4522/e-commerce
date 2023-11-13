@@ -5,7 +5,7 @@ import axios from 'axios';
 function AdminUserPage() {
     const [getData, setData] = useState([]);
     useEffect(() => {
-        axios.get('http://localhost:8080/api/user/list')
+        axios.get('https://intense-inlet-71668-b76c23b36694.herokuapp.com/api/user/list')
             .then(function (response) {
                 setData(response.data);
             })
@@ -47,7 +47,7 @@ function AdminUserPage() {
             return;
         };
         if (window.confirm('Are you sure you want to delete this blog?')) {
-            axios.delete(`http://localhost:8080/api/user/${id}`)
+            axios.delete(`https://intense-inlet-71668-b76c23b36694.herokuapp.com/api/user/${id}`)
                 .then(function (response) {
                     if (response.status === 200) {
                         e.target.parentNode.parentNode.remove();

@@ -23,7 +23,7 @@ function UpdateUser() {
         inputFileRef.current.click();
     };
     useEffect(() => {
-        axios.get('http://localhost:8080/api/user/' + id)
+        axios.get('https://intense-inlet-71668-b76c23b36694.herokuapp.com/api/user/' + id)
             .then(function (response) {
                 setInput((state) => {
                     return {
@@ -87,7 +87,7 @@ function UpdateUser() {
                 avatar: getInput.file ? getInput.file.name : null
             }
             
-            axios.post('http://localhost:8080/api/user/update/' + id, data_json)
+            axios.post('https://intense-inlet-71668-b76c23b36694.herokuapp.com/api/user/update/' + id, data_json)
                 .then(function (response) {
                     if(window.confirm('Are you sure you want to update this user?')){
                         if (response.status === 200) {

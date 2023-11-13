@@ -4,7 +4,6 @@ import ProductInfo from "./ProductInfo";
 import { useEffect, useState } from "react";
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { FreeMode, Navigation, Thumbs } from 'swiper/modules';
-import API from "../API/API";
 import 'swiper/css';
 import 'swiper/css/free-mode';
 import 'swiper/css/navigation';
@@ -23,7 +22,7 @@ function SingleProduct() {
         setQuantity(value);
     }
     useEffect(() => {
-        axios.get('http://localhost:8080/api/product/detail/' + productID)
+        axios.get('https://intense-inlet-71668-b76c23b36694.herokuapp.com/api/product/detail/' + productID)
             .then(res => {
                 setProduct(res.data);
             })

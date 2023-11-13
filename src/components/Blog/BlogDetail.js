@@ -12,7 +12,7 @@ function BlogDetail() {
     const [getComment, setComment] = useState('');
     const [getIdReply, setIdReply] = useState('');
     useEffect(() => {
-        axios.get('http://localhost:8080/api/blog/' + id)
+        axios.get('https://intense-inlet-71668-b76c23b36694.herokuapp.com/api/blog/detail/' + id)
             .then(res => {
                 setData(res.data);
                 setComment(res.data.comments);

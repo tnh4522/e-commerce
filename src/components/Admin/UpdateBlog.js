@@ -13,7 +13,7 @@ function UpdateBlog() {
     });
     let { id } = useParams();
     useEffect(() => {
-        axios.get('http://localhost:8080/api/blog/' + id)
+        axios.get('https://intense-inlet-71668-b76c23b36694.herokuapp.com/api/blog/detail/' + id)
             .then(function (response) {
                 setData((state) => {
                     return {
@@ -45,7 +45,6 @@ function UpdateBlog() {
             reader.readAsDataURL(fileInput[0]);
         }
     };
-    console.log(data);
     function handleChange(e) {
         const { name, value } = e.target;
         setData(state => {
@@ -66,7 +65,7 @@ function UpdateBlog() {
             idAuth: data.idAuth
         };
         console.log(jsonData);
-        axios.post('http://localhost:8080/api/blog/update/' + id, jsonData, {
+        axios.post('https://intense-inlet-71668-b76c23b36694.herokuapp.com/api/blog/update/' + id, jsonData, {
             headers: {
                 'Content-Type': 'application/json',
             },
@@ -93,7 +92,7 @@ function UpdateBlog() {
             <section className="py-5 mb-5" style={{ background: `url(${backgroundPattern})` }}>
                 <div className="container-fluid">
                     <div className="d-flex justify-content-between">
-                        <h1 className="page-title pb-2">Add New Blog</h1>
+                        <h1 className="page-title pb-2">Update Blog</h1>
                         <nav className="breadcrumb fs-6">
                             <Link className="breadcrumb-item nav-link" to="/">Home</Link>
                             <Link className="breadcrumb-item nav-link" to="">Pages</Link>

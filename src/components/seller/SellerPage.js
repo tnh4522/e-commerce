@@ -3,11 +3,10 @@ import backgroundPattern from '../../images/background-pattern.jpg';
 import { useState } from 'react';
 import axios from 'axios';
 import { useEffect } from 'react';
-import API from '../API/API';
 function SellerPage() {
     const [getData, setData] = useState([]);
     useEffect(() => {
-        axios.get('http://localhost:8080/api/product/list')
+        axios.get('https://intense-inlet-71668-b76c23b36694.herokuapp.com/api/product/list')
         .then(function (response) {
             setData(response.data);
         })
@@ -18,14 +17,20 @@ function SellerPage() {
     const [categories, setCategories] = useState([])
     const [brands, setBrands] = useState([])
     useEffect(() => {
-        API.get('/category-brand')
+        axios.get('https://intense-inlet-71668-b76c23b36694.herokuapp.com/api/category')
             .then(response => {
-                setCategories(response.data.category)
-                setBrands(response.data.brand)
+                setCategories(response.data)
             })
             .catch(error => {
                 console.log(error)
+            });
+        axios.get('https://intense-inlet-71668-b76c23b36694.herokuapp.com/api/brand')
+            .then(response => {
+                setBrands(response.data)
             })
+            .catch(error => {
+                console.log(error)
+            });
     }, []);
     function fetchCategory(category_id) {
         const category = categories.find(category => category.id === category_id);
@@ -75,7 +80,7 @@ function SellerPage() {
     }
     function deleteProduct(e) {
         const id = e.target.id;
-        axios.delete(`http://localhost:8080/api/product/${id}`)
+        axios.delete(`https://food-mart-e-commerce.onrender.com/api/product/${id}`)
         .then(function (response) {
             if (response.status === 200) {
                 e.target.parentNode.parentNode.remove();

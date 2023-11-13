@@ -12,7 +12,7 @@ function Cart() {
         });
     };
     useEffect(() => {
-        axios.post('http://localhost:8080/api/product/cart', cartData)
+        axios.post('https://intense-inlet-71668-b76c23b36694.herokuapp.com/api/product/cart', cartData)
             .then(res => {
                 setData(res.data);
                 if(window.location.pathname === '/cart') {

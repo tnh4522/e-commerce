@@ -1,5 +1,4 @@
 import React, { useEffect } from 'react'
-import API from '../API/API'
 import FormError from '../Error/FormError'
 import { useNavigate } from 'react-router';
 import { Link } from 'react-router-dom';
@@ -40,14 +39,20 @@ export default function AddProduct() {
     const [categories, setCategories] = React.useState([])
     const [brands, setBrands] = React.useState([])
     useEffect(() => {
-        API.get('/category-brand')
+        axios.get('https://intense-inlet-71668-b76c23b36694.herokuapp.com/api/category')
             .then(response => {
-                setCategories(response.data.category)
-                setBrands(response.data.brand)
+                setCategories(response.data)
             })
             .catch(error => {
                 console.log(error)
+            });
+        axios.get('https://intense-inlet-71668-b76c23b36694.herokuapp.com/api/brand')
+            .then(response => {
+                setBrands(response.data)
             })
+            .catch(error => {
+                console.log(error)
+            });
     }, []);
     function fetchCategory() {
         return categories.map((value, index) => {
@@ -146,7 +151,7 @@ export default function AddProduct() {
                 image: stringArrayImage.toString()
             }
 
-            axios.post('http://localhost:8080/api/product/add', data, {
+            axios.post('https://intense-inlet-71668-b76c23b36694.herokuapp.com/api/product/add', data, {
                 headers: {
                     'Content-Type': 'application/json',
                 },

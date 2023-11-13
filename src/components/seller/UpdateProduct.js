@@ -1,6 +1,5 @@
 import backgroundPattern from '../../images/background-pattern.jpg';
 import React, { useEffect } from 'react'
-import API from '../API/API'
 import FormError from "../Error/FormError";
 import { Link } from 'react-router-dom';
 import { useNavigate, useParams } from 'react-router';
@@ -32,7 +31,7 @@ function UpdateProduct() {
     let productID = useParams().id;
     const [getImages, setImages] = React.useState([]);
     useEffect(() => {
-        axios.get('http://localhost:8080/api/product/detail/' + productID)
+        axios.get('https://intense-inlet-71668-b76c23b36694.herokuapp.com/api/product/detail/' + productID)
             .then(response => {
                 setGetInput(response.data)
                 setImages(response.data.image);
@@ -44,14 +43,20 @@ function UpdateProduct() {
     const [categories, setCategories] = React.useState([])
     const [brands, setBrands] = React.useState([])
     useEffect(() => {
-        API.get('/category-brand')
+        axios.get('https://intense-inlet-71668-b76c23b36694.herokuapp.com/api/category')
             .then(response => {
-                setCategories(response.data.category)
-                setBrands(response.data.brand)
+                setCategories(response.data)
             })
             .catch(error => {
                 console.log(error)
+            });
+        axios.get('https://intense-inlet-71668-b76c23b36694.herokuapp.com/api/brand')
+            .then(response => {
+                setBrands(response.data)
             })
+            .catch(error => {
+                console.log(error)
+            });
     }, []);
     const [getError, setError] = React.useState("");
     function handleSubmit(e) {
@@ -137,7 +142,7 @@ function UpdateProduct() {
             console.log(data_json);
             console.log(selectedImages);
 
-            axios.post('http://localhost:8080/api/product/update/' + productID, data_json)
+            axios.post('https://intense-inlet-71668-b76c23b36694.herokuapp.com/api/product/update/' + productID, data_json)
                 .then(res => {
                     if (res.data.errors) {
                         setError(res.data.errors);

@@ -6,7 +6,7 @@ function SideBar(props) {
     const [categories, setCategories] = React.useState([]);
     const [brands, setBrands] = React.useState([]);
     React.useEffect(() => {
-        axios.get('http://localhost:8080/api/category')
+        axios.get('https://intense-inlet-71668-b76c23b36694.herokuapp.com/api/category')
             .then(res => { setCategories(res.data) })
             .catch(error => { console.log(error) })
     }, []);
@@ -20,7 +20,7 @@ function SideBar(props) {
         })
     }
     React.useEffect(() => {
-        axios.get('http://localhost:8080/api/brand')
+        axios.get('https://intense-inlet-71668-b76c23b36694.herokuapp.com/api/brand')
             .then(res => { setBrands(res.data) })
             .catch(error => { console.log(error) })
     }, []);

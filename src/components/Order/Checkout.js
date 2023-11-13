@@ -35,10 +35,10 @@ function CheckOut() {
             }
         }
         const amount = parseInt(priceTotalAll);
-        const cancelUrl = 'http://localhost:3000/cart';
+        const cancelUrl = 'https://food-mart-e-commerce.onrender.com/cart';
         const description = data.description;
         const orderCode = parseInt(data.idOrder);
-        const returnUrl = 'http://localhost:3000/thank-you';
+        const returnUrl = 'https://food-mart-e-commerce.onrender.com/thank-you';
         const name = data.name;
         const email = data.email;
         const phone = data.phone;

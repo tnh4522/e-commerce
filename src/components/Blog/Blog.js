@@ -10,7 +10,7 @@ function Blog() {
     });
     const [getData, setData] = useState([]);
     useEffect(() => {
-        axios.get('http://localhost:8080/api/blog/list')
+        axios.get('https://intense-inlet-71668-b76c23b36694.herokuapp.com/api/blog/list')
             .then(res => {
                 setData(res.data);
             })

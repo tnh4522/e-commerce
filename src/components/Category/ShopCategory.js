@@ -9,7 +9,7 @@ function ShopCategory() {
     const [records, setRecords] = useState([]);
     const navigater = useNavigate();
     useEffect(() => {
-        axios.get('http://localhost:8080/api/product/list')
+        axios.get('https://intense-inlet-71668-b76c23b36694.herokuapp.com/api/product/list')
             .then(res => {
                 setProducts(res.data.filter(val => val.idCategory == idCategory));
                 setRecords(res.data.filter(val => val.idCategory == idCategory));

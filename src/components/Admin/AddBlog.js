@@ -45,7 +45,7 @@ function AddBlog() {
       idAuth: idAuthor,
     };
   
-    axios.post('http://localhost:8080/api/blog', jsonData, {
+    axios.post('https://intense-inlet-71668-b76c23b36694.herokuapp.com/api/blog', jsonData, {
       headers: {
         'Content-Type': 'application/json',
       },

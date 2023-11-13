@@ -94,7 +94,7 @@ function MyAccount() {
                 country: getInput.country,
                 avatar: getInput.file ? getInput.file.name : null
             }
-            axios.post('http://localhost:8080/api/user/update/' + getInput.id, formData)
+            axios.post('https://intense-inlet-71668-b76c23b36694.herokuapp.com/api/user/update/' + getInput.id, formData)
                 .then(res => {
                     localStorage.setItem('user', JSON.stringify(res.data));
                     window.location.reload();
