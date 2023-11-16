@@ -2,8 +2,11 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import API from '../API/API'
 import backgroundPattern from '../../images/background-pattern.jpg';
+import Modal from "../Modal/Modal";
 function Wishlist() {
     const [getData, setData] = useState([]);
+    const [modalMessage, setModalMessage] = useState('');
+    const [showModal, setShowModal] = useState(false);
     useEffect(() => {
         API.get('product/wishlist')
             .then(res => {
@@ -24,18 +27,17 @@ function Wishlist() {
                 return (
                     <div className="col" key={index}>
                         <div className="product-item" id={item.id}>
-                            <Link to="#" className="btn-wishlist"><svg width={24} height={24}><use xlinkHref="#heart" /></svg></Link>
                             <figure>
                                 <Link to={'/product/detail/' + item.id} title="Product Title">
                                     <img alt='' src={require('../../img/' + extractFilenames(item.image)[0])} className="tab-image" />
                                 </Link>
                             </figure>
                             <Link to={'/product/detail/' + item.id} className="text-decoration-none"><h3>{item.name}</h3></Link>
-                            <span className="qty">Đánh giá</span><span className="rating"><svg width={24} height={24} className="text-primary"><use xlinkHref="#star-solid" /></svg> 4.5</span>
+                            <span className="qty">Reviews</span><span className="rating"><svg width={24} height={24} className="text-primary"><use xlinkHref="#star-solid" /></svg> 4.5</span>
                             <span className="price">${item.price}</span>
                             <div className="d-flex align-items-center justify-content-between">
-                                <Link to="#" className="btn btn-outline-primary btn-sm" onClick={deleteWishList}>Delete</Link>
-                                <Link to="#" className="nav-link" onClick={addToCart}>Add to Cart <svg width={24} height={24}><use xlinkHref="#cart" /></svg></Link>
+                                <Link to="" className="btn btn-outline-primary btn-sm" id={item.id} onClick={deleteWishList}>Delete</Link>
+                                <Link to="" className="nav-link" onClick={addToCart}>Add to Cart <svg width={24} height={24}><use xlinkHref="#cart" /></svg></Link>
                             </div>
                         </div>
                     </div>
@@ -73,6 +75,8 @@ function Wishlist() {
         }
         localStorage.setItem('cart', JSON.stringify(cart));
         updateCartTotalItem();
+        setModalMessage('Add to cart successfully!');
+        setShowModal(true);
     }
     function updateCartTotalItem() {
         let cart = JSON.parse(localStorage.getItem('cart'));
@@ -101,31 +105,41 @@ function Wishlist() {
         }
     }
     function deleteWishList(e) {
-        let product_id = e.target.parentNode.parentNode.parentNode.parentNode.id;
-        console.log(product_id);
+        let product_id = e.target.id;
         let wishlist = JSON.parse(localStorage.getItem('wishlist'));
         let index = wishlist.indexOf(parseInt(product_id));
         if (index > -1) {
             wishlist.splice(index, 1);
         }
         localStorage.setItem('wishlist', JSON.stringify(wishlist));
-        e.target.parentNode.parentNode.parentNode.parentNode.remove();
-    }
+        e.target.parentNode.parentNode.parentNode.remove();
+    };
+    useEffect(() => {
+        if (showModal) {
+            const timer = setTimeout(() => {
+                setShowModal(false);
+            }, 1200);
+
+            return () => clearTimeout(timer);
+        }
+    }, [showModal]);
     return (
         <div className="col-sm-12 padding-right">
+            {showModal && <div className="modal-backdrop fade show"></div>}
+            <Modal show={showModal} message={modalMessage} />
             <div className="features_items">
-            <section className="py-5 mb-5" style={{ background: `url(${backgroundPattern})` }}>
-                <div className="container-fluid">
-                    <div className="d-flex justify-content-between">
-                        <h1 className="page-title pb-2">Wishlist</h1>
-                        <nav className="breadcrumb fs-6">
-                            <Link className="breadcrumb-item nav-link" href="#">Home</Link>
-                            <Link className="breadcrumb-item nav-link" href="#">Pages</Link>
-                            <span className="breadcrumb-item active" aria-current="page">About Us</span>
-                        </nav>
+                <section className="py-5 mb-5" style={{ background: `url(${backgroundPattern})` }}>
+                    <div className="container-fluid">
+                        <div className="d-flex justify-content-between">
+                            <h1 className="page-title pb-2">Wishlist</h1>
+                            <nav className="breadcrumb fs-6">
+                                <Link className="breadcrumb-item nav-link" href="#">Home</Link>
+                                <Link className="breadcrumb-item nav-link" href="#">Pages</Link>
+                                <span className="breadcrumb-item active" aria-current="page">About Us</span>
+                            </nav>
+                        </div>
                     </div>
-                </div>
-            </section>
+                </section>
                 <div className="product-grid row row-cols-sm-1 row-cols-md-2 row-cols-lg-3 row-cols-xl-4">
                     {renderWishlist()}
                 </div>

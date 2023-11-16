@@ -27,6 +27,8 @@ import AddBlog from './components/Admin/AddBlog';
 import ManageBlogs from './components/Admin/ManageBlogs';
 import UpdateBlog from './components/Admin/UpdateBlog';
 import ShopCategory from './components/Category/ShopCategory';
+import ManageOrders from './components/seller/ManageOrder';
+import Payment from './components/Order/Payment';
 const checkAuthAdmin = () => {
   if (localStorage.getItem('user')) {
     const levelUser = JSON.parse(localStorage.getItem('user')).level;
@@ -69,6 +71,7 @@ root.render(
           <Route path='product/detail/:id' element={<SingleProduct />} />
           <Route path='/wish-list' element={<Wishlist />} />
           <Route path='shop-category/:id' element={<ShopCategory  />} />
+          <Route path='payment' element={<Payment />} />
           {/* Admin */}
           {checkAuthAdmin() && <Route path='/admin' element={<AdminUserPage />} />}
           {checkAuthAdmin() && <Route path='/admin/update/:id' element={<UpdateUser />} />}
@@ -79,6 +82,7 @@ root.render(
           {checkAuthSeller() && <Route path='/seller/update/:id' element={<UpdateProduct />} />}
           {checkAuthSeller() && <Route path='/seller/add-product' element={<AddProduct />} />}
           {checkAuthSeller() && <Route path='/seller' element={<SellerPage />} />}
+          {checkAuthSeller() && <Route path='/seller/manage-order' element={<ManageOrders />} />}
         </Routes>
       </App>
     </Router>

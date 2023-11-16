@@ -1,20 +1,36 @@
+import axios from 'axios';
 import { Link } from 'react-router-dom';
-import backgroundPattern from '../../images/background-pattern.jpg';
 function ThankYou() {
+    const orderData = JSON.parse(localStorage.getItem('orderData'));
+    if(orderData) {
+        axios.post('https://intense-inlet-71668-b76c23b36694.herokuapp.com/api/order/add', orderData)
+        .then(res => {
+            console.log(res);
+        })
+        .catch(err => {
+            console.log(err);
+        })
+    }
     return (
         <div>
-            <section className="py-5 mb-5" style={{ background: `url(${backgroundPattern})` }}>
+            <section className="py-5">
                 <div className="container-fluid">
-                    <div className="d-flex justify-content-between">
-                        <h1 className="page-title pb-2">Thank you</h1>
-                        <nav className="breadcrumb fs-6">
-                            <Link className="breadcrumb-item nav-link" to="#">Home</Link>
-                            <Link className="breadcrumb-item nav-link" to="#">Pages</Link>
-                            <span className="breadcrumb-item active" aria-current="page">Thank you</span>
-                        </nav>
+                    <div className="row justify-content-center">
+                        <div className="col-md-8">
+                            <div className="thank-you-content text-center">
+                                <i className="fa-solid fa-circle-check" style={{fontSize: '100px', color: '#00bdaa', marginBottom: '20px'}}></i>
+                                <h2 className="mb-4">Thank you for your order!</h2>
+                                <p className="mb-3">Your order has been placed and will be processed as soon as possible.</p>
+                                <p className="mb-3">Make sure you make note of your order number, which is <strong>#2001539</strong></p>
+                                <p className="mb-3">You will be receiving an <a href="https://mail.google.com/mail/u/0/#inbox" target='blank'><strong>email</strong></a> shortly with confirmation of your order. <br /> <strong>Estimated delivery time is 4-5 working days.</strong></p>
+                                <p className="mb-3">If you have any questions, please feel free to contact us at <Link to="mailto:tnh2045@gmail.com">Customer Support</Link></p>
+                                <Link to="/" className="btn btn-primary">Back to Home</Link>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </section>
+
             <section id="thank-you" className="py-5 bg-light-grey">
                 <div className="container-fluid">
                     <div className="row justify-content-center">

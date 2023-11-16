@@ -285,6 +285,7 @@ function Header() {
                                                     <Link to="/seller" className="nav-link dropdown-toggle" role="button" id="pages" data-bs-toggle="dropdown" aria-expanded="false">Seller</Link>
                                                     <ul className="dropdown-menu" aria-labelledby="pages">
                                                         <li><Link to="/seller" className="dropdown-item">Manage Products</Link></li>
+                                                        <li><Link to="/seller/manage-order" className="dropdown-item">Manage Orders</Link></li>
                                                         <li><Link to="/seller/add-product" className="dropdown-item">Add Product</Link></li>
                                                     </ul>
                                                 </li> : ''

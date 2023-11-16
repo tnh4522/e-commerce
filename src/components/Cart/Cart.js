@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import backgroundPattern from '../../images/background-pattern.jpg';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 function Cart() {
     const [getData, setData] = useState([]);
@@ -15,29 +15,16 @@ function Cart() {
         axios.post('https://intense-inlet-71668-b76c23b36694.herokuapp.com/api/product/cart', cartData)
             .then(res => {
                 setData(res.data);
-                if(window.location.pathname === '/cart') {
-                    updateCartTotalItem();
-                }
             })
             .catch(error => {
                 console.log(error);
             });
-        updatePriceTotalAll();
     }, []);
     useEffect(() => {
-        // This function runs whenever the cart data changes
-        const handleCartChange = () => {
-            updatePriceTotalAll();
-        };
-    
-        // Add event listener for changes in localStorage
-        window.addEventListener('storage', handleCartChange);
-    
-        // Cleanup the event listener on unmount
-        return () => {
-            window.removeEventListener('storage', handleCartChange);
-        };
-    }, []);
+        // Assuming that updating the total price does not need to interact directly with the DOM,
+        // and only needs the data in `getData`
+        updatePriceTotalAll();
+    }, [getData]); // Dependency array
     let priceTotalAll = localStorage.getItem('priceTotalAll');
     function renderData() {
         return getData.map((item, index) => {
@@ -47,7 +34,7 @@ function Cart() {
                         <div className="cart-info d-flex flex-wrap align-items-center mb-4">
                             <div className="col-lg-3">
                                 <div className="card-image">
-                                    <img src={require('../../img/' + extractFilenames(item.image)[0])} alt="cloth" className="img-fluid" />
+                                    <img src={require('../../images/' + extractFilenames(item.image)[0])} alt="cloth" className="img-fluid" />
                                 </div>
                             </div>
                             <div className="col-lg-9">
@@ -90,7 +77,7 @@ function Cart() {
                 </tr>
             )
         })
-    }
+    };
     function extractFilenames(inputString) {
         try {
             const inputArray = JSON.parse(inputString);
@@ -168,7 +155,6 @@ function Cart() {
             total += parseInt(item.innerHTML);
         });
         localStorage.setItem('priceTotalAll', total);
-        console.log(total);
         priceTotalAll = total;
         document.querySelectorAll('.price-currency-symbol').forEach((item) => {
             item.innerHTML = total;
@@ -189,7 +175,6 @@ function Cart() {
     function updateCart() {
         window.location.reload();
     }
-    
     return (
         <div>
             <section className="py-5 mb-5" style={{ background: `url(${backgroundPattern})` }}>

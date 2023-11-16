@@ -25,7 +25,7 @@ function Category() {
                             <div className="swiper-wrapper">
                                 <Swiper modules={[Navigation, Mousewheel, Autoplay]}
                                     spaceBetween={30}
-                                    breakpoints={{ 1402: {slidesPerView: 6 }, 1342: {slidesPerView: 5 }, 1208: { slidesPerView: 4 }, 780: { slidesPerView: 3 }, 576: { slidesPerView: 2 }, 0: { slidesPerView: 1 }}}
+                                    breakpoints={{ 1402: { slidesPerView: 6 }, 1342: { slidesPerView: 5 }, 1208: { slidesPerView: 4 }, 780: { slidesPerView: 3 }, 576: { slidesPerView: 2 }, 0: { slidesPerView: 1 } }}
                                     navigation={{
                                         nextEl: '.category-carousel-next',
                                         prevEl: '.category-carousel-prev',

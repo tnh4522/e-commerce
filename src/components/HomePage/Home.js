@@ -14,15 +14,15 @@ function Home() {
         <div>
             <Banner />
             <Category />
-            <NewlyBrands />
+            {/* <NewlyBrands /> */}
             <TrendingProduct />
             <BannerCenter />
             <GetDiscount />
-            <BestSelling />
+            {/* <BestSelling />
             <PopularProduct />
-            <JustArrived />
+            <JustArrived /> */}
             <RecentBlog />
-            <section className="py-5">
+            {/* <section className="py-5">
                 <div className="container-fluid">
                     <h2 className="my-5">People are also looking for</h2>
                     <Link to="#" className="btn btn-warning me-2 mb-2">Blue diamon almonds</Link>
@@ -44,7 +44,7 @@ function Home() {
                     <Link to="#" className="btn btn-warning me-2 mb-2">Chao Cheese Creamy</Link>
                     <Link to="#" className="btn btn-warning me-2 mb-2">Chicken meatballs</Link>
                 </div>
-            </section>
+            </section> */}
             <section className="py-5">
                 <div className="container-fluid">
                     <div className="row row-cols-1 row-cols-sm-3 row-cols-lg-5">

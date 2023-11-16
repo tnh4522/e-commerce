@@ -3,10 +3,15 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 import backgroundPattern from '../../images/background-pattern.jpg';
 import SideBar from "./SideBar";
+import ShopPagination from "../shop/ShopPagination";
+import Modal from "../Modal/Modal";
 function ShopCategory() {
     let idCategory = useParams().id;
     const [products, setProducts] = useState([]);
     const [records, setRecords] = useState([]);
+    const [modalMessage, setModalMessage] = useState('');
+    const [showModal, setShowModal] = useState(false);
+    const [wishlist, setWishlist] = useState([]);
     const navigater = useNavigate();
     useEffect(() => {
         axios.get('https://intense-inlet-71668-b76c23b36694.herokuapp.com/api/product/list')
@@ -14,20 +19,25 @@ function ShopCategory() {
                 setProducts(res.data.filter(val => val.idCategory == idCategory));
                 setRecords(res.data.filter(val => val.idCategory == idCategory));
             })
-            .catch(error => { console.log(error) })
+            .catch(error => { console.log(error) });
+        const localStorageWishlist = JSON.parse(localStorage.getItem('wishlist'));
+        if (localStorageWishlist) {
+            setWishlist(localStorageWishlist);
+        }
     }, [idCategory]);
     const searchFilter = (e) => {
         setRecords(products.filter(val => val.name.toLowerCase().includes(e.target.value)));
     }
     function renderProducts() {
         return records.map((item, index) => {
+            const isWishlistItem = wishlist.includes(item.id);
             return (
                 <div className="col" key={index}>
                     <div className="product-item" id={item.id}>
-                        <Link to='' onClick={addToWishlist} className="btn-wishlist"><svg width={24} height={24}><use xlinkHref="#heart" /></svg></Link>
+                        <Link to='' onClick={addToWishlist} className={`btn-wishlist ${isWishlistItem ? 'red-heart' : ''}`}><svg width={24} height={24}><use xlinkHref="#heart" /></svg></Link>
                         <figure>
                             <Link to={'/product/detail/' + item.id} title="Product Title">
-                                <img alt='' src={require('../../img/' + extractFilenames(item.image)[0])} className="tab-image" />
+                                <img alt='' src={require('../../images/' + extractFilenames(item.image)[0])} className="tab-image" />
                             </Link>
                         </figure>
                         <Link to={'/product/detail/' + item.id} className="text-decoration-none"><h3>{item.name}</h3></Link>
@@ -88,6 +98,8 @@ function ShopCategory() {
         }
         localStorage.setItem('cart', JSON.stringify(cart));
         updateCartTotalItem();
+        setModalMessage('Add to cart successfully!');
+        setShowModal(true);
     }
     function updateCartTotalItem() {
         let cart = JSON.parse(localStorage.getItem('cart'));
@@ -105,19 +117,28 @@ function ShopCategory() {
         if (getUser) {
             let productId = e.target.closest('.product-item').id;
             productId = parseInt(productId);
-            let wishlist = [];
-            if (localStorage.getItem('wishlist')) {
-                wishlist = JSON.parse(localStorage.getItem('wishlist'));
+    
+            const isWishlistItem = wishlist.includes(productId);
+    
+            let updatedWishlist = [];
+            if (isWishlistItem) {
+                updatedWishlist = wishlist.filter(id => id !== productId);
+            } else {
+
+                updatedWishlist = [...wishlist, productId];
             }
-            if (!wishlist.includes(productId)) {
-                wishlist.push(productId);
-            }
-            localStorage.setItem('wishlist', JSON.stringify(wishlist));
+    
+            localStorage.setItem('wishlist', JSON.stringify(updatedWishlist));
+            setWishlist(updatedWishlist);
+    
+            setModalMessage(isWishlistItem ? 'Removed from wishlist!' : 'Added to wishlist!');
+            setShowModal(true);
         } else {
             alert('Please login to use this feature!');
             navigater('/login');
         }
-    }
+    };
+    
     const [order, setOrder] = useState('name_a_z');
     const handleChanges = (e) => {
         setOrder(e.target.value);
@@ -137,8 +158,19 @@ function ShopCategory() {
         }
         setRecords(sort);
     }
+    useEffect(() => {
+        if (showModal) {
+            const timer = setTimeout(() => {
+                setShowModal(false);
+            }, 1200);
+
+            return () => clearTimeout(timer);
+        }
+    }, [showModal]);
     return (
         <div>
+            {showModal && <div className="modal-backdrop fade show"></div>}
+            <Modal show={showModal} message={modalMessage} />
             <section className="py-5 mb-5" style={{ background: `url(${backgroundPattern})` }}>
                 <div className="container-fluid">
                     <div className="d-flex justify-content-between">
@@ -160,7 +192,7 @@ function ShopCategory() {
                         <main className="col-md-10">
                             <div className="filter-shop d-flex justify-content-between">
                                 <div className="showing-product">
-                                    <p>Showing 1–9 of 55 results</p>
+                                    <p>Showing <span className="text-primary">{products.length}</span> results</p>
                                 </div>
                                 <div className="sort-by">
                                     <select id="input-sort" name="sort" className="form-control" data-filter-sort data-filter-order onChange={handleChanges}>
@@ -172,29 +204,8 @@ function ShopCategory() {
                                     </select>
                                 </div>
                             </div>
-                            <div className="product-grid row row-cols-sm-1 row-cols-md-2 row-cols-lg-3 row-cols-xl-4">
-                                {renderProducts()}
-                            </div>
                             {/* / product-grid */}
-                            <nav className="navigation paging-navigation text-center py-4" role="navigation">
-                                <div className="pagination loop-pagination d-flex justify-content-center align-items-center">
-                                    <Link to="#">
-                                        <svg className="chevron-left pe-3">
-                                            <use xlinkHref="#chevron-left" />
-                                        </svg>
-                                    </Link>
-                                    <span aria-current="page" className="page-numbers current pe-3">1</span>
-                                    <Link className="page-numbers pe-3" href="#">2</Link>
-                                    <Link className="page-numbers pe-3" href="#">3</Link>
-                                    <Link className="page-numbers pe-3" href="#">4</Link>
-                                    <Link className="page-numbers" href="#">5</Link>
-                                    <Link to="#">
-                                        <svg className="chevron-right ps-3">
-                                            <use xlinkHref="#chevron-right" />
-                                        </svg>
-                                    </Link>
-                                </div>
-                            </nav>
+                            <ShopPagination products={records} renderProducts={renderProducts} />
                         </main>
                     </div>
                 </div>

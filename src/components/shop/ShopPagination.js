@@ -17,27 +17,35 @@ function ShopPagination(props) {
         return products.slice(startIndex, endIndex);
     }
     return (
-        <div>
-            <div className="product-grid row row-cols-sm-1 row-cols-md-2 row-cols-lg-3 row-cols-xl-4">
-                {props.renderProducts(getProductsOfCurrentPage())}
-            </div>
-            <nav className="navigation paging-navigation text-center py-4" role="navigation">
-                <div className="pagination loop-pagination d-flex justify-content-center align-items-center">
-                    {/* <Link to="#" disabled={page === 1} onClick={() => changePage(page - 1)}>❮</Link> */}
-                    {[...Array(totalPages)].map((_, index) => (
-                        <Link
-                            key={index}
-                            to={`#page-${index + 1}`}
-                            className={index + 1 === page ? 'active' : ''}
-                            onClick={() => changePage(index + 1)}
-                        >
-                            {index + 1}
-                        </Link>
-                    ))}
-                    {/* <Link to="#" disabled={page === totalPages} onClick={() => changePage(page + 1)}>❯</Link> */}
-                </div>
-            </nav>
-        </div>
+<div>
+    <div className="product-grid row row-cols-sm-1 row-cols-md-2 row-cols-lg-3 row-cols-xl-4">
+        {props.renderProducts(getProductsOfCurrentPage())}
+    </div>
+    <nav className="navigation paging-navigation text-center py-4" role="navigation">
+        <ul className="pagination loop-pagination justify-content-center align-items-center">
+            {/* Uncomment and style previous button */}
+            <li className={`page-item ${page === 1 ? 'disabled' : ''}`}>
+                <Link className="page-link" to="#" onClick={() => changePage(page - 1)}>❮</Link>
+            </li>
+            {[...Array(totalPages)].map((_, index) => (
+                <li key={index} className={`page-item ${index + 1 === page ? 'active' : ''}`}>
+                    <Link
+                        className="page-link"
+                        to={`#page-${index + 1}`}
+                        onClick={() => changePage(index + 1)}
+                    >
+                        {index + 1}
+                    </Link>
+                </li>
+            ))}
+            {/* Uncomment and style next button */}
+            <li className={`page-item ${page === totalPages ? 'disabled' : ''}`}>
+                <Link className="page-link" to="#" onClick={() => changePage(page + 1)}>❯</Link>
+            </li>
+        </ul>
+    </nav>
+</div>
+
     )
 }
 export default ShopPagination;
