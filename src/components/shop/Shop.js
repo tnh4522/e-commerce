@@ -195,16 +195,16 @@ function Shop(props) {
                                 <div className="sort-by">
                                     <select id="input-sort" name="sort" className="form-control" data-filter-sort data-filter-order onChange={handleChanges}>
                                         <option value>Default sorting</option>
-                                        <option value="name_a_z">Name (A - Z)</option>
-                                        <option value="name_z_a">Name (Z - A)</option>
-                                        <option value="price_low_high">Price (Low-High)</option>
-                                        <option value="price_high_low">Price (High-Low)</option>
+                                        <option value="name_a_z">Name (Z - A)</option>
+                                        <option value="name_z_a">Name (A - Z)</option>
+                                        <option value="price_low_high">Price (High-Low)</option>
+                                        <option value="price_high_low">Price (Low-High)</option>
                                     </select>
                                 </div>
                             </div>
                             {/* / product-grid */}
                             {/* <nav className="navigation paging-navigation text-center py-4" role="navigation">
-                                <div className="pagination loop-pagination d-flex justify-content-center align-items-center">
+                                <div className="pagination loop-pagination d-flex justify-content-center align-items-center"></div>
                                     <Link to="#">
                                         <svg className="chevron-left pe-3">
                                             <use xlinkHref="#chevron-left" />

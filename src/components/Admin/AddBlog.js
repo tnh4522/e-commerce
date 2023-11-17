@@ -42,14 +42,14 @@ function AddBlog() {
       content: data.content,
       description: data.description,
       image: data.file.name,
-      idAuth: idAuthor,
+      idAuth: idAuthor
     };
   
-    axios.post('https://intense-inlet-71668-b76c23b36694.herokuapp.com/api/blog', jsonData, {
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    })
+    axios.post('http://localhost:8080/api/blog/add', jsonData, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
       .then((response) => {
         if (response.data) {
           setError('');
@@ -83,7 +83,7 @@ function AddBlog() {
       </section>
       <section className='mb-3'>
         <div className="container-sm">
-          <form className='row g-2 p-3 border shadow-lg needs-validation was-validated' noValidate encType="multipart/form-data" method='post' onSubmit={handleSubmit}>
+          <form className='row g-2 p-3 border shadow-lg needs-validation was-validated' noValidate method='post' onSubmit={handleSubmit}>
             <div className='col-md-12'>
               <label className="form-label">Blog Title</label>
               <input className='form-control' type="text" name="title" onChange={handleChange} required />

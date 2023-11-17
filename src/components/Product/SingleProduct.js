@@ -67,7 +67,6 @@ function SingleProduct() {
             })
             .catch(error => { console.log(error) })
     }, [productID]);
-    console.log(getProduct);
     function renderProduct() {
         if (getProduct) {
             return (
@@ -314,8 +313,8 @@ function SingleProduct() {
             <section id="selling-product" className="single-product mt-0 mt-md-5">
                 <div className="container-fluid">
                     <nav className="breadcrumb">
-                        <Link className="breadcrumb-item" to="#">Home</Link>
-                        <Link className="breadcrumb-item" to="#">Pages</Link>
+                        <Link className="breadcrumb-item" to="">Home</Link>
+                        <Link className="breadcrumb-item" to="">Pages</Link>
                         <span className="breadcrumb-item active" aria-current="page">Single Product</span>
                     </nav>
                     {renderProduct()}

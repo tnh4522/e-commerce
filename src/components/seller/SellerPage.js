@@ -60,12 +60,15 @@ function SellerPage() {
             return [];
         }
     }
+
     function renderData() {
         return getData.map((value, key) => {
+            const image = extractFilenames(value.image)[0] ? extractFilenames(value.image)[0] : value.image.split(',')[0];
+            console.log(image);
             return (
                 <tr key={key}>
                     <td>{value.id}</td>
-                    <td><img src={require('../../images/' + extractFilenames(value.image)[0])} alt="" width="70px" /></td>
+                    <td><img src={require('../../images/' + image)} alt="" width="100px" /></td>
                     <td>{value.name}</td>
                     <td>{fetchCategory(value.idCategory)}</td>
                     <td>{fetchBrand(value.idBrand)}</td>

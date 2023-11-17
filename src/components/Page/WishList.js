@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import API from '../API/API'
+import axios from 'axios';
 import backgroundPattern from '../../images/background-pattern.jpg';
 import Modal from "../Modal/Modal";
 function Wishlist() {
@@ -8,9 +8,9 @@ function Wishlist() {
     const [modalMessage, setModalMessage] = useState('');
     const [showModal, setShowModal] = useState(false);
     useEffect(() => {
-        API.get('product/wishlist')
+        axios.get('https://intense-inlet-71668-b76c23b36694.herokuapp.com/api/product/list')
             .then(res => {
-                setData(res.data.data);
+                setData(res.data);
             })
             .catch(err => {
                 console.log(err);

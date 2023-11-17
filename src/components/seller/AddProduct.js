@@ -118,8 +118,8 @@ export default function AddProduct() {
                         flag = false;
                     }
                 });
-                if (Object.keys(getFiles.files).length > 3) {
-                    errorSubmit.files = 'Maximun 3 files!';
+                if (Object.keys(getFiles.files).length > 5) {
+                    errorSubmit.files = 'Maximun 5 files!';
                     flag = false;
                 }
             }
@@ -148,7 +148,7 @@ export default function AddProduct() {
                 highlight: 0,
                 active: 0,
                 condition: 0,
-                image: stringArrayImage.toString()
+                image: JSON.stringify(stringArrayImage)
             }
 
             axios.post('https://intense-inlet-71668-b76c23b36694.herokuapp.com/api/product/add', data, {
@@ -157,7 +157,6 @@ export default function AddProduct() {
                 },
             })
                 .then(res => {
-                    console.log(res.data);
                     navigate('/seller');
                 })
                 .catch(err => {
@@ -267,8 +266,8 @@ export default function AddProduct() {
                             <label className="form-label">Status</label>
                             <select className="form-select" name='status' onChange={handleChange} required>
                                 <option>Status</option>
-                                <option value="1">Sale</option>
-                                <option value="0">New</option>
+                                <option value="1">New</option>
+                                <option value="0">Sale</option>
                             </select>
                             <div className="valid-feedback">
                                 Looks good!
