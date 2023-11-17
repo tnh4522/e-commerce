@@ -172,9 +172,6 @@ function Cart() {
         document.querySelector('.badge').innerHTML = total;
         updatePriceTotalAll();
     }
-    function updateCart() {
-        window.location.reload();
-    }
     return (
         <div>
             <section className="py-5 mb-5" style={{ background: `url(${backgroundPattern})` }}>
@@ -239,7 +236,7 @@ function Cart() {
                                     </table>
                                 </div>
                                 <div className="button-wrap row g-2">
-                                    <div className="col-md-6"><button onClick={updateCart} className="btn btn-dark py-3 px-4 text-uppercase btn-rounded-none w-100">Update Cart</button></div>
+                                    <div className="col-md-6"><button className="btn btn-dark py-3 px-4 text-uppercase btn-rounded-none w-100">Update Cart</button></div>
                                     <Link to="/shop" className="col-md-6"><button className="btn btn-dark py-3 px-4 text-uppercase btn-rounded-none w-100">Continue Shopping</button></Link>
                                     <Link to="/checkout" className="col-md-12"><button className="btn btn-primary py-3 px-4 text-uppercase btn-rounded-none w-100">Proceed to checkout</button></Link>
                                 </div>

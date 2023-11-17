@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import backgroundPattern from '../../images/background-pattern.jpg';
 import React, { useEffect, useRef } from "react";
 import { useState } from "react";
@@ -15,6 +15,7 @@ function MyAccount() {
         country: '',
         avatar: ''
     });
+    let navigater = useNavigate();
     const inputFileRef = useRef(null);
     const handlePhotoChangeClick = (event) => {
         event.preventDefault();
@@ -97,7 +98,7 @@ function MyAccount() {
             axios.post('https://intense-inlet-71668-b76c23b36694.herokuapp.com/api/user/update/' + getInput.id, formData)
                 .then(res => {
                     localStorage.setItem('user', JSON.stringify(res.data));
-                    window.location.reload();
+                    navigater('/account');
                 })
                 .catch(err => {
                     errorSubmit.email = "Something went wrong!";

@@ -11,7 +11,6 @@ function Payment() {
         const checkIframeUrl = () => {
             try {
                 const iframeUrl = new URL(iframeRef.current.contentWindow.location.href);
-                console.log(iframeUrl.href);
                 if (iframeUrl.searchParams.get('status') === 'PAID') {
                     localStorage.removeItem('data');
                     localStorage.removeItem('orderData');
