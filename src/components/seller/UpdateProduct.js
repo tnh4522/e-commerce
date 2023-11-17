@@ -34,7 +34,7 @@ function UpdateProduct() {
         axios.get('https://intense-inlet-71668-b76c23b36694.herokuapp.com/api/product/detail/' + productID)
             .then(response => {
                 setGetInput(response.data)
-                setImages(response.data.image);
+                setImages(response.data.image)
             })
             .catch(error => {
                 console.log(error)
@@ -109,7 +109,7 @@ function UpdateProduct() {
             }
         }
         let totalImages = 0;
-        if(getFiles.files) {
+        if (getFiles.files) {
             totalImages = parseJsonArray(getImages).length + Object.keys(getFiles.files).length - selectedImages.length;
         } else {
             totalImages = getImages.length - selectedImages.length;
@@ -123,37 +123,49 @@ function UpdateProduct() {
         }
         else {
             setError("");
-            const idUser = JSON.parse(localStorage.getItem('user')).id;
-            let data_json = {
-                name: getInput.name,
-                price: getInput.price,
-                idCategory: getInput.idCategory,
-                idBrand: getInput.idBrand,
-                idUser: idUser,
-                companyProfile: getInput.companyProfile,
-                detail: getInput.detail,
-                status: getInput.status,
-                sale: getInput.sale,
-                highlight: 0,
-                active: 0,
-                condition: 0,
-                image: getImages,
-            }
-            console.log(data_json);
-            console.log(selectedImages);
+            try {
+                const imagesArray = JSON.parse(getImages);
+                if (Array.isArray(imagesArray)) {
+                    const updatedImages = imagesArray.filter(image => !selectedImages.includes(image));
+                    const newImages = Array.from(getFiles.files ? getFiles.files : []);
+                    const newImagesName = newImages.map((image) => image.name);
+                    const totalUpdatedImages = [...updatedImages, ...newImagesName];
+                    const idUser = JSON.parse(localStorage.getItem('user')).id;
+                    const data_json = {
+                        name: getInput.name,
+                        price: getInput.price,
+                        idCategory: getInput.idCategory,
+                        idBrand: getInput.idBrand,
+                        idUser: idUser,
+                        companyProfile: getInput.companyProfile,
+                        detail: getInput.detail,
+                        status: getInput.status,
+                        sale: getInput.sale,
+                        highlight: 0,
+                        active: 0,
+                        condition: 0,
+                        image: JSON.stringify(totalUpdatedImages),
+                    };
+                    console.log(data_json);
+                    axios.post('https://intense-inlet-71668-b76c23b36694.herokuapp.com/api/product/update/' + productID, data_json)
+                        .then(res => {
+                            if (res.data.errors) {
+                                setError(res.data.errors);
+                            }
+                            else {
+                                navigate('/seller');
+                            }
+                        })
+                        .catch(err => {
+                            console.log(err);
+                        });
+                } else {
+                    console.error("Parsed data is not an array:", imagesArray);
+                }
 
-            axios.post('https://intense-inlet-71668-b76c23b36694.herokuapp.com/api/product/update/' + productID, data_json)
-                .then(res => {
-                    if (res.data.errors) {
-                        setError(res.data.errors);
-                    }
-                    else {
-                        navigate('/seller');
-                    }
-                })
-                .catch(err => {
-                    console.log(err);
-                });
+            } catch (error) {
+                console.error("Error parsing data:", error);
+            }
         }
     }
     function parseJsonArray(jsonString) {

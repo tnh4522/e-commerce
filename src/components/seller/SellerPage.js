@@ -80,7 +80,7 @@ function SellerPage() {
     }
     function deleteProduct(e) {
         const id = e.target.id;
-        axios.delete(`https://food-mart-e-commerce.onrender.com/api/product/${id}`)
+        axios.delete(`https://intense-inlet-71668-b76c23b36694.herokuapp.com/${id}`)
         .then(function (response) {
             if (response.status === 200) {
                 e.target.parentNode.parentNode.remove();
