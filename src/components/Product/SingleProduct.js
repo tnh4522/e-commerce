@@ -8,9 +8,10 @@ import 'swiper/css';
 import 'swiper/css/free-mode';
 import 'swiper/css/navigation';
 import 'swiper/css/thumbs';
-import axios from "axios";
 import Modal from "../Modal/Modal";
 import style from './style.module.css';
+import API from '../API/API';
+
 function SingleProduct() {
     let productID = useParams().id;
     const [getProduct, setProduct] = useState('');
@@ -21,6 +22,7 @@ function SingleProduct() {
     const [getBrands, setBrands] = useState([]);
     const [getQuantity, setQuantity] = useState(1);
     const navigater = useNavigate();
+
     function handleChange(event) {
         let value = parseInt(event.target.value);
         if (isNaN(value) || value < 1) {
@@ -28,6 +30,7 @@ function SingleProduct() {
         }
         setQuantity(value);
     };
+
     function handleBuyNowClick() {
         const productID = getProduct.id;
         var cartData = {
@@ -49,24 +52,26 @@ function SingleProduct() {
         setShowModal(true);
 
         navigater('/cart');
-    }
+    };
+
     useEffect(() => {
-        axios.get('https://intense-inlet-71668-b76c23b36694.herokuapp.com/api/product/detail/' + productID)
+        API.get('product/detail/' + productID)
             .then(res => {
                 setProduct(res.data);
             })
             .catch(error => console.log(error));
-        axios.get('https://intense-inlet-71668-b76c23b36694.herokuapp.com/api/category')
+        API.get('category')
             .then(res => {
                 setCategories(res.data);
             })
             .catch(error => { console.log(error) });
-        axios.get('https://intense-inlet-71668-b76c23b36694.herokuapp.com/api/brand')
+        API.get('brand')
             .then(res => {
                 setBrands(res.data);
             })
             .catch(error => { console.log(error) })
     }, [productID]);
+
     function renderProduct() {
         if (getProduct) {
             return (
@@ -79,7 +84,7 @@ function SingleProduct() {
                                         '--swiper-navigation-color': '#f7a422',
                                         '--swiper-pagination-color': '#f7a422',
                                     }}
-                                    loop = {true}
+                                    loop={true}
                                     spaceBetween={10}
                                     navigation={true}
                                     thumbs={{ swiper: thumbsSwiper }}
@@ -104,7 +109,7 @@ function SingleProduct() {
                                 </Swiper>
                                 <Swiper
                                     // onSwiper={setThumbsSwiper}
-                                    loop = {true}
+                                    loop={true}
                                     watchSlidesProgress={true}
                                     spaceBetween={10}
                                     slidesPerView={4}
@@ -218,7 +223,8 @@ function SingleProduct() {
                 </div>
             )
         }
-    }
+    };
+
     function extractFilenames(inputString) {
         try {
             const inputArray = JSON.parse(inputString);
@@ -234,7 +240,8 @@ function SingleProduct() {
             console.error("Invalid input JSON string.");
             return [];
         }
-    }
+    };
+
     function addToCart(e) {
         const productID = e.target.value;
         var cartData = {
@@ -254,7 +261,8 @@ function SingleProduct() {
         updateCartTotalItem();
         setModalMessage('Add to cart successfully!');
         setShowModal(true);
-    }
+    };
+
     function upQuantityInput() {
         let value = parseInt(getQuantity);
         if (isNaN(value)) {
@@ -262,7 +270,8 @@ function SingleProduct() {
         }
         value++;
         setQuantity(value);
-    }
+    };
+
     function downQuantityInput() {
         let value = parseInt(getQuantity);
         if (isNaN(value)) {
@@ -273,7 +282,8 @@ function SingleProduct() {
             value = 1;
         }
         setQuantity(value);
-    }
+    };
+
     function updateCartTotalItem() {
         let cart = JSON.parse(localStorage.getItem('cart'));
         let total = 0;
@@ -286,7 +296,8 @@ function SingleProduct() {
         document.querySelector('.badge').innerHTML = total;
         document.querySelector('.cart-total-item').innerHTML = total;
         updatePriceTotalAll();
-    }
+    };
+
     function updatePriceTotalAll() {
         let priceTotal = document.querySelectorAll('.price-total-item-header');
         let priceTotalAll = 0;
@@ -296,7 +307,8 @@ function SingleProduct() {
         if (priceTotalAll > 0) {
             localStorage.setItem('priceTotalAll', priceTotalAll);
         }
-    }
+    };
+
     useEffect(() => {
         if (showModal) {
             const timer = setTimeout(() => {
@@ -306,6 +318,7 @@ function SingleProduct() {
             return () => clearTimeout(timer);
         }
     }, [showModal]);
+
     return (
         <div>
             {showModal && <div className="modal-backdrop fade show"></div>}

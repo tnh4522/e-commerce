@@ -3,16 +3,20 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@ant-design/icons": "^5.3.7",
+    "@ant-design/pro-components": "^2.7.10",
     "@emailjs/browser": "^3.11.0",
     "@emotion/react": "^11.11.1",
     "@emotion/styled": "^11.11.0",
     "@fontsource/roboto": "^5.0.8",
+    "@google/generative-ai": "^0.3.1",
     "@mui/icons-material": "^5.14.9",
     "@mui/material": "^5.14.9",
     "@mui/styled-engine-sc": "^5.14.9",
     "@testing-library/jest-dom": "^5.17.0",
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
+    "antd": "^5.18.0",
     "axios": "^1.5.0",
     "bootstrap": "^5.3.1",
     "bootstrap-icons": "^1.11.1",
@@ -22,6 +26,7 @@
     "react": "^17.0.0 || ^18.0.0",
     "react-bootstrap": "^2.8.0",
     "react-dom": "^17.0.0 || ^18.0.0",
+    "react-lazyload": "^3.2.1",
     "react-router-dom": "^6.15.0",
     "react-scripts": "^5.0.1",
     "sass": "^1.66.1",
@@ -62,5 +67,9 @@
   },
   "tags": [
     "swiper"
-  ]
+  ],
+  "devDependencies": {
+    "webpack": "^5.91.0",
+    "webpack-cli": "^5.1.4"
+  }
 }

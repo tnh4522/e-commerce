@@ -3,7 +3,8 @@ import backgroundPattern from '../../images/background-pattern.jpg';
 import { useState } from "react";
 import FormError from "../Error/FormError";
 import { useNavigate } from "react-router-dom";
-import axios from 'axios';
+import API from '../API/API';
+
 function Login() {
 
     const [getInput, setInput] = useState({
@@ -24,19 +25,19 @@ function Login() {
         e.preventDefault();
         let errorSubmit = {};
         let flag = true;
-        if(getInput.email === '') {
+        if (getInput.email === '') {
             errorSubmit.email = 'Email is required!';
             flag = false;
         }
-        if(getInput.password === '') {
+        if (getInput.password === '') {
             errorSubmit.password = 'Password is required!';
             flag = false;
         }
-        if(flag === false) {
+        if (flag === false) {
             setError(errorSubmit);
         } else {
             setError('');
-            axios.post('https://intense-inlet-71668-b76c23b36694.herokuapp.com/api/user/login', getInput)
+            API.post('user/login', getInput)
                 .then(res => {
                     localStorage.setItem('user', JSON.stringify(res.data));
                     navigate('/');
@@ -69,11 +70,11 @@ function Login() {
                             <form id="form" className="form-group flex-wrap" onSubmit={handleSubmit} method="post">
                                 <div className="col-12 pb-3">
                                     <label className="d-none">Username or email address *</label>
-                                    <input className="form-control" type="email" placeholder="Enter Your Email" name="email" value={getInput.email} onChange={handleInput} required autoComplete="email" autoFocus aria-describedby="emailHelp"/>
+                                    <input className="form-control" type="email" placeholder="Enter Your Email" name="email" value={getInput.email} onChange={handleInput} required autoComplete="email" autoFocus aria-describedby="emailHelp" />
                                 </div>
                                 <div className="col-12 pb-3">
                                     <label className="d-none">Password *</label>
-                                    <input className="form-control" type="password" placeholder="Enter Your Password" name="password" value={getInput.password} onChange={handleInput} required  />
+                                    <input className="form-control" type="password" placeholder="Enter Your Password" name="password" value={getInput.password} onChange={handleInput} required />
                                 </div>
                                 <FormError error={getError} />
                                 <div className="col-12 pb-3">

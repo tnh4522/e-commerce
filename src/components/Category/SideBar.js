@@ -1,12 +1,13 @@
 import axios from 'axios';
 import React from 'react';
 import { Link } from 'react-router-dom';
+import API from "../API/API";
 function SideBar(props) {
     let { searchFilter } = props;
     const [categories, setCategories] = React.useState([]);
     const [brands, setBrands] = React.useState([]);
     React.useEffect(() => {
-        axios.get('https://intense-inlet-71668-b76c23b36694.herokuapp.com/api/category')
+        API.get('category')
             .then(res => { setCategories(res.data) })
             .catch(error => { console.log(error) })
     }, []);
@@ -20,7 +21,7 @@ function SideBar(props) {
         })
     }
     React.useEffect(() => {
-        axios.get('https://intense-inlet-71668-b76c23b36694.herokuapp.com/api/brand')
+        API.get('brand')
             .then(res => { setBrands(res.data) })
             .catch(error => { console.log(error) })
     }, []);

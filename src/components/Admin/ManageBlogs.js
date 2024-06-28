@@ -2,27 +2,31 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import backgroundPattern from '../../images/background-pattern.jpg';
 import axios from 'axios';
+import API from '../API/API';
+
 function ManageBlogs() {
     const [users, setUsers] = useState({});
     const [blogs, setBlogs] = useState([]);
     useEffect(() => {
-        axios.get('https://intense-inlet-71668-b76c23b36694.herokuapp.com/api/user/list')
-        .then(function (response) {
-            setUsers(response.data);
-        })
-        .catch(function (error) {
-            console.log(error);
-        });
+        API.get('user/list')
+            .then(function (response) {
+                setUsers(response.data);
+            })
+            .catch(function (error) {
+                console.log(error);
+            });
     }, []);
+
     useEffect(() => {
-        axios.get('https://intense-inlet-71668-b76c23b36694.herokuapp.com/api/blog/list')
-        .then(function (response) {
-            setBlogs(response.data);
-        })
-        .catch(function (error) {
-            console.log(error);
-        });
+        API.get('blog/list')
+            .then(function (response) {
+                setBlogs(response.data);
+            })
+            .catch(function (error) {
+                console.log(error);
+            });
     }, []);
+
     function renderAuthor(idAuth) {
         let Author = 'member';
         users.forEach((value, key) => {
@@ -31,7 +35,8 @@ function ManageBlogs() {
             }
         });
         return Author;
-    }
+    };
+
     function renderData() {
         return blogs.map((value, key) => {
             return (
@@ -46,21 +51,23 @@ function ManageBlogs() {
                 </tr>
             )
         })
-    }
+    };
+
     function deleteBlog(e) {
         const id = e.target.id;
-        if(window.confirm('Are you sure you want to delete this blog?')){
+        if (window.confirm('Are you sure you want to delete this blog?')) {
             axios.delete(`https://intense-inlet-71668-b76c23b36694.herokuapp.com/api/blog/${id}`)
-            .then(function (response) {
-                if (response.status === 200) {
-                    e.target.parentNode.parentNode.remove();
-                }
-            })
-            .catch(function (error) {
-                console.log(error);
-            });
+                .then(function (response) {
+                    if (response.status === 200) {
+                        e.target.parentNode.parentNode.remove();
+                    }
+                })
+                .catch(function (error) {
+                    console.log(error);
+                });
         }
-    }
+    };
+
     return (
         <div>
             <section className="py-5 mb-5" style={{ background: `url(${backgroundPattern})` }}>

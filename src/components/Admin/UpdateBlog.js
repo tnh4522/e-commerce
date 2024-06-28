@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import backgroundPattern from '../../images/background-pattern.jpg';
 import FormError from '../Error/FormError';
 import axios from 'axios';
+import API from '../API/API';
 function UpdateBlog() {
     const [data, setData] = useState({
         title: '',
@@ -11,9 +12,10 @@ function UpdateBlog() {
         idAuth: '',
         image: ''
     });
+
     let { id } = useParams();
     useEffect(() => {
-        axios.get('https://intense-inlet-71668-b76c23b36694.herokuapp.com/api/blog/detail/' + id)
+        API.get('blog/detail/' + id)
             .then(function (response) {
                 setData((state) => {
                     return {
@@ -30,9 +32,10 @@ function UpdateBlog() {
                 console.log(error);
             });
     }, [id]);
+
     function handleChangeImage(e) {
         const fileInput = e.target.files;
-        if(fileInput){
+        if (fileInput) {
             let reader = new FileReader();
             reader.onload = function (e) {
                 setData((state) => {
@@ -45,6 +48,7 @@ function UpdateBlog() {
             reader.readAsDataURL(fileInput[0]);
         }
     };
+
     function handleChange(e) {
         const { name, value } = e.target;
         setData(state => {
@@ -54,6 +58,7 @@ function UpdateBlog() {
             }
         })
     };
+
     const [getError, setError] = useState('');
     const handleSubmit = (event) => {
         event.preventDefault();
@@ -64,8 +69,8 @@ function UpdateBlog() {
             image: data.image,
             idAuth: data.idAuth
         };
-        console.log(jsonData);
-        axios.post('https://intense-inlet-71668-b76c23b36694.herokuapp.com/api/blog/update/' + id, jsonData, {
+
+        API.post('blog/update/' + id, jsonData, {
             headers: {
                 'Content-Type': 'application/json',
             },
@@ -86,7 +91,8 @@ function UpdateBlog() {
     let navigate = useNavigate();
     function turnBackButton() {
         navigate('/admin/manage-blog');
-    }
+    };
+
     return (
         <div>
             <section className="py-5 mb-5" style={{ background: `url(${backgroundPattern})` }}>
@@ -104,7 +110,7 @@ function UpdateBlog() {
             <section className='mb-3'>
                 <div className="container-sm">
                     <form className='row g-2 p-3 border shadow-lg needs-validation was-validated' noValidate encType="multipart/form-data" method='post' onSubmit={handleSubmit}>
-                    <div className='col-md-4'>
+                        <div className='col-md-4'>
                             <label className="form-label">ID Author</label>
                             <input className='form-control' type="text" name="idAuth" onChange={handleChange} value={data.idAuth} required />
                             <div className="valid-feedback">

@@ -4,7 +4,8 @@ import React from "react";
 import { useState } from "react";
 import FormError from "../Error/FormError";
 import { useNavigate } from "react-router-dom";
-import axios from 'axios';
+import API from '../API/API';
+
 function Register() {
     const [getInput, setInput] = useState({
         name: '',
@@ -77,7 +78,7 @@ function Register() {
                 avatar: getInput.file ? getInput.file.name : '',
                 level: getInput.level
             }
-            axios.post('https://intense-inlet-71668-b76c23b36694.herokuapp.com/api/user/register', formData)
+            API.post('user/register', formData)
                 .then(res => {
                     navigate('/login');
                     alert('Register success!');
@@ -87,7 +88,8 @@ function Register() {
                     setError(errorSubmit);
                 });
         }
-    }
+    };
+
     function handleInputFile(e) {
         const fileInput = e.target.files;
         let reader = new FileReader();
@@ -102,6 +104,7 @@ function Register() {
         };
         reader.readAsDataURL(fileInput[0]);
     }
+    
     return (
         <div>
             <section className="py-5 mb-5" style={{ background: `url(${backgroundPattern})` }}>

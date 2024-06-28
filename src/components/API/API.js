@@ -1,4 +1,4 @@
 import axios from "axios";
 export default axios.create({
-    baseURL: "https://localhost/laravel8/public/api/"
+    baseURL: "http://localhost:8080/api/"
 });

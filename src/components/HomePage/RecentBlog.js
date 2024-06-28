@@ -1,10 +1,11 @@
 import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import axios from "axios";
+import API from "../API/API";
 function RecentBlog() {
     const [getData, setData] = useState([]);
     useEffect(() => {
-        axios.get('https://intense-inlet-71668-b76c23b36694.herokuapp.com/api/blog/list')
+        API.get('blog/list')
             .then(res => {
                 setData(res.data);
             })

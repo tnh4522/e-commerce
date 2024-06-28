@@ -2,6 +2,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import Modal from '../Modal/Modal';
+import API from "../API/API";
 
 function TrendingProduct() {
     const [products, setProducts] = useState([]);
@@ -13,14 +14,14 @@ function TrendingProduct() {
     let navigater = useNavigate();
 
     useEffect(() => {
-        axios.get('https://intense-inlet-71668-b76c23b36694.herokuapp.com/api/product/list')
+        API.get('product/list')
             .then(res => {
                 setProducts(res.data);
             })
             .catch(error => { console.log(error) })
     }, []);
     useEffect(() => {
-        axios.get('https://intense-inlet-71668-b76c23b36694.herokuapp.com/api/category')
+        API.get('category')
             .then(res => {
                 setCategories(res.data);
             })

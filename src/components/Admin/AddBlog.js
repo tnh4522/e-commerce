@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import backgroundPattern from '../../images/background-pattern.jpg';
 import FormError from '../Error/FormError';
 import axios from 'axios';
+import API from '../API/API';
 function AddBlog() {
   const [data, setData] = useState({
     title: '',
@@ -13,13 +14,13 @@ function AddBlog() {
     const fileInput = e.target.files;
     let reader = new FileReader();
     reader.onload = function (e) {
-        setData((state) => {
-            return {
-                ...state,
-                image: e.target.result,
-                file: fileInput[0]
-            }
-        });
+      setData((state) => {
+        return {
+          ...state,
+          image: e.target.result,
+          file: fileInput[0]
+        }
+      });
     };
     reader.readAsDataURL(fileInput[0]);
   };
@@ -44,12 +45,12 @@ function AddBlog() {
       image: data.file.name,
       idAuth: idAuthor
     };
-  
-    axios.post('http://localhost:8080/api/blog/add', jsonData, {
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      })
+
+    API.post('blog/add', jsonData, {
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    })
       .then((response) => {
         if (response.data) {
           setError('');
@@ -62,7 +63,7 @@ function AddBlog() {
         setError(error.message);
       });
   };
-  
+
   let navigate = useNavigate();
   function turnBackButton() {
     navigate('/admin/manage-blogs');

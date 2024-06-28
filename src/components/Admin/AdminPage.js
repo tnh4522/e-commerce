@@ -1,11 +1,13 @@
 import { Link } from 'react-router-dom';
 import backgroundPattern from '../../images/background-pattern.jpg';
 import { useEffect, useState } from 'react';
-import axios from 'axios';
+import API from '../API/API';
+
 function AdminUserPage() {
     const [getData, setData] = useState([]);
+
     useEffect(() => {
-        axios.get('https://intense-inlet-71668-b76c23b36694.herokuapp.com/api/user/list')
+        API.get('user/list')
             .then(function (response) {
                 setData(response.data);
             })
@@ -13,6 +15,7 @@ function AdminUserPage() {
                 console.log(error);
             });
     }, []);
+
     function renderRole(role) {
         if (role === 1) {
             return 'Admin';
@@ -21,7 +24,8 @@ function AdminUserPage() {
         } else {
             return 'User';
         }
-    }
+    };
+
     function renderData() {
         return getData.map((value, key) => {
             return (
@@ -38,7 +42,8 @@ function AdminUserPage() {
                 </tr>
             )
         })
-    }
+    };
+
     function deleteUser(e) {
         const id = e.target.id;
         const level = e.target.parentNode.parentNode.childNodes[6].id;
@@ -47,7 +52,7 @@ function AdminUserPage() {
             return;
         };
         if (window.confirm('Are you sure you want to delete this blog?')) {
-            axios.delete(`https://intense-inlet-71668-b76c23b36694.herokuapp.com/api/user/${id}`)
+            API.delete(`user/${id}`)
                 .then(function (response) {
                     if (response.status === 200) {
                         e.target.parentNode.parentNode.remove();
@@ -57,7 +62,8 @@ function AdminUserPage() {
                     console.log(error);
                 });
         }
-    }
+    };
+    
     return (
         <div>
             <section className="py-5 mb-5" style={{ background: `url(${backgroundPattern})` }}>

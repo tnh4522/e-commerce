@@ -1,9 +1,11 @@
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import backgroundPattern from '../../images/background-pattern.jpg';
 import React, { useEffect, useRef } from "react";
+import { notification, Card } from 'antd';
 import { useState } from "react";
 import FormError from "../Error/FormError";
-import axios from 'axios';
+import API from "../API/API";
+
 function MyAccount() {
     const [getInput, setInput] = useState({
         id: 0,
@@ -15,12 +17,20 @@ function MyAccount() {
         country: '',
         avatar: ''
     });
-    let navigater = useNavigate();
+
+    const [api, contextHolder] = notification.useNotification();
+    const openNotificationWithIcon = (type) => {
+        api[type]({
+            description: type === 'success' ? 'Update successfully!' : 'Update failed!',
+        });
+    };
+
     const inputFileRef = useRef(null);
     const handlePhotoChangeClick = (event) => {
         event.preventDefault();
         inputFileRef.current.click();
     };
+
     useEffect(() => {
         let getUserData = JSON.parse(localStorage.getItem('user'));
         if (getUserData) {
@@ -38,6 +48,7 @@ function MyAccount() {
             });
         }
     }, []);
+
     const [getError, setError] = useState("");
     function handleInput(e) {
         const nameInput = e.target.name;
@@ -77,10 +88,10 @@ function MyAccount() {
             errorSubmit.avatar = 'Avatar is not valid!';
             flag = false;
         }
-        if (getInput.file && getInput.file.size > 1024 * 1024) {
-            errorSubmit.avatar = 'Avatar is too large!';
-            flag = false;
-        }
+        // if (getInput.file && getInput.file.size > 1024 * 1024) {
+        //     errorSubmit.avatar = 'Avatar is too large!';
+        //     flag = false;
+        // }
         if (!flag) {
             setError(errorSubmit);
         }
@@ -95,17 +106,20 @@ function MyAccount() {
                 country: getInput.country,
                 avatar: getInput.file ? getInput.file.name : null
             }
-            axios.post('https://intense-inlet-71668-b76c23b36694.herokuapp.com/api/user/update/' + getInput.id, formData)
+
+            API.post('user/update/' + getInput.id, formData)
                 .then(res => {
                     localStorage.setItem('user', JSON.stringify(res.data));
-                    navigater('/account');
+                    openNotificationWithIcon('success');
                 })
                 .catch(err => {
                     errorSubmit.email = "Something went wrong!";
                     setError(errorSubmit);
+                    openNotificationWithIcon('error');
                 });
         }
-    }
+    };
+
     function handleInputFile(e) {
         const fileInput = e.target.files;
         let reader = new FileReader();
@@ -120,6 +134,7 @@ function MyAccount() {
         };
         reader.readAsDataURL(fileInput[0]);
     };
+
     const avatar = getInput.file ? getInput.file.name : getInput.avatar;
     let imgSrc;
     try {
@@ -128,8 +143,10 @@ function MyAccount() {
         console.warn('Image not found, using default or leaving it blank');
         imgSrc = require('../../images/logo.png');
     }
+
     return (
         <div>
+            {contextHolder}
             <section className="py-5 mb-5" style={{ background: `url(${backgroundPattern})` }}>
                 <div className="container-fluid">
                     <div className="d-flex justify-content-between">
@@ -157,8 +174,8 @@ function MyAccount() {
                                     <input type="email" name="email" value={getInput.email} className="form-control" onChange={handleInput} readOnly />
                                 </div>
                                 <div className="col-12 pb-3">
-                                    <label className="d-flex">Password</label>
-                                    <input type="password" name="password" className="form-control" onChange={handleInput} />
+                                    <label className="d-flex">New Password</label>
+                                    <input type="password" name="password" className="form-control" onChange={handleInput} placeholder='Enter new password' />
                                 </div>
                                 <div className="col-12 pb-3">
                                     <label className="d-flex">Telephone Number</label>
@@ -173,8 +190,7 @@ function MyAccount() {
                                     <input type="text" name="country" className="form-control" onChange={handleInput} value={getInput.country} />
                                 </div>
                                 <div className="col-12 pb-3">
-                                    <label className="d-flex">Avatar</label>
-                                    <input type="file" name="avatar" className="form-control" onChange={handleInputFile} ref={inputFileRef} />
+                                    <input type="file" name="avatar" style={{ display: 'none' }} className="form-control" onChange={handleInputFile} ref={inputFileRef} />
                                 </div>
                                 <div className="col-12">
                                     <button type="submit" name="submit" className="btn btn-primary text-uppercase w-100">Update</button>
@@ -193,6 +209,12 @@ function MyAccount() {
                                     </div>
                                 </div>
                             </div>
+                            <Card type="inner" style={{ marginTop: 16 }} title="Delivery Address" >
+                                <p>Address: {getInput.address}</p>
+                                <p>Country: {getInput.country}</p>
+                                <p>Phone: {getInput.phone}</p>
+                                <p>Email: {getInput.email}</p>
+                            </Card>
                         </div>
                     </div>
                 </div>

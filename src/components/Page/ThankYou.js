@@ -1,16 +1,24 @@
-import axios from 'axios';
 import { Link } from 'react-router-dom';
+import API from '../API/API';
+
 function ThankYou() {
     const orderData = JSON.parse(localStorage.getItem('orderData'));
-    if(orderData) {
-        axios.post('https://intense-inlet-71668-b76c23b36694.herokuapp.com/api/order/add', orderData)
-        .then(res => {
-            console.log(res);
-        })
-        .catch(err => {
-            console.log(err);
-        })
+
+    if (orderData) {
+        API.post('order/add', orderData)
+            .then(res => {
+                localStorage.removeItem('orderData');
+                localStorage.removeItem('data');
+                localStorage.removeItem('orderData');
+                localStorage.removeItem('cart');
+                localStorage.removeItem('cartTotalItem');
+                localStorage.removeItem('priceTotalAll');
+            })
+            .catch(err => {
+                console.log(err);
+            })
     }
+
     return (
         <div>
             <section className="py-5">
@@ -18,7 +26,7 @@ function ThankYou() {
                     <div className="row justify-content-center">
                         <div className="col-md-8">
                             <div className="thank-you-content text-center">
-                                <i className="fa-solid fa-circle-check" style={{fontSize: '100px', color: '#00bdaa', marginBottom: '20px'}}></i>
+                                <i className="fa-solid fa-circle-check" style={{ fontSize: '100px', color: '#00bdaa', marginBottom: '20px' }}></i>
                                 <h2 className="mb-4">Thank you for your order!</h2>
                                 <p className="mb-3">Your order has been placed and will be processed as soon as possible.</p>
                                 <p className="mb-3">Make sure you make note of your order number, which is <strong>#2001539</strong></p>

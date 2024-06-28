@@ -40,10 +40,10 @@ function CheckOut() {
             }
         }
         const amount = parseInt(priceTotalAll);
-        const cancelUrl = 'https://food-mart-e-commerce.onrender.com/cart'
+        const cancelUrl = 'http://localhost:3000/cart'
         const description = data.description;
         const orderCode = parseInt(data.idOrder);
-        const returnUrl = 'https://food-mart-e-commerce.onrender.com/thank-you';
+        const returnUrl = 'http://localhost:3000/thank-you';
         const name = data.name;
         const email = data.email;
         const phone = data.phone;
@@ -66,7 +66,7 @@ function CheckOut() {
             'returnUrl': returnUrl,
             'signature': signature
         };
-        
+
         const orderData = {
             'userId': user ? user.id : '',
             'name': name,
@@ -75,6 +75,9 @@ function CheckOut() {
             'address': address,
             'description': description,
             'total': amount,
+            'date': new Date().toISOString(),
+            'status': 'payment',
+            'paymentMethod': 'QR VNPay',
             'orderDetails': Object.keys(cart).map((key) => {
                 return {
                     'productId': parseInt(cart[key].id),
@@ -82,11 +85,12 @@ function CheckOut() {
                 }
             })
         };
-        localStorage.setItem('orderData', JSON.stringify(orderData));
 
         axios.post('https://api-merchant.payos.vn/v2/payment-requests', formData, config)
             .then(res => {
+                console.log(res);
                 localStorage.setItem('data', JSON.stringify(res.data.data));
+                localStorage.setItem('orderData', JSON.stringify(orderData));
                 navigater('/payment');
             }).catch(err => {
                 console.log(err);
@@ -103,9 +107,11 @@ function CheckOut() {
             }, (error) => {
                 console.log(error.text);
             });
-    }
+    };
+    
     let date = dayjs().format('DD/MM/YYYY');
     let estimate_date = dayjs().add(3, 'day').format('DD/MM/YYYY');
+
     return (
         <div>
             <section className="py-5 mb-5" style={{ background: `url(${backgroundPattern})` }}>

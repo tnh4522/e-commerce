@@ -1,12 +1,13 @@
 import { Link } from 'react-router-dom';
 import backgroundPattern from '../../images/background-pattern.jpg';
 import { useState } from 'react';
-import axios from 'axios';
 import { useEffect } from 'react';
+import API from '../API/API';
+
 function ManageOrders() {
     const [getData, setData] = useState([]);
     useEffect(() => {
-        axios.get('https://intense-inlet-71668-b76c23b36694.herokuapp.com/api/order/list')
+        API.get('order/list')
         .then(function (response) {
             setData(response.data);
         })

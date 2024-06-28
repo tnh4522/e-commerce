@@ -1,7 +1,8 @@
 import { Link } from 'react-router-dom';
 import backgroundPattern from '../../images/background-pattern.jpg';
 import { useState, useEffect, useRef } from 'react';
-import axios from 'axios';
+import API from '../API/API';
+
 function Cart() {
     const [getData, setData] = useState([]);
     const getCart = JSON.parse(localStorage.getItem('cart'));
@@ -12,7 +13,7 @@ function Cart() {
         });
     };
     useEffect(() => {
-        axios.post('https://intense-inlet-71668-b76c23b36694.herokuapp.com/api/product/cart', cartData)
+        API.post('product/cart', cartData)
             .then(res => {
                 setData(res.data);
             })
@@ -21,10 +22,10 @@ function Cart() {
             });
     }, []);
     useEffect(() => {
-        // Assuming that updating the total price does not need to interact directly with the DOM,
-        // and only needs the data in `getData`
+
         updatePriceTotalAll();
-    }, [getData]); // Dependency array
+    }, [getData]);
+
     let priceTotalAll = localStorage.getItem('priceTotalAll');
     function renderData() {
         return getData.map((item, index) => {
@@ -66,7 +67,7 @@ function Cart() {
                         </div>
                     </td>
                     <td className="py-4">
-                        <div className="cart-remove" >
+                        <div className="cart-remove">
                             <Link onClick={deleteItem} >
                                 <svg width={24} height={24}>
                                     <use xlinkHref="#trash" />

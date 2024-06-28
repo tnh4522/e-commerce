@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import axios from "axios";
 import backgroundPattern from '../../images/background-pattern.jpg';
 import SideBar from "../Category/SideBar";
 import ShopPagination from "./ShopPagination";
 import Modal from "../Modal/Modal";
+import API from "../API/API";
 function Shop(props) {
     const [products, setProducts] = useState([]);
     const [records, setRecords] = useState([]);
@@ -13,7 +13,7 @@ function Shop(props) {
     const [wishlist, setWishlist] = useState([]);
     const navigater = useNavigate();
     useEffect(() => {
-        axios.get('https://intense-inlet-71668-b76c23b36694.herokuapp.com/api/product/list')
+        API.get('product/list')
             .then(res => { setProducts(res.data); setRecords(res.data); })
             .catch(error => { console.log(error) });
         const localStorageWishlist = JSON.parse(localStorage.getItem('wishlist'));

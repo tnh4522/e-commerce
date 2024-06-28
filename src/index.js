@@ -29,6 +29,10 @@ import UpdateBlog from './components/Admin/UpdateBlog';
 import ShopCategory from './components/Category/ShopCategory';
 import ManageOrders from './components/seller/ManageOrder';
 import Payment from './components/Order/Payment';
+import GeminiModal from './components/gemini/gemini_modal';
+import OrderList from './components/Order/OrderList';
+import OrderDetail from './components/Order/OrderDetail';
+
 const checkAuthAdmin = () => {
   if (localStorage.getItem('user')) {
     const levelUser = JSON.parse(localStorage.getItem('user')).level;
@@ -72,6 +76,10 @@ root.render(
           <Route path='/wish-list' element={<Wishlist />} />
           <Route path='shop-category/:id' element={<ShopCategory  />} />
           <Route path='payment' element={<Payment />} />
+          <Route path='gemini-modal' element={<GeminiModal />} />
+          <Route path='order' element={<OrderList />} />
+          <Route path='/order/detail' element={<OrderDetail />} />
+          <Route path='*' element={<Home />} />
           {/* Admin */}
           {checkAuthAdmin() && <Route path='/admin' element={<AdminUserPage />} />}
           {checkAuthAdmin() && <Route path='/admin/update/:id' element={<UpdateUser />} />}

@@ -3,12 +3,14 @@ import { Link } from "react-router-dom";
 import axios from 'axios';
 import backgroundPattern from '../../images/background-pattern.jpg';
 import Modal from "../Modal/Modal";
+import API from "../API/API";
+
 function Wishlist() {
     const [getData, setData] = useState([]);
     const [modalMessage, setModalMessage] = useState('');
     const [showModal, setShowModal] = useState(false);
     useEffect(() => {
-        axios.get('https://intense-inlet-71668-b76c23b36694.herokuapp.com/api/product/list')
+        API.get('product/list')
             .then(res => {
                 setData(res.data);
             })
@@ -29,7 +31,7 @@ function Wishlist() {
                         <div className="product-item" id={item.id}>
                             <figure>
                                 <Link to={'/product/detail/' + item.id} title="Product Title">
-                                    <img alt='' src={require('../../img/' + extractFilenames(item.image)[0])} className="tab-image" />
+                                    <img alt='' src={require('../../images/' + extractFilenames(item.image)[0])} className="tab-image" />
                                 </Link>
                             </figure>
                             <Link to={'/product/detail/' + item.id} className="text-decoration-none"><h3>{item.name}</h3></Link>

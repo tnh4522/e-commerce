@@ -2,7 +2,7 @@ import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import API from '../API/API';
-import axios from 'axios';
+
 function Header() {
     const navigate = useNavigate();
     function handleLogout() {
@@ -31,15 +31,15 @@ function Header() {
             cartData[getCart[key].id] = getCart[key].quantity;
         });
     };
-    useEffect(() => {
-        API.post('product/cart', cartData)
-            .then(res => {
-                setData(res.data.data);
-            })
-            .catch(error => {
-                console.log(error);
-            })
-    }, []);
+    // useEffect(() => {
+    //     API.post('product/cart', cartData)
+    //         .then(res => {
+    //             setData(res.data.data);
+    //         })
+    //         .catch(error => {
+    //             console.log(error);
+    //         })
+    // }, []);
     let priceTotalAll = localStorage.getItem('priceTotalAll');
     let cartTotalItem = localStorage.getItem('cartTotalItem');
     function updateCartTotalItem() {
@@ -79,7 +79,7 @@ function Header() {
                             <li><Link to="/account" className="dropdown-item">My Account</Link></li>
                             <li><Link to="/wish-list" className="dropdown-item">Wishlist</Link></li>
                             <li><Link to="/cart" className="dropdown-item">Cart</Link></li>
-                            <li><Link to="/checkout" className="dropdown-item">Checkout</Link></li>
+                            <li><Link to="/order" className="dropdown-item">Orders</Link></li>
                             <li><Link to="/login" className="dropdown-item" onClick={handleLogout}>Logout</Link></li>
                         </ul>
                     </li>
@@ -113,7 +113,7 @@ function Header() {
     const [record, setRecord] = useState([]);
 
     useEffect(() => {
-        axios.get('https://intense-inlet-71668-b76c23b36694.herokuapp.com/api/product/list')
+        API.get('product/list')
             .then(res => { setProduct(res.data); })
             .catch(error => { console.log(error) })
     }, []);
@@ -134,7 +134,7 @@ function Header() {
             setRecord([]);
         }, 200);
     }
-    
+
     const renderData = () => {
         if (record.length > 0) {
             return record.map((val, index) => {
@@ -252,9 +252,12 @@ function Header() {
                                                 <Link to="/blog" className="nav-link">Blog</Link>
                                             </li>
                                             <li className="nav-item">
+                                                <Link to="/gemini-modal" className="nav-link">Recipe</Link>
+                                            </li>
+                                            <li className="nav-item">
                                                 <Link to="/contact" className="nav-link">Contact </Link>
                                             </li>
-                                            <li className="nav-item dropdown">
+                                            {/* <li className="nav-item dropdown">
                                                 <Link to="" className="nav-link dropdown-toggle" role="button" id="pages" data-bs-toggle="dropdown" aria-expanded="false">Pages</Link>
                                                 <ul className="dropdown-menu" aria-labelledby="pages">
                                                     <li><Link to="/about" className="dropdown-item">About Us <span className="badge bg-success text-dark ms-2">PRO</span></Link></li>
@@ -270,7 +273,7 @@ function Header() {
                                                     <li><Link to="/login" className="dropdown-item">My Account <span className="badge bg-success text-dark ms-2">PRO</span></Link></li>
                                                     <li><Link to="" className="dropdown-item">404 Error <span className="badge bg-success text-dark ms-2">PRO</span></Link></li>
                                                 </ul>
-                                            </li>
+                                            </li> */}
                                             {checkAuthenticate() === 1 ?
                                                 <li className="nav-item dropdown">
                                                     <Link to="/admin" className="nav-link dropdown-toggle" role="button" id="pages" data-bs-toggle="dropdown" aria-expanded="false">Admin</Link>

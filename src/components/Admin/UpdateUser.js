@@ -5,6 +5,7 @@ import React, { useEffect, useRef } from "react";
 import { useState } from "react";
 import FormError from "../Error/FormError";
 import axios from "axios";
+import API from "../API/API";
 function UpdateUser() {
     let { id } = useParams();
     const [getInput, setInput] = useState({
@@ -17,11 +18,13 @@ function UpdateUser() {
         country: '',
         avatar: ''
     });
+
     const inputFileRef = useRef(null);
     const handlePhotoChangeClick = (event) => {
         event.preventDefault();
         inputFileRef.current.click();
     };
+
     useEffect(() => {
         axios.get('https://intense-inlet-71668-b76c23b36694.herokuapp.com/api/user/' + id)
             .then(function (response) {
@@ -42,6 +45,7 @@ function UpdateUser() {
                 console.log(error);
             });
     }, [id]);
+
     const [getError, setError] = useState("");
     function handleInput(e) {
         const nameInput = e.target.name;
@@ -50,7 +54,8 @@ function UpdateUser() {
             ...state,
             [nameInput]: valueInput
         }));
-    }
+    };
+
     let navigate = useNavigate();
     function handleSubmit(e) {
         e.preventDefault();
@@ -86,10 +91,10 @@ function UpdateUser() {
                 country: getInput.country,
                 avatar: getInput.file ? getInput.file.name : null
             }
-            
-            axios.post('https://intense-inlet-71668-b76c23b36694.herokuapp.com/api/user/update/' + id, data_json)
+
+            API.post('user/update/' + id, data_json)
                 .then(function (response) {
-                    if(window.confirm('Are you sure you want to update this user?')){
+                    if (window.confirm('Are you sure you want to update this user?')) {
                         if (response.status === 200) {
                             navigate('/admin');
                         }
@@ -99,7 +104,8 @@ function UpdateUser() {
                     console.log(error);
                 });
         }
-    }
+    };
+
     function handleInputFile(e) {
         const fileInput = e.target.files;
         let reader = new FileReader();
@@ -114,6 +120,7 @@ function UpdateUser() {
         };
         reader.readAsDataURL(fileInput[0]);
     };
+
     const avatar = getInput.file ? getInput.file.name : getInput.avatar;
     let imgSrc;
     try {
@@ -121,7 +128,8 @@ function UpdateUser() {
     } catch (error) {
         console.warn('Image not found, using default or leaving it blank');
         imgSrc = require('../../images/logo.png');
-    }
+    };
+
     return (
         <div>
             <section className="py-5 mb-5" style={{ background: `url(${backgroundPattern})` }}>
