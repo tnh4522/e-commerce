@@ -1,10 +1,12 @@
 import { Link } from 'react-router-dom';
 import backgroundPattern from '../../images/background-pattern.jpg';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import API from '../API/API';
+import { extractFilenames, updateCartTotalItem as updateCartBadge } from '../utils/cartUtils';
 
 function Cart() {
     const [getData, setData] = useState([]);
+    const [loading, setLoading] = useState(true);
     const getCart = JSON.parse(localStorage.getItem('cart'));
     let cartData = {};
     if (getCart) {
@@ -12,6 +14,7 @@ function Cart() {
             cartData[getCart[key].id] = getCart[key].quantity;
         });
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     useEffect(() => {
         API.post('product/cart', cartData)
             .then(res => {
@@ -19,10 +22,13 @@ function Cart() {
             })
             .catch(error => {
                 console.log(error);
+            })
+            .finally(() => {
+                setLoading(false);
             });
     }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     useEffect(() => {
-
         updatePriceTotalAll();
     }, [getData]);
 
@@ -79,27 +85,11 @@ function Cart() {
             )
         })
     };
-    function extractFilenames(inputString) {
-        try {
-            const inputArray = JSON.parse(inputString);
-            const resultArray = [];
-            for (let i = 0; i < inputArray.length; i++) {
-                const filename = inputArray[i];
-                const startIndex = filename.indexOf("_") + 1;
-                const newFilename = filename.slice(startIndex);
-                resultArray.push(newFilename);
-            }
-            return resultArray;
-        } catch (error) {
-            console.error("Invalid input JSON string.");
-            return [];
-        }
-    }
+
     function downQuantityInput(e) {
         let id = e.target.parentNode.parentNode.parentNode.id;
         let quantity = e.target.parentNode.parentNode.querySelector('.cart-quantity-input').value;
         quantity--;
-        e.target.parentNode.parentNode.querySelector('.cart-quantity-input').value = quantity;
         if (quantity < 1) {
             let cart = JSON.parse(localStorage.getItem('cart'));
             if (cart[id]) {
@@ -107,12 +97,16 @@ function Cart() {
                 localStorage.setItem('cart', JSON.stringify(cart));
                 e.target.parentNode.parentNode.parentNode.remove();
             }
+            updatePriceTotalAll();
+            updateCartBadge();
+            return;
         }
+        e.target.parentNode.parentNode.querySelector('.cart-quantity-input').value = quantity;
         updateQuantityInLocal(id, quantity);
         let price = e.target.parentNode.parentNode.parentNode.querySelector('.price-product').innerHTML;
         updatePriceTotal(price, quantity, e);
         updatePriceTotalAll();
-        updateCartTotalItem();
+        updateCartBadge();
     }
     function upQuantityInput(e) {
         let id = e.target.parentNode.parentNode.parentNode.id;
@@ -123,7 +117,7 @@ function Cart() {
         let price = e.target.parentNode.parentNode.parentNode.querySelector('.price-product').innerHTML;
         updatePriceTotal(price, quantity, e);
         updatePriceTotalAll();
-        updateCartTotalItem();
+        updateCartBadge();
     }
     function updateQuantityInLocal(id, quantity) {
         let cart = JSON.parse(localStorage.getItem('cart'));
@@ -142,7 +136,7 @@ function Cart() {
             e.target.parentNode.parentNode.parentNode.parentNode.remove();
         }
         updatePriceTotalAll();
-        updateCartTotalItem();
+        updateCartBadge();
     }
     function updatePriceTotal(price, quantity, e) {
         let total = price * quantity;
@@ -161,18 +155,7 @@ function Cart() {
             item.innerHTML = total;
         });
     }
-    function updateCartTotalItem() {
-        let cart = JSON.parse(localStorage.getItem('cart'));
-        let total = 0;
-        if (cart) {
-            Object.keys(cart).forEach(function (key) {
-                total += cart[key].quantity;
-            });
-        }
-        localStorage.setItem('cartTotalItem', total);
-        document.querySelector('.badge').innerHTML = total;
-        updatePriceTotalAll();
-    }
+
     return (
         <div>
             <section className="py-5 mb-5" style={{ background: `url(${backgroundPattern})` }}>
@@ -180,8 +163,8 @@ function Cart() {
                     <div className="d-flex justify-content-between">
                         <h1 className="page-title pb-2">Cart</h1>
                         <nav className="breadcrumb fs-6">
-                            <Link className="breadcrumb-item nav-link" href="#">Home</Link>
-                            <Link className="breadcrumb-item nav-link" href="#">Pages</Link>
+                            <Link className="breadcrumb-item nav-link" to="/">Home</Link>
+                            <Link className="breadcrumb-item nav-link" to="/shop">Pages</Link>
                             <span className="breadcrumb-item active" aria-current="page">Cart</span>
                         </nav>
                     </div>
@@ -191,6 +174,19 @@ function Cart() {
                 <div className="container-fluid">
                     <div className="row g-5">
                         <div className="col-md-8">
+                            {loading ? (
+                                <div className="text-center py-5">
+                                    <div className="spinner-border text-primary" role="status">
+                                        <span className="visually-hidden">Loading...</span>
+                                    </div>
+                                </div>
+                            ) : getData.length === 0 ? (
+                                <div className="text-center py-5">
+                                    <h3>Your cart is empty</h3>
+                                    <p className="text-muted">Looks like you haven't added anything to your cart yet.</p>
+                                    <Link to="/shop" className="btn btn-primary mt-3">Continue Shopping</Link>
+                                </div>
+                            ) : (
                             <div className="table-responsive cart">
                                 <table className="table">
                                     <thead>
@@ -206,6 +202,7 @@ function Cart() {
                                     </tbody>
                                 </table>
                             </div>
+                            )}
                         </div>
                         <div className="col-md-4">
                             <div className="cart-totals bg-grey py-5">

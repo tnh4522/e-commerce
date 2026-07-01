@@ -11,6 +11,7 @@ import 'swiper/css/thumbs';
 import Modal from "../Modal/Modal";
 import style from './style.module.css';
 import API from '../API/API';
+import { extractFilenames, addProductToCart } from '../utils/cartUtils';
 
 function SingleProduct() {
     let productID = useParams().id;
@@ -32,22 +33,7 @@ function SingleProduct() {
     };
 
     function handleBuyNowClick() {
-        const productID = getProduct.id;
-        var cartData = {
-            id: productID,
-            quantity: parseInt(getQuantity)
-        }
-        var cart = {};
-        if (localStorage.getItem('cart')) {
-            cart = JSON.parse(localStorage.getItem('cart'));
-        }
-        if (!cart[productID]) {
-            cart[productID] = cartData;
-        } else {
-            cart[productID].quantity += parseInt(getQuantity);
-        }
-        localStorage.setItem('cart', JSON.stringify(cart));
-        updateCartTotalItem();
+        addProductToCart(getProduct.id, getQuantity);
         setModalMessage('Add to cart successfully!');
         setShowModal(true);
 
@@ -91,24 +77,14 @@ function SingleProduct() {
                                     modules={[FreeMode, Navigation, Thumbs]}
                                     className={style.mySwiper2}
                                 >
-                                    <SwiperSlide className={style.swiperSlide}>
-                                        <img src={require('../../images/' + extractFilenames(getProduct.image)[0])} alt="" />
-                                    </SwiperSlide>
-                                    <SwiperSlide className={style.swiperSlide}>
-                                        <img src={require('../../images/' + extractFilenames(getProduct.image)[1])} alt="" />
-                                    </SwiperSlide>
-                                    <SwiperSlide className={style.swiperSlide}>
-                                        <img src={require('../../images/' + extractFilenames(getProduct.image)[2])} alt="" />
-                                    </SwiperSlide>
-                                    <SwiperSlide className={style.swiperSlide}>
-                                        <img src={require('../../images/' + extractFilenames(getProduct.image)[3])} alt="" />
-                                    </SwiperSlide>
-                                    <SwiperSlide className={style.swiperSlide}>
-                                        <img src={require('../../images/' + extractFilenames(getProduct.image)[4])} alt="" />
-                                    </SwiperSlide>
+                                    {extractFilenames(getProduct.image).map((filename, index) => (
+                                        <SwiperSlide className={style.swiperSlide} key={index}>
+                                            <img src={require('../../images/' + filename)} alt={getProduct.name} />
+                                        </SwiperSlide>
+                                    ))}
                                 </Swiper>
                                 <Swiper
-                                    // onSwiper={setThumbsSwiper}
+                                    onSwiper={setThumbsSwiper}
                                     loop={true}
                                     watchSlidesProgress={true}
                                     spaceBetween={10}
@@ -117,21 +93,11 @@ function SingleProduct() {
                                     modules={[FreeMode, Navigation, Thumbs]}
                                     className={style.mySwiper}
                                 >
-                                    <SwiperSlide className={style.swiperSlide}>
-                                        <img src={require('../../images/' + extractFilenames(getProduct.image)[0])} alt="" />
-                                    </SwiperSlide>
-                                    <SwiperSlide className={style.swiperSlide}>
-                                        <img src={require('../../images/' + extractFilenames(getProduct.image)[1])} alt="" />
-                                    </SwiperSlide>
-                                    <SwiperSlide className={style.swiperSlide}>
-                                        <img src={require('../../images/' + extractFilenames(getProduct.image)[2])} alt="" />
-                                    </SwiperSlide>
-                                    <SwiperSlide className={style.swiperSlide}>
-                                        <img src={require('../../images/' + extractFilenames(getProduct.image)[3])} alt="" />
-                                    </SwiperSlide>
-                                    <SwiperSlide className={style.swiperSlide}>
-                                        <img src={require('../../images/' + extractFilenames(getProduct.image)[4])} alt="" />
-                                    </SwiperSlide>
+                                    {extractFilenames(getProduct.image).map((filename, index) => (
+                                        <SwiperSlide className={style.swiperSlide} key={index}>
+                                            <img src={require('../../images/' + filename)} alt={getProduct.name} />
+                                        </SwiperSlide>
+                                    ))}
                                 </Swiper>
                             </div>
                         </div>
@@ -225,40 +191,11 @@ function SingleProduct() {
         }
     };
 
-    function extractFilenames(inputString) {
-        try {
-            const inputArray = JSON.parse(inputString);
-            const resultArray = [];
-            for (let i = 0; i < inputArray.length; i++) {
-                const filename = inputArray[i];
-                const startIndex = filename.indexOf("_") + 1;
-                const newFilename = filename.slice(startIndex);
-                resultArray.push(newFilename);
-            }
-            return resultArray;
-        } catch (error) {
-            console.error("Invalid input JSON string.");
-            return [];
-        }
-    };
+
 
     function addToCart(e) {
         const productID = e.target.value;
-        var cartData = {
-            id: productID,
-            quantity: parseInt(getQuantity)
-        }
-        var cart = {};
-        if (localStorage.getItem('cart')) {
-            cart = JSON.parse(localStorage.getItem('cart'));
-        }
-        if (!cart[productID]) {
-            cart[productID] = cartData;
-        } else {
-            cart[productID].quantity += parseInt(getQuantity);
-        }
-        localStorage.setItem('cart', JSON.stringify(cart));
-        updateCartTotalItem();
+        addProductToCart(productID, getQuantity);
         setModalMessage('Add to cart successfully!');
         setShowModal(true);
     };
@@ -284,30 +221,7 @@ function SingleProduct() {
         setQuantity(value);
     };
 
-    function updateCartTotalItem() {
-        let cart = JSON.parse(localStorage.getItem('cart'));
-        let total = 0;
-        if (cart) {
-            Object.keys(cart).forEach(function (key) {
-                total += cart[key].quantity;
-            });
-        }
-        localStorage.setItem('cartTotalItem', total);
-        document.querySelector('.badge').innerHTML = total;
-        document.querySelector('.cart-total-item').innerHTML = total;
-        updatePriceTotalAll();
-    };
 
-    function updatePriceTotalAll() {
-        let priceTotal = document.querySelectorAll('.price-total-item-header');
-        let priceTotalAll = 0;
-        priceTotal.forEach((item, index) => {
-            priceTotalAll += parseInt(item.innerHTML);
-        })
-        if (priceTotalAll > 0) {
-            localStorage.setItem('priceTotalAll', priceTotalAll);
-        }
-    };
 
     useEffect(() => {
         if (showModal) {

@@ -1,13 +1,8 @@
-import { Link } from 'react-router-dom';
 import Banner from './Banner';
 import Category from './Category';
 import TrendingProduct from './TrendingProduct';
 import BannerCenter from './BannerCenter';
-import NewlyBrands from './NewlyBrands';
-import BestSelling from './BestSelling';
 import GetDiscount from './GetDiscount';
-import PopularProduct from './PopularProduct';
-import JustArrived from './JustArrived';
 import RecentBlog from './RecentBlog';
 function Home() {
     return (

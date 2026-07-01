@@ -1,23 +1,34 @@
 import { Link } from 'react-router-dom';
 import API from '../API/API';
+import { useEffect, useState, useRef } from 'react';
 
 function ThankYou() {
-    const orderData = JSON.parse(localStorage.getItem('orderData'));
+    const [orderCode, setOrderCode] = useState('');
+    const hasSubmitted = useRef(false);
 
-    if (orderData) {
-        API.post('order/add', orderData)
-            .then(res => {
-                localStorage.removeItem('orderData');
-                localStorage.removeItem('data');
-                localStorage.removeItem('orderData');
-                localStorage.removeItem('cart');
-                localStorage.removeItem('cartTotalItem');
-                localStorage.removeItem('priceTotalAll');
-            })
-            .catch(err => {
-                console.log(err);
-            })
-    }
+    useEffect(() => {
+        if (hasSubmitted.current) return;
+        
+        const orderData = JSON.parse(localStorage.getItem('orderData'));
+        if (orderData) {
+            hasSubmitted.current = true;
+            setOrderCode(orderData.description || '');
+            
+            API.post('order/add', orderData)
+                .then(res => {
+                    localStorage.removeItem('orderData');
+                    localStorage.removeItem('data');
+                    localStorage.removeItem('cart');
+                    localStorage.removeItem('cartTotalItem');
+                    localStorage.removeItem('priceTotalAll');
+                    // Dispatch cart update event so header badge resets
+                    window.dispatchEvent(new CustomEvent('cartUpdated', { detail: { totalItems: 0 } }));
+                })
+                .catch(err => {
+                    console.error('Failed to submit order:', err);
+                });
+        }
+    }, []);
 
     return (
         <div>
@@ -29,9 +40,9 @@ function ThankYou() {
                                 <i className="fa-solid fa-circle-check" style={{ fontSize: '100px', color: '#00bdaa', marginBottom: '20px' }}></i>
                                 <h2 className="mb-4">Thank you for your order!</h2>
                                 <p className="mb-3">Your order has been placed and will be processed as soon as possible.</p>
-                                <p className="mb-3">Make sure you make note of your order number, which is <strong>#2001539</strong></p>
-                                <p className="mb-3">You will be receiving an <a href="https://mail.google.com/mail/u/0/#inbox" target='blank'><strong>email</strong></a> shortly with confirmation of your order. <br /> <strong>Estimated delivery time is 4-5 working days.</strong></p>
-                                <p className="mb-3">If you have any questions, please feel free to contact us at <Link to="mailto:tnh2045@gmail.com">Customer Support</Link></p>
+                                {orderCode && <p className="mb-3">Make sure you make note of your order number, which is <strong>#{orderCode}</strong></p>}
+                                <p className="mb-3">You will be receiving an <a href="https://mail.google.com/mail/u/0/#inbox" target='_blank' rel='noreferrer'><strong>email</strong></a> shortly with confirmation of your order. <br /> <strong>Estimated delivery time is 4-5 working days.</strong></p>
+                                <p className="mb-3">If you have any questions, please feel free to contact us at <Link to="/contact">Customer Support</Link></p>
                                 <Link to="/" className="btn btn-primary">Back to Home</Link>
                             </div>
                         </div>
@@ -54,12 +65,8 @@ function ThankYou() {
                                             <div className="detail">
                                                 <h3>Phones</h3>
                                                 <ul className="list-unstyled">
-                                                    <li>
-                                                        <i className="icon icon-phone" />+1650-243-00023
-                                                    </li>
-                                                    <li>
-                                                        <i className="icon icon-phone" />+1650-243-00021
-                                                    </li>
+                                                    <li><i className="icon icon-phone" />+1650-243-00023</li>
+                                                    <li><i className="icon icon-phone" />+1650-243-00021</li>
                                                 </ul>
                                             </div>
                                         </div>
@@ -67,10 +74,7 @@ function ThankYou() {
                                             <div className="detail">
                                                 <h3>Emails</h3>
                                                 <ul className="list-unstyled">
-                                                    <li>
-                                                        <i className="icon icon-envelope" />
-                                                        <Link to="mailto:info@yourcompany.com">info@yourcompany.com</Link>
-                                                    </li>
+                                                    <li><i className="icon icon-envelope" /><Link to="mailto:info@yourcompany.com">info@yourcompany.com</Link></li>
                                                 </ul>
                                             </div>
                                         </div>
@@ -78,10 +82,7 @@ function ThankYou() {
                                             <div className="address detail">
                                                 <h3>Address</h3>
                                                 <ul className="list-unstyled">
-                                                    <li>
-                                                        <i className="icon icon-location" />
-                                                        <span>North Melbourne VIC 3051, Australia</span>
-                                                    </li>
+                                                    <li><i className="icon icon-location" /><span>North Melbourne VIC 3051, Australia</span></li>
                                                 </ul>
                                             </div>
                                         </div>

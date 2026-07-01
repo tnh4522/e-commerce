@@ -8,8 +8,10 @@ import emailjs from '@emailjs/browser';
 function CheckOut() {
     const form = useRef();
     let navigater = useNavigate();
+    const cart = JSON.parse(localStorage.getItem('cart'));
+    let user = null;
     if (localStorage.getItem('user')) {
-        var user = JSON.parse(localStorage.getItem('user'));
+        user = JSON.parse(localStorage.getItem('user'));
     };
     function getRandomNumber() {
         return Math.floor(Math.random() * 100000) + 1;
@@ -24,6 +26,16 @@ function CheckOut() {
         description: user ? 'VNQR'.concat(user.phone) : ''
     });
     const priceTotalAll = localStorage.getItem('priceTotalAll');
+
+    if (!cart || Object.keys(cart).length === 0) {
+        return (
+            <div className="container-fluid py-5 text-center">
+                <h3>Your cart is empty</h3>
+                <p>Please add some products before checking out.</p>
+                <Link to="/shop" className="btn btn-primary">Go to Shop</Link>
+            </div>
+        );
+    }
     function handleChange(e) {
         const newData = { ...data }
         newData[e.target.name] = e.target.value;
@@ -52,7 +64,7 @@ function CheckOut() {
         const secretKey = 'f0509838332245e2d4a79db36909ef4efdfd7de34725206d40b4dfb01c750c0b';
         const signature = CryptoJS.HmacSHA256(sortedData, secretKey).toString(CryptoJS.enc.Hex);
 
-        const cart = JSON.parse(localStorage.getItem('cart'));
+
 
         const formData = {
             'orderCode': orderCode,
@@ -119,8 +131,8 @@ function CheckOut() {
                     <div className="d-flex justify-content-between">
                         <h1 className="page-title pb-2">Checkout</h1>
                         <nav className="breadcrumb fs-6">
-                            <Link className="breadcrumb-item nav-link" href="#">Home</Link>
-                            <Link className="breadcrumb-item nav-link" href="#">Pages</Link>
+                            <Link className="breadcrumb-item nav-link" to="/">Home</Link>
+                            <Link className="breadcrumb-item nav-link" to="/shop">Pages</Link>
                             <span className="breadcrumb-item active" aria-current="page">Checkout</span>
                         </nav>
                     </div>
@@ -139,7 +151,7 @@ function CheckOut() {
                                     <input type="text" id="fname" name="name" className="form-control mt-2 mb-4 ps-3" value={data.name} onChange={handleChange} required />
                                     <label htmlFor="address">Address*</label>
                                     <input type="text" id="adr" name="address" className="form-control mt-3 ps-3 mb-3" value={data.address} onChange={handleChange} required />
-                                    <label htmlFor="email">Phone*</label>
+                                    <label htmlFor="phone">Phone*</label>
                                     <input type="text" id="phone" name="phone" className="form-control mt-2 mb-4 ps-3" value={data.phone} onChange={handleChange} required />
                                     <label htmlFor="email">Email*</label>
                                     <input type="text" id="email" name="email" className="form-control mt-2 mb-4 ps-3" value={data.email} onChange={handleChange} required />
@@ -191,7 +203,7 @@ function CheckOut() {
                                                 </span>
                                             </label>
                                             <label className="list-group-item d-flex gap-2 border-0">
-                                                <input className="form-check-input flex-shrink-0" type="radio" name="listGroupRadios" id="listGroupRadios3" defaultValue />
+                                                <input className="form-check-input flex-shrink-0" type="radio" name="listGroupRadios" id="listGroupRadios4" defaultValue />
                                                 <span>
                                                     <strong className="text-uppercase">Paypal</strong>
                                                     <small className="d-block text-body-secondary">Pay via PayPal; you can pay with your credit card if you don’t have a PayPal account.</small>

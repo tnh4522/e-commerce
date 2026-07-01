@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import axios from 'axios';
+
 import backgroundPattern from '../../images/background-pattern.jpg';
 import Modal from "../Modal/Modal";
 import API from "../API/API";

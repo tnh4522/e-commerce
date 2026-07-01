@@ -2,7 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Home from './components/HomePage/Home';
 import About from './components/Page/About';
 import Shop from './components/shop/Shop';
@@ -33,24 +33,19 @@ import GeminiModal from './components/gemini/gemini_modal';
 import OrderList from './components/Order/OrderList';
 import OrderDetail from './components/Order/OrderDetail';
 
-const checkAuthAdmin = () => {
-  if (localStorage.getItem('user')) {
-    const levelUser = JSON.parse(localStorage.getItem('user')).level;
-    if (levelUser === 1) {
-      return true;
+// Protected route component that checks auth level on every render
+function ProtectedRoute({ level, children }) {
+    try {
+        const user = JSON.parse(localStorage.getItem('user'));
+        if (user && user.level === level) {
+            return children;
+        }
+    } catch (e) {
+        // Invalid user data
     }
-    return false;
-  }
+    return <Navigate to="/login" replace />;
 }
-const checkAuthSeller = () => {
-  if (localStorage.getItem('user')) {
-    const levelUser = JSON.parse(localStorage.getItem('user')).level;
-    if (levelUser === 2) {
-      return true;
-    }
-    return false;
-  }
-}
+
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
@@ -74,23 +69,24 @@ root.render(
           <Route path='/account' element={<MyAccount />} />
           <Route path='product/detail/:id' element={<SingleProduct />} />
           <Route path='/wish-list' element={<Wishlist />} />
-          <Route path='shop-category/:id' element={<ShopCategory  />} />
+          <Route path='shop-category/:id' element={<ShopCategory />} />
           <Route path='payment' element={<Payment />} />
           <Route path='gemini-modal' element={<GeminiModal />} />
           <Route path='order' element={<OrderList />} />
           <Route path='/order/detail' element={<OrderDetail />} />
+          {/* Admin routes */}
+          <Route path='/admin' element={<ProtectedRoute level={1}><AdminUserPage /></ProtectedRoute>} />
+          <Route path='/admin/update/:id' element={<ProtectedRoute level={1}><UpdateUser /></ProtectedRoute>} />
+          <Route path='/admin/add-blog' element={<ProtectedRoute level={1}><AddBlog /></ProtectedRoute>} />
+          <Route path='/admin/manage-blog' element={<ProtectedRoute level={1}><ManageBlogs /></ProtectedRoute>} />
+          <Route path='/admin/update-blog/:id' element={<ProtectedRoute level={1}><UpdateBlog /></ProtectedRoute>} />
+          {/* Seller routes */}
+          <Route path='/seller' element={<ProtectedRoute level={2}><SellerPage /></ProtectedRoute>} />
+          <Route path='/seller/update/:id' element={<ProtectedRoute level={2}><UpdateProduct /></ProtectedRoute>} />
+          <Route path='/seller/add-product' element={<ProtectedRoute level={2}><AddProduct /></ProtectedRoute>} />
+          <Route path='/seller/manage-order' element={<ProtectedRoute level={2}><ManageOrders /></ProtectedRoute>} />
+          {/* Catch-all route - must be LAST */}
           <Route path='*' element={<Home />} />
-          {/* Admin */}
-          {checkAuthAdmin() && <Route path='/admin' element={<AdminUserPage />} />}
-          {checkAuthAdmin() && <Route path='/admin/update/:id' element={<UpdateUser />} />}
-          {checkAuthAdmin() && <Route path='/admin/add-blog' element={<AddBlog />} />}
-          {checkAuthAdmin() && <Route path='/admin/manage-blog' element={<ManageBlogs />} />}
-          {checkAuthAdmin() && <Route path='/admin/update-blog/:id' element={<UpdateBlog />} />}
-          {/* Seller */}
-          {checkAuthSeller() && <Route path='/seller/update/:id' element={<UpdateProduct />} />}
-          {checkAuthSeller() && <Route path='/seller/add-product' element={<AddProduct />} />}
-          {checkAuthSeller() && <Route path='/seller' element={<SellerPage />} />}
-          {checkAuthSeller() && <Route path='/seller/manage-order' element={<ManageOrders />} />}
         </Routes>
       </App>
     </Router>

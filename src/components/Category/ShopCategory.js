@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import axios from "axios";
+
 import backgroundPattern from '../../images/background-pattern.jpg';
 import SideBar from "./SideBar";
 import ShopPagination from "../shop/ShopPagination";
@@ -17,8 +17,8 @@ function ShopCategory() {
     useEffect(() => {
         API.get('product/list')
             .then(res => {
-                setProducts(res.data.filter(val => val.idCategory == idCategory));
-                setRecords(res.data.filter(val => val.idCategory == idCategory));
+                setProducts(res.data.filter(val => String(val.idCategory) === String(idCategory)));
+                setRecords(res.data.filter(val => String(val.idCategory) === String(idCategory)));
             })
             .catch(error => { console.log(error) });
         const localStorageWishlist = JSON.parse(localStorage.getItem('wishlist'));

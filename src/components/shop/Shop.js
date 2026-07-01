@@ -5,6 +5,7 @@ import SideBar from "../Category/SideBar";
 import ShopPagination from "./ShopPagination";
 import Modal from "../Modal/Modal";
 import API from "../API/API";
+import { extractFilenames, addProductToCart } from '../utils/cartUtils';
 function Shop(props) {
     const [products, setProducts] = useState([]);
     const [records, setRecords] = useState([]);
@@ -63,52 +64,12 @@ function Shop(props) {
             })
         }
     }
-    function extractFilenames(inputString) {
-        try {
-            const inputArray = JSON.parse(inputString);
-            const resultArray = [];
-            for (let i = 0; i < inputArray.length; i++) {
-                const filename = inputArray[i];
-                const startIndex = filename.indexOf("_") + 1;
-                const newFilename = filename.slice(startIndex);
-                resultArray.push(newFilename);
-            }
-            return resultArray;
-        } catch (error) {
-            console.error("Invalid input JSON string.");
-            return [];
-        }
-    }
     function addToCart(e) {
         let productId = e.target.closest('.product-item').id;
         productId = parseInt(productId);
-        var cartData = {
-            id: productId,
-            quantity: 1
-        }
-        var cart = {};
-        if (localStorage.getItem('cart')) {
-            cart = JSON.parse(localStorage.getItem('cart'));
-        }
-        if (!cart[productId]) {
-            cart[productId] = cartData;
-        } else {
-            cart[productId].quantity += 1;
-        }
-        localStorage.setItem('cart', JSON.stringify(cart));
-        updateCartTotalItem();
+        addProductToCart(productId, 1);
         setModalMessage('Add to cart successfully!');
         setShowModal(true);
-    }
-    function updateCartTotalItem() {
-        let cart = JSON.parse(localStorage.getItem('cart'));
-        let total = 0;
-        if (cart) {
-            Object.keys(cart).forEach(function (key) {
-                total += cart[key].quantity;
-            });
-        }
-        localStorage.setItem('cartTotalItem', total);
     }
     function addToWishlist(e) {
         const getUser = localStorage.getItem('user');
@@ -136,24 +97,24 @@ function Shop(props) {
             navigater('/login');
         }
     };
-    const [order, setOrder] = useState('name_a_z');
     const handleChanges = (e) => {
-        setOrder(e.target.value);
-        sorting(order);
+        const newOrder = e.target.value;
+        sorting(newOrder);
     }
-    const sorting = (sort) => {
-        if (order === 'name_a_z') {
-            sort = products.sort((a, b) => a.name.toLowerCase().localeCompare(b.name.toLowerCase()));
-        } else if (order === 'name_z_a') {
-            sort = products.sort((a, b) => b.name.toLowerCase().localeCompare(a.name.toLowerCase()));
-        } else if (order === 'price_low_high') {
-            sort = products.sort((a, b) => a.price - b.price);
-        } else if (order === 'price_high_low') {
-            sort = products.sort((a, b) => b.price - a.price);
+    const sorting = (sortOrder) => {
+        let sorted;
+        if (sortOrder === 'name_a_z') {
+            sorted = [...products].sort((a, b) => a.name.toLowerCase().localeCompare(b.name.toLowerCase()));
+        } else if (sortOrder === 'name_z_a') {
+            sorted = [...products].sort((a, b) => b.name.toLowerCase().localeCompare(a.name.toLowerCase()));
+        } else if (sortOrder === 'price_low_high') {
+            sorted = [...products].sort((a, b) => a.price - b.price);
+        } else if (sortOrder === 'price_high_low') {
+            sorted = [...products].sort((a, b) => b.price - a.price);
         } else {
-            sort = products;
+            sorted = [...products];
         }
-        setRecords(sort);
+        setRecords(sorted);
     };
     useEffect(() => {
         if (showModal) {
@@ -174,8 +135,8 @@ function Shop(props) {
                     <div className="d-flex justify-content-between">
                         <h1 className="page-title pb-2">Shop</h1>
                         <nav className="breadcrumb fs-6">
-                            <Link className="breadcrumb-item nav-link" href="#">Home</Link>
-                            <Link className="breadcrumb-item nav-link" href="#">Pages</Link>
+                            <Link className="breadcrumb-item nav-link" to="/">Home</Link>
+                            <Link className="breadcrumb-item nav-link" to="/shop">Pages</Link>
                             <span className="breadcrumb-item active" aria-current="page">Shop</span>
                         </nav>
                     </div>
@@ -194,11 +155,11 @@ function Shop(props) {
                                 </div>
                                 <div className="sort-by">
                                     <select id="input-sort" name="sort" className="form-control" data-filter-sort data-filter-order onChange={handleChanges}>
-                                        <option value>Default sorting</option>
-                                        <option value="name_a_z">Name (Z - A)</option>
-                                        <option value="name_z_a">Name (A - Z)</option>
-                                        <option value="price_low_high">Price (High-Low)</option>
-                                        <option value="price_high_low">Price (Low-High)</option>
+                                        <option value="">Default sorting</option>
+                                        <option value="name_a_z">Name (A - Z)</option>
+                                        <option value="name_z_a">Name (Z - A)</option>
+                                        <option value="price_low_high">Price (Low - High)</option>
+                                        <option value="price_high_low">Price (High - Low)</option>
                                     </select>
                                 </div>
                             </div>

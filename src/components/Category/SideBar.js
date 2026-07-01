@@ -1,4 +1,3 @@
-import axios from 'axios';
 import React from 'react';
 import { Link } from 'react-router-dom';
 import API from "../API/API";
@@ -39,7 +38,7 @@ function SideBar(props) {
             <div className="widget-menu">
                 <div className="widget-search-bar">
                     <form role="search" method="get" className="d-flex position-relative">
-                        <input className="form-control form-control-lg rounded-2 bg-light" type="email" placeholder="Search here" aria-label="Search here" onChange={searchFilter} />
+                        <input className="form-control form-control-lg rounded-2 bg-light" type="text" placeholder="Search here" aria-label="Search here" onChange={searchFilter} />
                         <button className="btn bg-transparent position-absolute end-0" type="submit"><svg width={24} height={24} viewBox="0 0 24 24"><use xlinkHref="#search" /></svg></button>
                     </form>
                 </div>

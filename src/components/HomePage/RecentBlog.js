@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
-import axios from "axios";
+
 import API from "../API/API";
 function RecentBlog() {
     const [getData, setData] = useState([]);

@@ -138,11 +138,11 @@ function Register() {
                                     <input type="password" name="password" placeholder="Password" className="form-control" onChange={handleInput} required />
                                 </div>
                                 <div className="col-12 pb-3">
-                                    <label className="d-none">Phone *</label>
+                                    <label className="d-none">Address *</label>
                                     <input type="text" name="address" placeholder="Address" className="form-control" onChange={handleInput} required />
                                 </div>
                                 <div className="col-12 pb-3">
-                                    <label className="d-none">Adress *</label>
+                                    <label className="d-none">Phone *</label>
                                     <input type="text" name="phone" placeholder="Phone" className="form-control" onChange={handleInput} required />
                                 </div>
                                 <div className="col-12 pb-3">

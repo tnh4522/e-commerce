@@ -2,6 +2,7 @@ import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import API from '../API/API';
+import { extractFilenames } from '../utils/cartUtils';
 
 function Header() {
     const navigate = useNavigate();
@@ -10,60 +11,34 @@ function Header() {
         localStorage.removeItem('token');
         navigate('/');
     };
-    function checkLogin() {
-        let user = JSON.parse(localStorage.getItem('user'));
-        if (user) {
-            return true;
-        }
-        return false;
-    }
     function checkAuthenticate() {
         let user = JSON.parse(localStorage.getItem('user'));
         if (user) {
             return user.level
         }
     }
-    const [getData, setData] = useState([]);
-    const getCart = JSON.parse(localStorage.getItem('cart'));
-    let cartData = {};
-    if (getCart) {
-        Object.keys(getCart).forEach(function (key) {
-            cartData[getCart[key].id] = getCart[key].quantity;
-        });
-    };
-    // useEffect(() => {
-    //     API.post('product/cart', cartData)
-    //         .then(res => {
-    //             setData(res.data.data);
-    //         })
-    //         .catch(error => {
-    //             console.log(error);
-    //         })
-    // }, []);
-    let priceTotalAll = localStorage.getItem('priceTotalAll');
-    let cartTotalItem = localStorage.getItem('cartTotalItem');
-    function updateCartTotalItem() {
-        let cart = JSON.parse(localStorage.getItem('cart'));
-        let total = 0;
-        if (cart) {
-            Object.keys(cart).forEach(function (key) {
-                total += cart[key].quantity;
-            });
-        }
-        localStorage.setItem('cartTotalItem', total);
-        document.querySelector('.badge').innerHTML = total;
-        updatePriceTotalAll();
-    }
-    function updatePriceTotalAll() {
-        let priceTotal = document.querySelectorAll('.price-total-item');
-        let priceTotalAll = 0;
-        priceTotal.forEach((item, index) => {
-            priceTotalAll += parseInt(item.innerHTML);
-        })
-        localStorage.setItem('priceTotalAll', priceTotalAll);
-        document.querySelector('.price-total-cart-offcanvas').innerHTML = '$' + priceTotalAll;
-        document.querySelector('.cart-total').innerHTML = '$' + priceTotalAll;
-    }
+    const [cartCount, setCartCount] = useState(() => {
+        return parseInt(localStorage.getItem('cartTotalItem')) || 0;
+    });
+
+    useEffect(() => {
+        const handleCartUpdate = (e) => {
+            if (e.detail && e.detail.totalItems !== undefined) {
+                setCartCount(e.detail.totalItems);
+            }
+        };
+        const handleStorageChange = (e) => {
+            if (e.key === 'cartTotalItem') {
+                setCartCount(parseInt(e.newValue) || 0);
+            }
+        };
+        window.addEventListener('cartUpdated', handleCartUpdate);
+        window.addEventListener('storage', handleStorageChange);
+        return () => {
+            window.removeEventListener('cartUpdated', handleCartUpdate);
+            window.removeEventListener('storage', handleStorageChange);
+        };
+    }, []);
     function renderLogin() {
         let user = localStorage.getItem('user');
         if (user) {
@@ -86,7 +61,7 @@ function Header() {
                     <li>
                         <Link to="/cart" className="rounded-circle position-relative p-2 mx-2">
                             <svg width={30} height={30} viewBox="0 0 24 24"><use xlinkHref="#cart" /></svg>
-                            <div className="cart-total-item badge position-absolute top-0 start-5 bg-primary rounded-pill">{cartTotalItem}</div>
+                            <div className="cart-total-item badge position-absolute top-0 start-5 bg-primary rounded-pill">{cartCount}</div>
                         </Link>
                     </li>
                 </ul>
@@ -102,7 +77,7 @@ function Header() {
                     <li>
                         <Link to="/cart" className="rounded-circle p-2 mx-2">
                             <svg width={30} height={30} viewBox="0 0 24 24"><use xlinkHref="#cart" /></svg>
-                            <div className="cart-total-item badge position-absolute top-5 start-5 bg-primary rounded-pill">{cartTotalItem}</div>
+                            <div className="cart-total-item badge position-absolute top-5 start-5 bg-primary rounded-pill">{cartCount}</div>
                         </Link>
                     </li>
                 </ul >
@@ -149,22 +124,7 @@ function Header() {
             })
         }
     }
-    function extractFilenames(inputString) {
-        try {
-            const inputArray = JSON.parse(inputString);
-            const resultArray = [];
-            for (let i = 0; i < inputArray.length; i++) {
-                const filename = inputArray[i];
-                const startIndex = filename.indexOf("_") + 1;
-                const newFilename = filename.slice(startIndex);
-                resultArray.push(newFilename);
-            }
-            return resultArray;
-        } catch (error) {
-            console.error("Invalid input JSON string.");
-            return [];
-        }
-    }
+
     return (
         <div>
             <div>
@@ -182,7 +142,7 @@ function Header() {
                                 <span className="text-primary">Search</span>
                             </h4>
                             <form role="search" action="index.html" method="get" className="d-flex mt-3 gap-0">
-                                <input className="form-control rounded-start rounded-0 bg-light" type="email" placeholder="What are you looking for?" aria-label="What are you looking for?" />
+                                <input className="form-control rounded-start rounded-0 bg-light" type="text" placeholder="What are you looking for?" aria-label="What are you looking for?" />
                                 <button className="btn btn-dark rounded-end rounded-0" type="submit">Search</button>
                             </form>
                         </div>
@@ -194,7 +154,7 @@ function Header() {
                     <div className="row py-3 border-bottom">
                         <div className="col-sm-4 col-lg-3 text-center text-sm-start">
                             <div className="main-logo">
-                                <Link to="">
+                                <Link to="/">
                                     <img src={require('../../images/logo.png')} alt="logo" className="img-fluid" />
                                 </Link>
                             </div>
@@ -243,7 +203,7 @@ function Header() {
                                         </select>
                                         <ul className="navbar-nav justify-content-end menu-list list-unstyled d-flex gap-md-3 mb-0">
                                             <li className="nav-item active">
-                                                <Link to="" className="nav-link">Home</Link>
+                                                <Link to="/" className="nav-link">Home</Link>
                                             </li>
                                             <li className="nav-item dropdown">
                                                 <Link to="/shop" className="nav-link">Shop</Link>
@@ -294,7 +254,7 @@ function Header() {
                                                 </li> : ''
                                             }
                                             <li className="nav-item">
-                                                <Link to="" className="nav-link">Info</Link>
+                                                <Link to="/about" className="nav-link">Info</Link>
                                             </li>
                                         </ul>
                                     </div>
