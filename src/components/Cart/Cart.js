@@ -2,55 +2,70 @@ import { Link } from 'react-router-dom';
 import backgroundPattern from '../../images/background-pattern.jpg';
 import { useState, useEffect } from 'react';
 import API from '../API/API';
-import { extractFilenames, updateCartTotalItem as updateCartBadge } from '../utils/cartUtils';
+import { calculateCartTotal, formatCurrency, getStoredCart, removeCartItem, sanitizeQuantity, updateCartItemQuantity } from '../utils/cartUtils';
+import { getProductImageSrc, getProductName, getProductPrice } from '../utils/productUtils';
 
 function Cart() {
     const [getData, setData] = useState([]);
     const [loading, setLoading] = useState(true);
-    const getCart = JSON.parse(localStorage.getItem('cart'));
-    let cartData = {};
-    if (getCart) {
-        Object.keys(getCart).forEach(function (key) {
-            cartData[getCart[key].id] = getCart[key].quantity;
-        });
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    const [error, setError] = useState('');
+    const [priceTotalAll, setPriceTotalAll] = useState(0);
+
     useEffect(() => {
+        const cart = getStoredCart();
+        const cartData = Object.keys(cart).reduce((data, key) => {
+            data[cart[key].id] = cart[key].quantity;
+            return data;
+        }, {});
+
+        if (Object.keys(cartData).length === 0) {
+            setData([]);
+            setLoading(false);
+            return;
+        }
+
         API.post('product/cart', cartData)
             .then(res => {
-                setData(res.data);
+                const products = Array.isArray(res.data) ? res.data : [];
+                const normalizedProducts = products.map((item) => ({
+                    ...item,
+                    quantity: sanitizeQuantity(cart[String(item.id)]?.quantity ?? item.quantity),
+                }));
+                setData(normalizedProducts);
+                setError('');
             })
-            .catch(error => {
-                console.log(error);
+            .catch(() => {
+                setError('We could not load your cart right now. Please try again later.');
             })
             .finally(() => {
                 setLoading(false);
             });
     }, []);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+
     useEffect(() => {
-        updatePriceTotalAll();
+        const total = calculateCartTotal(getData);
+        setPriceTotalAll(total);
+        localStorage.setItem('priceTotalAll', total);
     }, [getData]);
 
-    let priceTotalAll = localStorage.getItem('priceTotalAll');
     function renderData() {
-        return getData.map((item, index) => {
+        return getData.map((item) => {
             return (
-                <tr key={index} id={item.id}>
+                <tr key={item.id} id={item.id}>
                     <td className="py-4">
                         <div className="cart-info d-flex flex-wrap align-items-center mb-4">
                             <div className="col-lg-3">
                                 <div className="card-image">
-                                    <img src={require('../../images/' + extractFilenames(item.image)[0])} alt="cloth" className="img-fluid" />
+                                    <img src={getProductImageSrc(item)} alt={getProductName(item)} className="img-fluid" loading="lazy" />
                                 </div>
                             </div>
                             <div className="col-lg-9">
                                 <div className="card-detail ps-3">
                                     <h5 className="card-title">
-                                        <Link to={'/product/detail/' + item.id} className="text-decoration-none">{item.name}</Link>
+                                        <Link to={'/product/detail/' + item.id} className="text-decoration-none">{getProductName(item)}</Link>
                                     </h5>
                                     <div className="card-price">
-                                        $<span className="price-product text-dark">{item.price}</span>
+                                        <span className="price-product text-dark">{formatCurrency(getProductPrice(item))}</span>
                                     </div>
                                 </div>
                             </div>
@@ -58,27 +73,27 @@ function Cart() {
                     </td>
                     <td className="py-4">
                         <div className="input-group product-qty w-50">
-                            <Link className="input-group-btn quantity-left-minus btn btn-light btn-number" onClick={downQuantityInput} >
+                            <button type="button" className="input-group-btn quantity-left-minus btn btn-light btn-number" onClick={() => updateQuantity(item.id, item.quantity - 1)} aria-label={`Decrease quantity for ${getProductName(item)}`}>
                                 -
-                            </Link>
-                            <input type="text" name="quantity" className="cart-quantity-input form-control text-center" value={item.quantity} readOnly />
-                            <Link className="input-group-btn quantity-right-plus btn btn-light btn-number" onClick={upQuantityInput}>
+                            </button>
+                            <input type="number" name="quantity" className="cart-quantity-input form-control text-center" value={item.quantity} min={1} onChange={(event) => updateQuantity(item.id, event.target.value)} aria-label={`Quantity for ${getProductName(item)}`} />
+                            <button type="button" className="input-group-btn quantity-right-plus btn btn-light btn-number" onClick={() => updateQuantity(item.id, item.quantity + 1)} aria-label={`Increase quantity for ${getProductName(item)}`}>
                                 +
-                            </Link>
+                            </button>
                         </div>
                     </td>
                     <td className="py-4">
                         <div className="total-price">
-                            $<span className="total-price-product text-dark">{item.price * item.quantity}</span>
+                            <span className="total-price-product text-dark">{formatCurrency(getProductPrice(item) * sanitizeQuantity(item.quantity))}</span>
                         </div>
                     </td>
                     <td className="py-4">
                         <div className="cart-remove">
-                            <Link onClick={deleteItem} >
+                            <button type="button" className="btn btn-link p-0" onClick={() => deleteItem(item.id)} aria-label={`Remove ${getProductName(item)} from cart`}>
                                 <svg width={24} height={24}>
                                     <use xlinkHref="#trash" />
                                 </svg>
-                            </Link>
+                            </button>
                         </div>
                     </td>
                 </tr>
@@ -86,74 +101,21 @@ function Cart() {
         })
     };
 
-    function downQuantityInput(e) {
-        let id = e.target.parentNode.parentNode.parentNode.id;
-        let quantity = e.target.parentNode.parentNode.querySelector('.cart-quantity-input').value;
-        quantity--;
-        if (quantity < 1) {
-            let cart = JSON.parse(localStorage.getItem('cart'));
-            if (cart[id]) {
-                delete cart[id];
-                localStorage.setItem('cart', JSON.stringify(cart));
-                e.target.parentNode.parentNode.parentNode.remove();
-            }
-            updatePriceTotalAll();
-            updateCartBadge();
+    function updateQuantity(id, quantity) {
+        const nextQuantity = parseInt(quantity, 10);
+        if (!Number.isFinite(nextQuantity) || nextQuantity < 1) {
+            deleteItem(id);
             return;
         }
-        e.target.parentNode.parentNode.querySelector('.cart-quantity-input').value = quantity;
-        updateQuantityInLocal(id, quantity);
-        let price = e.target.parentNode.parentNode.parentNode.querySelector('.price-product').innerHTML;
-        updatePriceTotal(price, quantity, e);
-        updatePriceTotalAll();
-        updateCartBadge();
+        updateCartItemQuantity(id, nextQuantity);
+        setData((items) => items.map((item) => (
+            String(item.id) === String(id) ? { ...item, quantity: nextQuantity } : item
+        )));
     }
-    function upQuantityInput(e) {
-        let id = e.target.parentNode.parentNode.parentNode.id;
-        let quantity = e.target.parentNode.parentNode.querySelector('.cart-quantity-input').value;
-        quantity++;
-        e.target.parentNode.parentNode.querySelector('.cart-quantity-input').value = quantity;
-        updateQuantityInLocal(id, quantity);
-        let price = e.target.parentNode.parentNode.parentNode.querySelector('.price-product').innerHTML;
-        updatePriceTotal(price, quantity, e);
-        updatePriceTotalAll();
-        updateCartBadge();
-    }
-    function updateQuantityInLocal(id, quantity) {
-        let cart = JSON.parse(localStorage.getItem('cart'));
-        if (cart[id]) {
-            cart[id].quantity = quantity;
-            localStorage.setItem('cart', JSON.stringify(cart));
-        }
-    }
-    function deleteItem(e) {
-        e.preventDefault();
-        let id = e.target.parentNode.parentNode.parentNode.parentNode.id;
-        let cart = JSON.parse(localStorage.getItem('cart'));
-        if (cart[id]) {
-            delete cart[id];
-            localStorage.setItem('cart', JSON.stringify(cart));
-            e.target.parentNode.parentNode.parentNode.parentNode.remove();
-        }
-        updatePriceTotalAll();
-        updateCartBadge();
-    }
-    function updatePriceTotal(price, quantity, e) {
-        let total = price * quantity;
-        let priceTotal = e.target.parentNode.parentNode.parentNode.querySelector('.total-price-product');
-        priceTotal.innerHTML = total;
-    }
-    function updatePriceTotalAll() {
-        let priceTotal = document.querySelectorAll('.total-price-product');
-        let total = 0;
-        priceTotal.forEach((item) => {
-            total += parseInt(item.innerHTML);
-        });
-        localStorage.setItem('priceTotalAll', total);
-        priceTotalAll = total;
-        document.querySelectorAll('.price-currency-symbol').forEach((item) => {
-            item.innerHTML = total;
-        });
+
+    function deleteItem(id) {
+        removeCartItem(id);
+        setData((items) => items.filter((item) => String(item.id) !== String(id)));
     }
 
     return (
@@ -180,6 +142,8 @@ function Cart() {
                                         <span className="visually-hidden">Loading...</span>
                                     </div>
                                 </div>
+                            ) : error ? (
+                                <div className="alert alert-danger" role="alert">{error}</div>
                             ) : getData.length === 0 ? (
                                 <div className="text-center py-5">
                                     <h3>Your cart is empty</h3>
@@ -215,7 +179,7 @@ function Cart() {
                                                 <td data-title="Subtotal">
                                                     <span className="price-amount amount text-dark ps-5">
                                                         <bdi>
-                                                            $<span className="price-currency-symbol">{priceTotalAll}</span>
+                                                            <span className="price-currency-symbol">{formatCurrency(priceTotalAll)}</span>
                                                         </bdi>
                                                     </span>
                                                 </td>
@@ -225,7 +189,7 @@ function Cart() {
                                                 <td data-title="Total">
                                                     <span className="price-amount amount text-dark ps-5">
                                                         <bdi>
-                                                            $<span className="price-currency-symbol">{priceTotalAll}</span>
+                                                            <span className="price-currency-symbol">{formatCurrency(priceTotalAll)}</span>
                                                         </bdi>
                                                     </span>
                                                 </td>
@@ -234,9 +198,9 @@ function Cart() {
                                     </table>
                                 </div>
                                 <div className="button-wrap row g-2">
-                                    <div className="col-md-6"><button className="btn btn-dark py-3 px-4 text-uppercase btn-rounded-none w-100">Update Cart</button></div>
-                                    <Link to="/shop" className="col-md-6"><button className="btn btn-dark py-3 px-4 text-uppercase btn-rounded-none w-100">Continue Shopping</button></Link>
-                                    <Link to="/checkout" className="col-md-12"><button className="btn btn-primary py-3 px-4 text-uppercase btn-rounded-none w-100">Proceed to checkout</button></Link>
+                                    <div className="col-md-6"><button type="button" className="btn btn-dark py-3 px-4 text-uppercase btn-rounded-none w-100" disabled>Cart Updated</button></div>
+                                    <Link to="/shop" className="col-md-6"><button type="button" className="btn btn-dark py-3 px-4 text-uppercase btn-rounded-none w-100">Continue Shopping</button></Link>
+                                    <Link to={getData.length === 0 ? "/cart" : "/checkout"} className="col-md-12"><button type="button" className="btn btn-primary py-3 px-4 text-uppercase btn-rounded-none w-100" disabled={getData.length === 0}>Proceed to checkout</button></Link>
                                 </div>
                             </div>
                         </div>
