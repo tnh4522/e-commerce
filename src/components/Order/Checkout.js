@@ -1,18 +1,22 @@
 import { Link, useNavigate } from "react-router-dom";
 import backgroundPattern from '../../images/background-pattern.jpg';
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import CryptoJS from 'crypto-js'
 import axios from "axios";
 import dayjs from "dayjs";
 import emailjs from '@emailjs/browser';
+import API from "../API/API";
+import { calculateCartTotal, formatCurrency, getStoredCart, safeParseJSON, sanitizeQuantity } from "../utils/cartUtils";
+import { getProductImageSrc, getProductName, getProductPrice } from "../utils/productUtils";
 function CheckOut() {
     const form = useRef();
     let navigater = useNavigate();
-    const cart = JSON.parse(localStorage.getItem('cart'));
-    let user = null;
-    if (localStorage.getItem('user')) {
-        user = JSON.parse(localStorage.getItem('user'));
-    };
+    const [cart] = useState(() => getStoredCart());
+    const user = safeParseJSON(localStorage.getItem('user'));
+    const [formErrors, setFormErrors] = useState({});
+    const [submitError, setSubmitError] = useState('');
+    const [submitting, setSubmitting] = useState(false);
+    const [orderItems, setOrderItems] = useState([]);
     function getRandomNumber() {
         return Math.floor(Math.random() * 100000) + 1;
     };
@@ -25,7 +29,28 @@ function CheckOut() {
         email: user ? user.email : '',
         description: user ? 'VNQR'.concat(user.phone) : ''
     });
-    const priceTotalAll = localStorage.getItem('priceTotalAll');
+    const priceTotalAll = calculateCartTotal(orderItems) || parseInt(localStorage.getItem('priceTotalAll'), 10) || 0;
+
+    useEffect(() => {
+        const cartData = Object.keys(cart).reduce((data, key) => {
+            data[cart[key].id] = cart[key].quantity;
+            return data;
+        }, {});
+
+        if (Object.keys(cartData).length === 0) return;
+
+        API.post('product/cart', cartData)
+            .then((res) => {
+                const products = Array.isArray(res.data) ? res.data : [];
+                setOrderItems(products.map((item) => ({
+                    ...item,
+                    quantity: sanitizeQuantity(cart[String(item.id)]?.quantity ?? item.quantity),
+                })));
+            })
+            .catch(() => {
+                setOrderItems([]);
+            });
+    }, [cart]);
 
     if (!cart || Object.keys(cart).length === 0) {
         return (
@@ -39,11 +64,29 @@ function CheckOut() {
     function handleChange(e) {
         const newData = { ...data }
         newData[e.target.name] = e.target.value;
+        if (e.target.name === 'phone') {
+            newData.description = 'VNQR'.concat(e.target.value || '');
+        }
         setData(newData);
+        setFormErrors((errors) => ({ ...errors, [e.target.name]: '' }));
     };
+
+    function validateForm() {
+        const errors = {};
+        if (!data.name.trim()) errors.name = 'Full name is required.';
+        if (!data.address.trim()) errors.address = 'Address is required.';
+        if (!/^[0-9+\-\s()]{8,15}$/.test(data.phone.trim())) errors.phone = 'Enter a valid phone number.';
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email.trim())) errors.email = 'Enter a valid email address.';
+        if (priceTotalAll <= 0) errors.cart = 'Your cart total is invalid. Please review your cart.';
+        setFormErrors(errors);
+        return Object.keys(errors).length === 0;
+    }
 
     function handleSubmit(e) {
         e.preventDefault();
+        setSubmitError('');
+        if (!validateForm()) return;
+        setSubmitting(true);
         let config = {
             headers: {
                 'x-client-id': 'e6a2fc4b-67d4-41fa-9064-e4e85f96f755',
@@ -51,7 +94,7 @@ function CheckOut() {
                 'Content-Type': 'application/json'
             }
         }
-        const amount = parseInt(priceTotalAll);
+        const amount = parseInt(priceTotalAll, 10);
         const cancelUrl = 'http://localhost:3000/cart'
         const description = data.description;
         const orderCode = parseInt(data.idOrder);
@@ -92,33 +135,25 @@ function CheckOut() {
             'paymentMethod': 'QR VNPay',
             'orderDetails': Object.keys(cart).map((key) => {
                 return {
-                    'productId': parseInt(cart[key].id),
-                    'quantity': parseInt(cart[key].quantity),
+                    'productId': parseInt(cart[key].id, 10),
+                    'quantity': sanitizeQuantity(cart[key].quantity),
                 }
             })
         };
 
         axios.post('https://api-merchant.payos.vn/v2/payment-requests', formData, config)
             .then(res => {
-                console.log(res);
                 localStorage.setItem('data', JSON.stringify(res.data.data));
                 localStorage.setItem('orderData', JSON.stringify(orderData));
                 navigater('/payment');
             }).catch(err => {
-                console.log(err);
-                const html = `<div class="alert alert-danger alert-dismissible fade show" role="alert">
-                                <strong>Checkout failed!</strong> Please complete the information.
-                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                            </div>`;
-                document.querySelector('.total-price').insertAdjacentHTML('afterbegin', html);
+                setSubmitError('Checkout failed. Please review your information and try again.');
+            }).finally(() => {
+                setSubmitting(false);
             });
 
         emailjs.sendForm('service_4bzeg5e', 'template_ulcz6dg', form.current, '2QVLowuJSd6aP7lpj')
-            .then((result) => {
-                console.log(result.text);
-            }, (error) => {
-                console.log(error.text);
-            });
+            .catch(() => {});
     };
     
     let date = dayjs().format('DD/MM/YYYY');
@@ -148,16 +183,20 @@ function CheckOut() {
                                     <input type="hidden" name="idOrder" value={data.idOrder} />
                                     {user ? '' : <input type="hidden" name="userId" value={user ? user.id : ''} />}
                                     <label htmlFor="fname">Full Name*</label>
-                                    <input type="text" id="fname" name="name" className="form-control mt-2 mb-4 ps-3" value={data.name} onChange={handleChange} required />
+                                    <input type="text" id="fname" name="name" className={`form-control mt-2 ps-3 ${formErrors.name ? 'is-invalid' : ''}`} value={data.name} onChange={handleChange} required />
+                                    {formErrors.name && <div className="invalid-feedback d-block mb-3">{formErrors.name}</div>}
                                     <label htmlFor="address">Address*</label>
-                                    <input type="text" id="adr" name="address" className="form-control mt-3 ps-3 mb-3" value={data.address} onChange={handleChange} required />
+                                    <input type="text" id="address" name="address" className={`form-control mt-3 ps-3 ${formErrors.address ? 'is-invalid' : ''}`} value={data.address} onChange={handleChange} required />
+                                    {formErrors.address && <div className="invalid-feedback d-block mb-3">{formErrors.address}</div>}
                                     <label htmlFor="phone">Phone*</label>
-                                    <input type="text" id="phone" name="phone" className="form-control mt-2 mb-4 ps-3" value={data.phone} onChange={handleChange} required />
+                                    <input type="tel" id="phone" name="phone" className={`form-control mt-2 ps-3 ${formErrors.phone ? 'is-invalid' : ''}`} value={data.phone} onChange={handleChange} required />
+                                    {formErrors.phone && <div className="invalid-feedback d-block mb-3">{formErrors.phone}</div>}
                                     <label htmlFor="email">Email*</label>
-                                    <input type="text" id="email" name="email" className="form-control mt-2 mb-4 ps-3" value={data.email} onChange={handleChange} required />
-                                    <label htmlFor="fname">Order notes (optional)</label>
+                                    <input type="email" id="email" name="email" className={`form-control mt-2 ps-3 ${formErrors.email ? 'is-invalid' : ''}`} value={data.email} onChange={handleChange} required />
+                                    {formErrors.email && <div className="invalid-feedback d-block mb-3">{formErrors.email}</div>}
+                                    <label htmlFor="order-notes">Order notes (optional)</label>
                                     <input type="hidden" name="description" value={data.description} />
-                                    <textarea className="form-control pt-3 pb-3 ps-3 mt-2"></textarea>
+                                    <textarea id="order-notes" className="form-control pt-3 pb-3 ps-3 mt-2" aria-label="Order notes"></textarea>
                                     <input type="hidden" name="total" value={priceTotalAll} />
                                     <input type="hidden" name="date" value={date} />
                                     <input type="hidden" name="estimate_date" value={estimate_date} />
@@ -167,6 +206,22 @@ function CheckOut() {
                                 <div className="your-order mt-5">
                                     <h4 className="display-7 text-dark pb-4">Cart Totals</h4>
                                     <div className="total-price">
+                                        {submitError && <div className="alert alert-danger" role="alert">{submitError}</div>}
+                                        {formErrors.cart && <div className="alert alert-danger" role="alert">{formErrors.cart}</div>}
+                                        <div className="checkout-items mb-4">
+                                            {orderItems.length > 0 ? orderItems.map((item) => (
+                                                <div className="checkout-item d-flex align-items-center gap-3 py-2 border-bottom" key={item.id}>
+                                                    <img src={getProductImageSrc(item)} alt={getProductName(item)} width={56} height={56} className="object-fit-cover rounded" />
+                                                    <div className="flex-grow-1">
+                                                        <strong>{getProductName(item)}</strong>
+                                                        <div className="text-muted small">Qty: {sanitizeQuantity(item.quantity)} x {formatCurrency(getProductPrice(item))}</div>
+                                                    </div>
+                                                    <span>{formatCurrency(getProductPrice(item) * sanitizeQuantity(item.quantity))}</span>
+                                                </div>
+                                            )) : (
+                                                <p className="text-muted">Product details are loading. Your order total is still shown below.</p>
+                                            )}
+                                        </div>
                                         <table cellSpacing={0} className="table">
                                             <tbody>
                                                 <tr className="order-total border-bottom pt-2 pb-2 text-uppercase">
@@ -174,7 +229,7 @@ function CheckOut() {
                                                     <td data-title="Total">
                                                         <span className="price-amount amount ps-5">
                                                             <bdi>
-                                                                <span className="price-currency-symbol">$</span>{priceTotalAll}</bdi>
+                                                                <span className="price-currency-symbol">{formatCurrency(priceTotalAll)}</span></bdi>
                                                         </span>
                                                     </td>
                                                 </tr>
@@ -210,7 +265,9 @@ function CheckOut() {
                                                 </span>
                                             </label>
                                         </div>
-                                        <button type="submit" name="submit" className="btn btn-dark btn-lg text-uppercase btn-rounded-none w-100">Place an order</button>
+                                        <button type="submit" name="submit" className="btn btn-dark btn-lg text-uppercase btn-rounded-none w-100" disabled={submitting}>
+                                            {submitting ? 'Processing...' : 'Place an order'}
+                                        </button>
                                     </div>
                                 </div>
                             </div>

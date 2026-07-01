@@ -7,8 +7,8 @@ function SideBar(props) {
     const [brands, setBrands] = React.useState([]);
     React.useEffect(() => {
         API.get('category')
-            .then(res => { setCategories(res.data) })
-            .catch(error => { console.log(error) })
+            .then(res => { setCategories(Array.isArray(res.data) ? res.data : []) })
+            .catch(() => { setCategories([]) })
     }, []);
     function renderCategory() {
         return categories.map((item, index) => {
@@ -21,14 +21,14 @@ function SideBar(props) {
     }
     React.useEffect(() => {
         API.get('brand')
-            .then(res => { setBrands(res.data) })
-            .catch(error => { console.log(error) })
+            .then(res => { setBrands(Array.isArray(res.data) ? res.data : []) })
+            .catch(() => { setBrands([]) })
     }, []);
     function renderBrand() {
         return brands.map((item, index) => {
             return (
                 <li className="cat-item" key={index}>
-                    <Link to={'/shop-brand/' + item.id} className="nav-link">{item.brand}</Link>
+                    <Link to="/shop" className="nav-link">{item.brand}</Link>
                 </li>
             )
         })
@@ -37,7 +37,7 @@ function SideBar(props) {
         <div className="sidebar">
             <div className="widget-menu">
                 <div className="widget-search-bar">
-                    <form role="search" method="get" className="d-flex position-relative">
+                    <form role="search" className="d-flex position-relative" onSubmit={(event) => event.preventDefault()}>
                         <input className="form-control form-control-lg rounded-2 bg-light" type="text" placeholder="Search here" aria-label="Search here" onChange={searchFilter} />
                         <button className="btn bg-transparent position-absolute end-0" type="submit"><svg width={24} height={24} viewBox="0 0 24 24"><use xlinkHref="#search" /></svg></button>
                     </form>

@@ -1,25 +1,28 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import API from '../API/API';
-import { extractFilenames } from '../utils/cartUtils';
+import { getCartTotalItems, safeParseJSON } from '../utils/cartUtils';
+import { getProductImageSrc, getProductName } from '../utils/productUtils';
 
 function Header() {
     const navigate = useNavigate();
     function handleLogout() {
         localStorage.removeItem('user');
         localStorage.removeItem('token');
+        localStorage.removeItem('wishlist');
         navigate('/');
     };
     function checkAuthenticate() {
-        let user = JSON.parse(localStorage.getItem('user'));
+        let user = safeParseJSON(localStorage.getItem('user'));
         if (user) {
             return user.level
         }
     }
     const [cartCount, setCartCount] = useState(() => {
-        return parseInt(localStorage.getItem('cartTotalItem')) || 0;
+        return getCartTotalItems();
     });
+    const blurTimeout = useRef(null);
 
     useEffect(() => {
         const handleCartUpdate = (e) => {
@@ -40,16 +43,15 @@ function Header() {
         };
     }, []);
     function renderLogin() {
-        let user = localStorage.getItem('user');
+        let user = safeParseJSON(localStorage.getItem('user'));
         if (user) {
-            user = JSON.parse(user);
             return (
                 <ul className="d-flex justify-content-end list-unstyled m-0" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-around' }}>
                     <li className="dropdown" style={{ display: 'flex', alignItems: 'center' }}>
                         <span>Welcome, {user.name}</span>
-                        <Link to="" className="p-2 mx-2 dropdown-toggle" role="button" id="user" data-bs-toggle="dropdown" aria-expanded="false">
+                        <button type="button" className="p-2 mx-2 dropdown-toggle border-0 bg-transparent" id="user" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Open user menu">
                             <svg width={24} height={24} viewBox="0 0 24 24"><use xlinkHref="#user" /></svg>
-                        </Link>
+                        </button>
                         <ul className="dropdown-menu" aria-labelledby="user">
                             <li><Link to="/account" className="dropdown-item">My Account</Link></li>
                             <li><Link to="/wish-list" className="dropdown-item">Wishlist</Link></li>
@@ -89,23 +91,21 @@ function Header() {
 
     useEffect(() => {
         API.get('product/list')
-            .then(res => { setProduct(res.data); })
-            .catch(error => { console.log(error) })
+            .then(res => { setProduct(Array.isArray(res.data) ? res.data : []); })
+            .catch(() => { setProduct([]); })
     }, []);
 
     const searchFilter = (e) => {
-        let input = e.target.value;
+        let input = e.target.value.trim().toLowerCase();
         if (input === '') {
             setRecord([]);
         } else {
-            setRecord(product.filter(val => val.name.toLowerCase().includes(input.toLowerCase())));
+            setRecord(product.filter(val => getProductName(val).toLowerCase().includes(input)).slice(0, 8));
         }
     }
 
-    let blurTimeout;
-
     const handleBlur = () => {
-        blurTimeout = setTimeout(() => {
+        blurTimeout.current = setTimeout(() => {
             setRecord([]);
         }, 200);
     }
@@ -114,10 +114,10 @@ function Header() {
         if (record.length > 0) {
             return record.map((val, index) => {
                 return (
-                    <li key={index} className="border-bottom" onMouseDown={() => clearTimeout(blurTimeout)}>
+                    <li key={val.id || index} className="border-bottom" onMouseDown={() => clearTimeout(blurTimeout.current)}>
                         <Link to={`/product/detail/${val.id}`} className="d-flex align-items-center text-decoration-none gap-3 py-2 px-3">
-                            <img src={require('../../images/' + extractFilenames(val.image)[0])} alt="product" className="img-fluid" width={50} />
-                            <div className="product-name">{val.name}</div>
+                            <img src={getProductImageSrc(val)} alt={getProductName(val)} className="img-fluid" width={50} />
+                            <div className="product-name">{getProductName(val)}</div>
                         </Link>
                     </li>
                 )
@@ -141,7 +141,7 @@ function Header() {
                             <h4 className="d-flex justify-content-between align-items-center mb-3">
                                 <span className="text-primary">Search</span>
                             </h4>
-                            <form role="search" action="index.html" method="get" className="d-flex mt-3 gap-0">
+                            <form role="search" className="d-flex mt-3 gap-0" onSubmit={(e) => e.preventDefault()}>
                                 <input className="form-control rounded-start rounded-0 bg-light" type="text" placeholder="What are you looking for?" aria-label="What are you looking for?" />
                                 <button className="btn btn-dark rounded-end rounded-0" type="submit">Search</button>
                             </form>
@@ -162,7 +162,7 @@ function Header() {
                         <div className="col-sm-6 offset-sm-2 offset-md-0 col-lg-5 d-none d-lg-block">
                             <div className="search-bar row bg-light p-2 my-2 rounded-4">
                                 <div className="col-11 col-md-11">
-                                    <form id="search-form" className="text-center" method="post">
+                                    <form id="search-form" className="text-center" onSubmit={(e) => e.preventDefault()}>
                                         <input type="text" className="form-control border-0 bg-transparent" placeholder="Search for more than 20,000 products" onChange={searchFilter} onBlur={handleBlur} />
                                         <div className="col-sm-4 search-results position-absolute bg-light z-3">
                                             <ul className="list-unstyled m-0 p-0">
@@ -172,9 +172,9 @@ function Header() {
                                     </form>
                                 </div>
                                 <div className="col-1">
-                                    <Link to="" className="rounded-circle bg-light p-2 mx-1" data-bs-toggle="offcanvas" data-bs-target="#offcanvasSearch" aria-controls="offcanvasSearch">
+                                    <button type="button" className="rounded-circle bg-light p-2 mx-1 border-0" data-bs-toggle="offcanvas" data-bs-target="#offcanvasSearch" aria-controls="offcanvasSearch" aria-label="Open search">
                                         <svg width={24} height={24} viewBox="0 0 24 24"><use xlinkHref="#search" /></svg>
-                                    </Link>
+                                    </button>
                                 </div>
                             </div>
                         </div>

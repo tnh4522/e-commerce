@@ -5,58 +5,70 @@ import SideBar from "../Category/SideBar";
 import ShopPagination from "./ShopPagination";
 import Modal from "../Modal/Modal";
 import API from "../API/API";
-import { extractFilenames, addProductToCart } from '../utils/cartUtils';
+import { addProductToCart, safeParseJSON } from '../utils/cartUtils';
+import { getProductImageSrc, getProductName, getProductPrice, getProductPriceLabel } from '../utils/productUtils';
 function Shop(props) {
     const [products, setProducts] = useState([]);
     const [records, setRecords] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState('');
     const [modalMessage, setModalMessage] = useState('');
     const [showModal, setShowModal] = useState(false);
     const [wishlist, setWishlist] = useState([]);
     const navigater = useNavigate();
     useEffect(() => {
         API.get('product/list')
-            .then(res => { setProducts(res.data); setRecords(res.data); })
-            .catch(error => { console.log(error) });
-        const localStorageWishlist = JSON.parse(localStorage.getItem('wishlist'));
-        if (localStorageWishlist) {
+            .then(res => {
+                const list = Array.isArray(res.data) ? res.data : [];
+                setProducts(list);
+                setRecords(list);
+                setError('');
+            })
+            .catch(() => {
+                setError('We could not load products right now. Please try again later.');
+            })
+            .finally(() => setLoading(false));
+        const localStorageWishlist = safeParseJSON(localStorage.getItem('wishlist'), []);
+        if (Array.isArray(localStorageWishlist)) {
             setWishlist(localStorageWishlist);
         }
     }, []);
     const searchFilter = (e) => {
-        setRecords(products.filter(val => val.name.toLowerCase().includes(e.target.value)));
+        const keyword = e.target.value.trim().toLowerCase();
+        setRecords(products.filter(val => getProductName(val).toLowerCase().includes(keyword)));
     }
     function renderProducts(products) {
         let currentProducts = products;
         if (currentProducts) {
-            return currentProducts.map((item, index) => {
+            return currentProducts.map((item) => {
                 const isWishlistItem = wishlist.includes(item.id);
                 return (
-                    <div className="col" key={index}>
+                    <div className="col" key={item.id}>
                         <div className="product-item" id={item.id}>
-                            <Link to='' onClick={addToWishlist} className={`btn-wishlist ${isWishlistItem ? 'red-heart' : ''}`}><svg width={24} height={24}><use xlinkHref="#heart" /></svg></Link>
+                            <button type="button" onClick={addToWishlist} className={`btn-wishlist border-0 ${isWishlistItem ? 'red-heart' : ''}`} aria-label={isWishlistItem ? 'Remove from wishlist' : 'Add to wishlist'}><svg width={24} height={24}><use xlinkHref="#heart" /></svg></button>
                             <figure>
                                 <Link to={'/product/detail/' + item.id} title="Product Title">
-                                    <img alt='' src={require('../../images/' + extractFilenames(item.image)[0])} className="tab-image" />
+                                    <img alt={getProductName(item)} src={getProductImageSrc(item)} className="tab-image" loading="lazy" />
                                 </Link>
                             </figure>
-                            <Link to={'/product/detail/' + item.id} className="text-decoration-none"><h3>{item.name}</h3></Link>
+                            <Link to={'/product/detail/' + item.id} className="text-decoration-none"><h3>{getProductName(item)}</h3></Link>
                             <span className="qty">Reviews</span><span className="rating"><svg width={24} height={24} className="text-primary"><use xlinkHref="#star-solid" /></svg> 4.5</span>
-                            <span className="price">${item.price}</span>
+                            <span className="price">{getProductPriceLabel(item)}</span>
                             <div className="d-flex align-items-center justify-content-between">
-                                <div className="input-group product-qty">
+                                <div className="input-group product-qty" aria-label="Default quantity is 1">
                                     <span className="input-group-btn">
-                                        <button type="button" className="quantity-left-minus btn btn-danger btn-number" data-type="minus" data-field>
+                                        <button type="button" className="quantity-left-minus btn btn-danger btn-number" disabled aria-label="Decrease quantity">
                                             <svg width={16} height={16}><use xlinkHref="#minus" /></svg>
                                         </button>
                                     </span>
-                                    <input type="text" id="quantity" name="quantity" className="form-control input-number" defaultValue={1} min={1} max={100} />
+                                    <input type="text" name="quantity" className="form-control input-number" value={1} readOnly aria-label="Quantity" />
                                     <span className="input-group-btn">
-                                        <button type="button" className="quantity-right-plus btn btn-success btn-number" data-type="plus" data-field>
+                                        <button type="button" className="quantity-right-plus btn btn-success btn-number" disabled aria-label="Increase quantity">
                                             <svg width={16} height={16}><use xlinkHref="#plus" /></svg>
                                         </button>
                                     </span>
                                 </div>
-                                <Link to="#" className="nav-link" onClick={addToCart}>Add to Cart <svg width={24} height={24}><use xlinkHref="#cart" /></svg></Link>
+                                <button type="button" className="nav-link border-0 bg-transparent" onClick={addToCart} disabled={getProductPrice(item) < 0}>Add to Cart <svg width={24} height={24}><use xlinkHref="#cart" /></svg></button>
                             </div>
                         </div>
                     </div>
@@ -104,13 +116,13 @@ function Shop(props) {
     const sorting = (sortOrder) => {
         let sorted;
         if (sortOrder === 'name_a_z') {
-            sorted = [...products].sort((a, b) => a.name.toLowerCase().localeCompare(b.name.toLowerCase()));
+            sorted = [...records].sort((a, b) => getProductName(a).toLowerCase().localeCompare(getProductName(b).toLowerCase()));
         } else if (sortOrder === 'name_z_a') {
-            sorted = [...products].sort((a, b) => b.name.toLowerCase().localeCompare(a.name.toLowerCase()));
+            sorted = [...records].sort((a, b) => getProductName(b).toLowerCase().localeCompare(getProductName(a).toLowerCase()));
         } else if (sortOrder === 'price_low_high') {
-            sorted = [...products].sort((a, b) => a.price - b.price);
+            sorted = [...records].sort((a, b) => getProductPrice(a) - getProductPrice(b));
         } else if (sortOrder === 'price_high_low') {
-            sorted = [...products].sort((a, b) => b.price - a.price);
+            sorted = [...records].sort((a, b) => getProductPrice(b) - getProductPrice(a));
         } else {
             sorted = [...products];
         }
@@ -151,7 +163,7 @@ function Shop(props) {
                         <main className="col-md-10">
                             <div className="filter-shop d-flex justify-content-between">
                                 <div className="showing-product">
-                                    <p>Showing <span className="text-primary">{products.length}</span> results</p>
+                                    <p>Showing <span className="text-primary">{records.length}</span> of {products.length} results</p>
                                 </div>
                                 <div className="sort-by">
                                     <select id="input-sort" name="sort" className="form-control" data-filter-sort data-filter-order onChange={handleChanges}>
@@ -183,7 +195,22 @@ function Shop(props) {
                                     </Link>
                                 </div>
                             </nav> */}
-                            <ShopPagination products={records} renderProducts={renderProducts} />
+                            {loading ? (
+                                <div className="text-center py-5">
+                                    <div className="spinner-border text-primary" role="status">
+                                        <span className="visually-hidden">Loading products...</span>
+                                    </div>
+                                </div>
+                            ) : error ? (
+                                <div className="alert alert-danger" role="alert">{error}</div>
+                            ) : records.length === 0 ? (
+                                <div className="empty-state text-center py-5">
+                                    <h3>No products found</h3>
+                                    <p className="text-muted">Try another search term or browse all categories.</p>
+                                </div>
+                            ) : (
+                                <ShopPagination products={records} renderProducts={renderProducts} />
+                            )}
                         </main>
                     </div>
                 </div>

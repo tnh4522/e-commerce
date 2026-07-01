@@ -11,7 +11,8 @@ import 'swiper/css/thumbs';
 import Modal from "../Modal/Modal";
 import style from './style.module.css';
 import API from '../API/API';
-import { extractFilenames, addProductToCart } from '../utils/cartUtils';
+import { addProductToCart, sanitizeQuantity } from '../utils/cartUtils';
+import { getProductDescription, getProductImageList, getProductName, getProductPriceLabel } from '../utils/productUtils';
 
 function SingleProduct() {
     let productID = useParams().id;
@@ -22,17 +23,16 @@ function SingleProduct() {
     const [getCategories, setCategories] = useState([]);
     const [getBrands, setBrands] = useState([]);
     const [getQuantity, setQuantity] = useState(1);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState('');
     const navigater = useNavigate();
 
     function handleChange(event) {
-        let value = parseInt(event.target.value);
-        if (isNaN(value) || value < 1) {
-            value = 1;
-        }
-        setQuantity(value);
+        setQuantity(sanitizeQuantity(event.target.value));
     };
 
     function handleBuyNowClick() {
+        if (!getProduct?.id) return;
         addProductToCart(getProduct.id, getQuantity);
         setModalMessage('Add to cart successfully!');
         setShowModal(true);
@@ -41,25 +41,42 @@ function SingleProduct() {
     };
 
     useEffect(() => {
+        if (!productID) {
+            setLoading(false);
+            setError('Product not found.');
+            return;
+        }
+        setLoading(true);
         API.get('product/detail/' + productID)
             .then(res => {
-                setProduct(res.data);
+                if (res.data && res.data.id) {
+                    setProduct(res.data);
+                    setError('');
+                } else {
+                    setProduct('');
+                    setError('Product not found.');
+                }
             })
-            .catch(error => console.log(error));
+            .catch(() => {
+                setProduct('');
+                setError('Product not found.');
+            })
+            .finally(() => setLoading(false));
         API.get('category')
             .then(res => {
-                setCategories(res.data);
+                setCategories(Array.isArray(res.data) ? res.data : []);
             })
-            .catch(error => { console.log(error) });
+            .catch(() => { setCategories([]) });
         API.get('brand')
             .then(res => {
-                setBrands(res.data);
+                setBrands(Array.isArray(res.data) ? res.data : []);
             })
-            .catch(error => { console.log(error) })
+            .catch(() => { setBrands([]) })
     }, [productID]);
 
     function renderProduct() {
         if (getProduct) {
+            const productImages = getProductImageList(getProduct);
             return (
                 <div className="row g-5">
                     <div className="col-lg-7">
@@ -77,9 +94,9 @@ function SingleProduct() {
                                     modules={[FreeMode, Navigation, Thumbs]}
                                     className={style.mySwiper2}
                                 >
-                                    {extractFilenames(getProduct.image).map((filename, index) => (
+                                    {productImages.map((imageSrc, index) => (
                                         <SwiperSlide className={style.swiperSlide} key={index}>
-                                            <img src={require('../../images/' + filename)} alt={getProduct.name} />
+                                            <img src={imageSrc} alt={getProductName(getProduct)} />
                                         </SwiperSlide>
                                     ))}
                                 </Swiper>
@@ -93,9 +110,9 @@ function SingleProduct() {
                                     modules={[FreeMode, Navigation, Thumbs]}
                                     className={style.mySwiper}
                                 >
-                                    {extractFilenames(getProduct.image).map((filename, index) => (
+                                    {productImages.map((imageSrc, index) => (
                                         <SwiperSlide className={style.swiperSlide} key={index}>
-                                            <img src={require('../../images/' + filename)} alt={getProduct.name} />
+                                            <img src={imageSrc} alt={getProductName(getProduct)} />
                                         </SwiperSlide>
                                     ))}
                                 </Swiper>
@@ -105,7 +122,7 @@ function SingleProduct() {
                     <div className="col-lg-5">
                         <div className="product-info">
                             <div className="element-header">
-                                <h2 itemProp="name" className="display-6">{getProduct.name}</h2>
+                                <h2 itemProp="name" className="display-6">{getProductName(getProduct)}</h2>
                                 {/* <div className="rating-container d-flex gap-0 align-items-center">
                                     <div className="rating" data-rating={1}>
                                         <svg width={32} height={32} className="text-primary"><use xlinkHref="#star-solid" /></svg>
@@ -126,10 +143,10 @@ function SingleProduct() {
                                 </div> */}
                             </div>
                             <div className="product-price pt-3 pb-3">
-                                <strong className="text-primary display-6 fw-bold">${getProduct.price}</strong>
+                                <strong className="text-primary display-6 fw-bold">{getProductPriceLabel(getProduct)}</strong>
                                 {/* <del className="ms-2">$940.00</del> */}
                             </div>
-                            <p>{getProduct.detail}</p>
+                            <p>{getProductDescription(getProduct)}</p>
                             <div className="cart-wrap py-5">
                                 <div className="product-quantity pt-3">
                                     {/* <div className="stock-number text-dark"><em>{getProduct.status === 1 ? 'In stock' : 'Sale'}</em></div> */}
@@ -194,31 +211,19 @@ function SingleProduct() {
 
 
     function addToCart(e) {
-        const productID = e.target.value;
+        const productID = e.currentTarget.value;
+        if (!productID) return;
         addProductToCart(productID, getQuantity);
         setModalMessage('Add to cart successfully!');
         setShowModal(true);
     };
 
     function upQuantityInput() {
-        let value = parseInt(getQuantity);
-        if (isNaN(value)) {
-            value = 1;
-        }
-        value++;
-        setQuantity(value);
+        setQuantity(sanitizeQuantity(getQuantity) + 1);
     };
 
     function downQuantityInput() {
-        let value = parseInt(getQuantity);
-        if (isNaN(value)) {
-            value = 1;
-        }
-        value--;
-        if (value < 1) {
-            value = 1;
-        }
-        setQuantity(value);
+        setQuantity(Math.max(1, sanitizeQuantity(getQuantity) - 1));
     };
 
 
@@ -240,15 +245,27 @@ function SingleProduct() {
             <section id="selling-product" className="single-product mt-0 mt-md-5">
                 <div className="container-fluid">
                     <nav className="breadcrumb">
-                        <Link className="breadcrumb-item" to="">Home</Link>
-                        <Link className="breadcrumb-item" to="">Pages</Link>
+                        <Link className="breadcrumb-item" to="/">Home</Link>
+                        <Link className="breadcrumb-item" to="/shop">Shop</Link>
                         <span className="breadcrumb-item active" aria-current="page">Single Product</span>
                     </nav>
-                    {renderProduct()}
+                    {loading ? (
+                        <div className="text-center py-5">
+                            <div className="spinner-border text-primary" role="status">
+                                <span className="visually-hidden">Loading product...</span>
+                            </div>
+                        </div>
+                    ) : error ? (
+                        <div className="empty-state text-center py-5">
+                            <h3>{error}</h3>
+                            <p className="text-muted">The product may have been removed or the link is incorrect.</p>
+                            <Link to="/shop" className="btn btn-primary">Back to shop</Link>
+                        </div>
+                    ) : renderProduct()}
                 </div>
             </section>
-            <ProductInfo />
-            <RelatedProduct />
+            {!error && <ProductInfo />}
+            {!error && <RelatedProduct />}
         </div>
     )
 }

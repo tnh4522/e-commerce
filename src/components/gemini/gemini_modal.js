@@ -1,7 +1,5 @@
 import React, { useRef, useState } from 'react';
 import { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold } from '@google/generative-ai';
-import backgroundPattern from "../../images/background-pattern.jpg";
-import { Link } from "react-router-dom";
 
 function GeminiModal() {
     const [content, setContent] = useState('');
@@ -48,7 +46,6 @@ function GeminiModal() {
         const response = result.response;
         setLoading(false);
         setContent(response.text());
-        console.log(response.text());
     };
 
     const inputRef = useRef();

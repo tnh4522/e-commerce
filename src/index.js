@@ -1,5 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
+import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
@@ -32,6 +33,7 @@ import Payment from './components/Order/Payment';
 import GeminiModal from './components/gemini/gemini_modal';
 import OrderList from './components/Order/OrderList';
 import OrderDetail from './components/Order/OrderDetail';
+import NotFound from './components/Page/NotFound';
 
 // Protected route component that checks auth level on every render
 function ProtectedRoute({ level, children }) {
@@ -86,7 +88,7 @@ root.render(
           <Route path='/seller/add-product' element={<ProtectedRoute level={2}><AddProduct /></ProtectedRoute>} />
           <Route path='/seller/manage-order' element={<ProtectedRoute level={2}><ManageOrders /></ProtectedRoute>} />
           {/* Catch-all route - must be LAST */}
-          <Route path='*' element={<Home />} />
+          <Route path='*' element={<NotFound />} />
         </Routes>
       </App>
     </Router>

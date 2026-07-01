@@ -1,35 +1,21 @@
 import backgroundPattern from '../../images/background-pattern.jpg';
 import { Link } from 'react-router-dom';
-import { ProFormRadio, ProFormSwitch, ProList } from '@ant-design/pro-components';
-import { Badge, Avatar, List, Typography, Button, Tag, Col, Row, Statistic, Divider, ConfigProvider, Space, Progress, Flex } from 'antd';
+import { ProList } from '@ant-design/pro-components';
+import { Badge, Avatar, List, Typography, Button, Tag, Col, Row, Statistic, ConfigProvider, Progress, Flex } from 'antd';
 import { useEffect, useState } from 'react';
 import { TinyColor } from '@ctrl/tinycolor';
 import VirtualList from 'rc-virtual-list';
 import API from '../API/API';
 import { TruckOutlined } from '@ant-design/icons';
+import { getProductImageSrc } from '../utils/productUtils';
 
 export default function OrderList() {
     const { Text } = Typography;
-    const fakeDataUrl =
-        'http://localhost:8080/api/order/list';
     const ContainerHeight = 150;
-    const [data, setData] = useState([]);
-    const appendData = () => {
-        fetch(fakeDataUrl)
-            .then((res) => res.json())
-            .then((body) => {
-                console.log(body);
-                setData(data.concat(body));
-            });
-    };
-
-    useEffect(() => {
-        appendData();
-    }, []);
 
     const onScroll = (e) => {
         if (Math.abs(e.currentTarget.scrollHeight - e.currentTarget.scrollTop - ContainerHeight) <= 1) {
-            appendData();
+            return;
         }
     };
 
@@ -40,9 +26,7 @@ export default function OrderList() {
     const getActiveColors = (colors) =>
         colors.map((color) => new TinyColor(color).darken(5).toString());
 
-    const [cardActionProps, setCardActionProps] = useState('actions');
-
-    const [ghost, setGhost] = useState(true);
+    const [ghost] = useState(true);
 
     const [orderList, setOrderList] = useState([]);
 
@@ -55,23 +39,6 @@ export default function OrderList() {
                 console.log(error);
             });
     }, []);
-
-    function extractFilenames(inputString) {
-        try {
-            const inputArray = JSON.parse(inputString);
-            const resultArray = [];
-            for (let i = 0; i < inputArray.length; i++) {
-                const filename = inputArray[i];
-                const startIndex = filename.indexOf("_") + 1;
-                const newFilename = filename.slice(startIndex);
-                resultArray.push(newFilename);
-            }
-            return resultArray;
-        } catch (error) {
-            console.error("Invalid input JSON string.");
-            return [];
-        }
-    }
 
     const renderData = () => {
         return orderList.map((value, key) => ({
@@ -93,7 +60,7 @@ export default function OrderList() {
                                 {(item) => (
                                     <List.Item key={item.product.id}>
                                         <List.Item.Meta
-                                            avatar={<Avatar src={require('../../images/' + extractFilenames(item.product.image)[0])} />}
+                                            avatar={<Avatar src={getProductImageSrc(item.product)} />}
                                             title={<a href="https://ant.design">{item.product.name}</a>}
                                             description={item.product.price + ' x ' + item.quantity}
                                         />
@@ -217,16 +184,6 @@ export default function OrderList() {
                     showActions="hover"
                     rowSelection={{}}
                     grid={{ gutter: 16, column: 2 }}
-                    onItem={(record) => {
-                        return {
-                            onMouseEnter: () => {
-                                console.log(record);
-                            },
-                            onClick: () => {
-                                console.log(record);
-                            },
-                        };
-                    }}
                     metas={{
                         title: {},
                         subTitle: {},

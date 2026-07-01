@@ -1,7 +1,27 @@
 /**
  * Shared utility functions for cart and product operations.
- * Extracted to avoid code duplication across components.
+ * Keep localStorage parsing defensive because users can edit stored data.
  */
+
+export function safeParseJSON(value, fallback = null) {
+    if (!value) return fallback;
+    try {
+        const parsed = JSON.parse(value);
+        return parsed === null ? fallback : parsed;
+    } catch {
+        return fallback;
+    }
+}
+
+export function sanitizeQuantity(quantity, fallback = 1) {
+    const value = parseInt(quantity, 10);
+    return Number.isFinite(value) && value > 0 ? value : fallback;
+}
+
+export function sanitizePrice(price) {
+    const value = Number(price);
+    return Number.isFinite(value) && value >= 0 ? value : 0;
+}
 
 /**
  * Parse image filenames from JSON string stored in DB.
@@ -11,20 +31,51 @@
  * @returns {string[]} Array of cleaned filenames
  */
 export function extractFilenames(inputString) {
-    try {
-        const inputArray = JSON.parse(inputString);
-        const resultArray = [];
-        for (let i = 0; i < inputArray.length; i++) {
-            const filename = inputArray[i];
-            const startIndex = filename.indexOf("_") + 1;
-            const newFilename = startIndex > 0 ? filename.slice(startIndex) : filename;
-            resultArray.push(newFilename);
-        }
-        return resultArray;
-    } catch (error) {
-        console.error("Invalid input JSON string for image filenames.");
+    const inputArray = Array.isArray(inputString) ? inputString : safeParseJSON(inputString, []);
+    if (!Array.isArray(inputArray)) {
         return [];
     }
+    return inputArray
+        .filter(Boolean)
+        .map((filename) => {
+            const value = String(filename);
+            const startIndex = value.indexOf("_") + 1;
+            return startIndex > 0 ? value.slice(startIndex) : value;
+        });
+}
+
+export function formatCurrency(value) {
+    return new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD',
+        maximumFractionDigits: 2,
+    }).format(sanitizePrice(value));
+}
+
+export function getStoredCart() {
+    const rawCart = safeParseJSON(localStorage.getItem('cart'), {});
+    if (!rawCart || typeof rawCart !== 'object' || Array.isArray(rawCart)) {
+        return {};
+    }
+
+    return Object.keys(rawCart).reduce((cart, key) => {
+        const item = rawCart[key];
+        if (!item || typeof item !== 'object') return cart;
+        const id = item.id ?? key;
+        if (id === undefined || id === null || id === '') return cart;
+        cart[String(id)] = {
+            id,
+            quantity: sanitizeQuantity(item.quantity),
+        };
+        return cart;
+    }, {});
+}
+
+export function saveCart(cart) {
+    const nextCart = cart && typeof cart === 'object' ? cart : {};
+    localStorage.setItem('cart', JSON.stringify(nextCart));
+    updateCartTotalItem();
+    return nextCart;
 }
 
 /**
@@ -32,17 +83,9 @@ export function extractFilenames(inputString) {
  * @returns {number}
  */
 export function getCartTotalItems() {
-    try {
-        const cart = JSON.parse(localStorage.getItem('cart'));
-        if (!cart) return 0;
-        let total = 0;
-        Object.keys(cart).forEach(function (key) {
-            total += parseInt(cart[key].quantity) || 0;
-        });
-        return total;
-    } catch {
-        return 0;
-    }
+    return Object.values(getStoredCart()).reduce((total, item) => {
+        return total + sanitizeQuantity(item.quantity);
+    }, 0);
 }
 
 /**
@@ -63,19 +106,43 @@ export function updateCartTotalItem() {
  */
 export function addProductToCart(productId, quantity = 1) {
     const id = typeof productId === 'string' ? productId : String(productId);
-    let cart = {};
-    try {
-        cart = JSON.parse(localStorage.getItem('cart')) || {};
-    } catch {
-        cart = {};
-    }
+    if (!id || id === 'undefined' || id === 'null') return false;
+    const cart = getStoredCart();
+    const safeQuantity = sanitizeQuantity(quantity);
     if (!cart[id]) {
-        cart[id] = { id: productId, quantity: parseInt(quantity) };
+        cart[id] = { id: productId, quantity: safeQuantity };
     } else {
-        cart[id].quantity += parseInt(quantity);
+        cart[id].quantity = sanitizeQuantity(cart[id].quantity) + safeQuantity;
     }
-    localStorage.setItem('cart', JSON.stringify(cart));
-    updateCartTotalItem();
+    saveCart(cart);
+    return true;
+}
+
+export function updateCartItemQuantity(productId, quantity) {
+    const id = String(productId);
+    const cart = getStoredCart();
+    if (!cart[id]) return cart;
+
+    const safeQuantity = parseInt(quantity, 10);
+    if (!Number.isFinite(safeQuantity) || safeQuantity < 1) {
+        delete cart[id];
+    } else {
+        cart[id].quantity = safeQuantity;
+    }
+
+    return saveCart(cart);
+}
+
+export function removeCartItem(productId) {
+    const cart = getStoredCart();
+    delete cart[String(productId)];
+    return saveCart(cart);
+}
+
+export function calculateCartTotal(products = []) {
+    return products.reduce((total, item) => {
+        return total + sanitizePrice(item.price) * sanitizeQuantity(item.quantity);
+    }, 0);
 }
 
 /**

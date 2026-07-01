@@ -2,10 +2,10 @@ import { Link } from 'react-router-dom';
 function ListCommentBlog(props) {
     let { dataComment } = props;
     const mainCommentData = dataComment.filter((value) => {
-        return value.idComment == 0;
+        return Number(value.idComment) === 0;
     });
     const subCommentData = dataComment.filter((value) => {
-        return value.idComment != 0;
+        return Number(value.idComment) !== 0;
     });
     const fetchImage = (image) => {
         try {
@@ -45,7 +45,7 @@ function ListCommentBlog(props) {
     function fetchSubComment(idComment) {
         if (subCommentData) {
             return subCommentData.map((value, key) => {
-                if (value.idComment == idComment) {
+                if (Number(value.idComment) === Number(idComment)) {
                     return (
                         <article className="comment-item d-flex child-comments flex-wrap ps-5 mb-3" key={key}>
                             <div className="col-lg-1 col-sm-3 me-4 mb-3">

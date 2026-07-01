@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import backgroundPattern from '../../images/background-pattern.jpg';
 import FormError from '../Error/FormError';
-import axios from 'axios';
 import API from '../API/API';
 function UpdateBlog() {
     const [data, setData] = useState({

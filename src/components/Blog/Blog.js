@@ -14,9 +14,6 @@ const contentStyle = {
 };
 const content = <div style={contentStyle} />;
 function Blog() {
-    jarallax(document.querySelectorAll('.jarallax'), {
-        speed: 0.2,
-    });
     const [getData, setData] = useState([]);
     const [record, setRecord] = useState([]);
     const [countData, setCountData] = useState(0);
@@ -30,6 +27,12 @@ function Blog() {
     //     const headers = { 'Accept': 'application/sparql-results+json' };
     //     fetch(fullUrl, { headers }).then(body => body.json()).then(json => console.log(json));
     // }
+
+    useEffect(() => {
+        jarallax(document.querySelectorAll('.jarallax'), {
+            speed: 0.2,
+        });
+    }, []);
 
     useEffect(() => {
         const sparqlQuery = "SELECT DISTINCT ?country ?countryLabel ?capital ?capitalLabel\n" +
@@ -48,7 +51,7 @@ function Blog() {
         const fullUrl = endpointUrl + '?query=' + encodeURIComponent(sparqlQuery);
         const headers = { 'Accept': 'application/sparql-results+json' };
 
-        fetch(fullUrl, { headers }).then(body => body.json()).then(json => { console.log(json); setCountry(json.results.bindings); });
+        fetch(fullUrl, { headers }).then(body => body.json()).then(json => { setCountry(json.results.bindings); });
     }, []);
 
     useEffect(() => {
@@ -78,8 +81,9 @@ function Blog() {
             setRecord(json.results.bindings.filter(value => {
                 if (value._image && value.countryLabel && value.itemLabel && value.itemDescription && value.item) {
                     count++;
-                    return value;
+                    return true;
                 }
+                return false;
             }));
             setCountData(count);
             setLoading(true);
@@ -129,6 +133,7 @@ function Blog() {
                             </div>
                         )
                     }
+                    return null;
                 })
             )
         }
@@ -146,9 +151,10 @@ function Blog() {
                     }
                     if (countryName === 'default') {
                         count++;
-                        return value;
+                        return true;
                     }
                 }
+                return false;
             }
             ));
         }

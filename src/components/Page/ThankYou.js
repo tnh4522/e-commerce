@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import API from '../API/API';
 import { useEffect, useState, useRef } from 'react';
+import { safeParseJSON } from '../utils/cartUtils';
 
 function ThankYou() {
     const [orderCode, setOrderCode] = useState('');
@@ -9,13 +10,13 @@ function ThankYou() {
     useEffect(() => {
         if (hasSubmitted.current) return;
         
-        const orderData = JSON.parse(localStorage.getItem('orderData'));
+        const orderData = safeParseJSON(localStorage.getItem('orderData'));
         if (orderData) {
             hasSubmitted.current = true;
             setOrderCode(orderData.description || '');
             
             API.post('order/add', orderData)
-                .then(res => {
+                .then(() => {
                     localStorage.removeItem('orderData');
                     localStorage.removeItem('data');
                     localStorage.removeItem('cart');

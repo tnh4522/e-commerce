@@ -3,8 +3,10 @@ import Rating from '@mui/material/Rating';
 import { useNavigate } from 'react-router';
 import API from '../API/API';
 import { useEffect } from 'react';
+import { safeParseJSON } from '../utils/cartUtils';
 export default function BasicRating(props) {
-    const getUser = JSON.parse(localStorage.getItem('user'));
+    const getUser = safeParseJSON(localStorage.getItem('user'));
+    const getUserId = getUser?.id;
     const navigate = useNavigate();
     let url = '/blog/rate/' + props.idBlog;
     let accessToken = localStorage.getItem('token');
@@ -22,7 +24,7 @@ export default function BasicRating(props) {
             .then(res => {
                 setData(res.data.data);
                 Object.keys(res.data.data).forEach(function (key) {
-                    if (res.data.data[key].user_id == getUser.id) {
+                    if (getUserId && Number(res.data.data[key].user_id) === Number(getUserId)) {
                         setRating(res.data.data[key].rate);
                     }
                 });
@@ -30,7 +32,7 @@ export default function BasicRating(props) {
             .catch(err => {
                 console.log(err);
             })
-    }, [props.idBlog]);
+    }, [props.idBlog, getUserId]);
     function handleChangeRating(e) {
         if (getUser) {
             const valueInput = parseInt(e.target.value);
@@ -45,7 +47,7 @@ export default function BasicRating(props) {
         e.preventDefault();
         if (getUser) {
             const flag = Object.keys(data).some(function (key) {
-                return data[key].user_id == getUser.id;
+                return Number(data[key].user_id) === Number(getUser.id);
             });
             if (flag) {
                 alert('You have rated this blog!');

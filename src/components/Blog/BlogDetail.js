@@ -1,38 +1,19 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import RecentBlog from "../HomePage/RecentBlog";
-import CommentBlog from "./CommentBlog";
-import ListCommentBlog from "./ListCommentBlog";
-import HalfRating from "./RatingReadOnly";
-import BasicRating from "./Rating";
 import axios from "axios";
 function BlogDetail() {
     let { id } = useParams();
     const [getData, setData] = useState('');
-    const [getComment, setComment] = useState('');
-    const [getIdReply, setIdReply] = useState('');
     useEffect(() => {
         axios.get('https://intense-inlet-71668-b76c23b36694.herokuapp.com/api/blog/detail/' + id)
             .then(res => {
                 setData(res.data);
-                setComment(res.data.comments);
             })
             .catch(err => {
                 console.log(err);
             })
     }, [id]);
-    function handleReplyComment(e) {
-        setIdReply(e.target.id);
-        document.querySelector('.comment-respond textarea').focus();
-    }
-    function getCMT(data) {
-        let listComment = [...getComment];
-        if (data) {
-            listComment.push(data);
-            setComment(listComment);
-        }
-        return <ListCommentBlog dataComment={listComment} handleReplyComment={handleReplyComment} />
-    }
     function fetchData() {
         if (getData) {
             const createMarkup = (html) => {

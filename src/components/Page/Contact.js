@@ -1,4 +1,5 @@
 import backgroundPattern from '../../images/background-pattern.jpg';
+import { Link } from 'react-router-dom';
 function Contact() {
     return (
         <div>
@@ -7,8 +8,8 @@ function Contact() {
                     <div className="d-flex justify-content-between">
                         <h1 className="page-title pb-2">Contact info</h1>
                         <nav className="breadcrumb fs-6">
-                            <a className="breadcrumb-item nav-link" href="#">Home</a>
-                            <a className="breadcrumb-item nav-link" href="#">Pages</a>
+                            <Link className="breadcrumb-item nav-link" to="/">Home</Link>
+                            <Link className="breadcrumb-item nav-link" to="/contact">Pages</Link>
                             <span className="breadcrumb-item active" aria-current="page">Contact info</span>
                         </nav>
                     </div>
@@ -28,15 +29,15 @@ function Contact() {
                                         </div>
                                         <div className="contact-number">
                                             <p>
-                                                <a href="#">+123 987 321</a>
+                                                <a href="tel:+123987321">+123 987 321</a>
                                             </p>
                                             <p>
-                                                <a href="#">+123 123 654</a>
+                                                <a href="tel:+123123654">+123 123 654</a>
                                             </p>
                                         </div>
                                         <div className="email-address">
                                             <p>
-                                                <a href="#">contact@website.com</a>
+                                                <a href="mailto:contact@website.com">contact@website.com</a>
                                             </p>
                                         </div>
                                     </div>
@@ -49,15 +50,15 @@ function Contact() {
                                         </div>
                                         <div className="contact-number">
                                             <p>
-                                                <a href="#">+123 987 321</a>
+                                                <a href="tel:+123987321">+123 987 321</a>
                                             </p>
                                             <p>
-                                                <a href="#">+123 123 654</a>
+                                                <a href="tel:+123123654">+123 123 654</a>
                                             </p>
                                         </div>
                                         <div className="email-address">
                                             <p>
-                                                <a href="#">contact@website.com</a>
+                                                <a href="mailto:contact@website.com">contact@website.com</a>
                                             </p>
                                         </div>
                                     </div>
@@ -68,7 +69,7 @@ function Contact() {
                             <div className="bg-light p-5 rounded-5">
                                 <h2 className="display-7 text-dark">Get in Touch</h2>
                                 <p>Use the form below to get in touch with us.</p>
-                                <form id="form" className="form-group flex-wrap">
+                                <form id="form" className="form-group flex-wrap" onSubmit={(event) => event.preventDefault()}>
                                     <div className="form-input col-lg-12 d-flex mb-3">
                                         <input type="text" name="email" placeholder="Write Your Name Here" className="form-control ps-3 me-3" />
                                         <input type="text" name="email" placeholder="Write Your Email Here" className="form-control ps-3" />
@@ -94,8 +95,7 @@ function Contact() {
             <section className="google-map">
                 <div className="mapouter">
                     <div className="gmap_canvas">
-                        <iframe width="100%" height={500} id="gmap_canvas" src="https://maps.google.com/maps?q=2880%20Broadway,%20New%20York&t=&z=13&ie=UTF8&iwloc=&output=embed" frameBorder={0} scrolling="no" marginHeight={0} marginWidth={0} />
-                        <a href="https://getasearch.com/fmovies" />
+                        <iframe title="Store location map" width="100%" height={500} id="gmap_canvas" src="https://maps.google.com/maps?q=2880%20Broadway,%20New%20York&t=&z=13&ie=UTF8&iwloc=&output=embed" frameBorder={0} scrolling="no" marginHeight={0} marginWidth={0} />
                         <br />
                         <style dangerouslySetInnerHTML={{ __html: "\n            .mapouter {\n              position: relative;\n              text-align: right;\n              height: 500px;\n              width: 100%;\n            }\n          " }} />
                         <a href="https://www.embedgooglemap.net">embedgooglemap.net</a>
