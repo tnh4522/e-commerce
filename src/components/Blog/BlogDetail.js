@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import RecentBlog from "../HomePage/RecentBlog";
 import axios from "axios";
+import { fallbackImage, getImageSrc } from "../utils/imageUtils";
 function BlogDetail() {
     let { id } = useParams();
     const [getData, setData] = useState('');
@@ -42,7 +43,12 @@ function BlogDetail() {
                                         <article className="post-item">
                                             <div className="post-content">
                                                 <div className="post-thumbnail mb-5">
-                                                    <img src={require('../../images/' + getData.image)} alt="single-post" className="img-fluid" />
+                                                    <img
+                                                        src={getImageSrc(getData.image)}
+                                                        alt="single-post"
+                                                        className="img-fluid"
+                                                        onError={(e) => { e.currentTarget.src = fallbackImage; }}
+                                                    />
                                                 </div>
                                                 <div className="post-description py-4">
                                                     <p>

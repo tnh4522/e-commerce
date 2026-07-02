@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import dataService from '../../services/dataService';
+import { fallbackImage, getImageSrc } from '../utils/imageUtils';
 function RecentBlog() {
     const [getData, setData] = useState([]);
     useEffect(() => {
@@ -12,16 +13,17 @@ function RecentBlog() {
         const data = getData.slice(0, 3);
         return (
             data.map((item, index) => {
+                const imageSrc = getImageSrc(item.image);
                 return (
                     <div className="col-md-4" key={index} style={{ display: '-webkit-box', WebkitLineClamp: 5, WebkitBoxOrient: 'vertical', overflow: 'hidden', paddingBottom: '1rem' }}>
                         <article className="post-item card border-0 shadow-sm p-3">
                             <div className="image-holder zoom-effect">
                                 <Link to={"/blog/detail/" + item.id}>
                             <img
-                                    src={item.image ? require('../../images/' + item.image) : require('../../images/basket.png')}
+                                    src={imageSrc}
                                     alt="post"
                                     className="card-img-top"
-                                    onError={(e) => { e.target.src = require('../../images/basket.png'); }}
+                                    onError={(e) => { e.currentTarget.src = fallbackImage; }}
                                 />
                                 </Link>
                             </div>

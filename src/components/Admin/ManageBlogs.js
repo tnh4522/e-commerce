@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import backgroundPattern from '../../images/background-pattern.jpg';
 import axios from 'axios';
 import API from '../API/API';
+import { fallbackImage, getImageSrc } from '../utils/imageUtils';
 
 function ManageBlogs() {
     const [users, setUsers] = useState({});
@@ -42,7 +43,7 @@ function ManageBlogs() {
             return (
                 <tr key={key}>
                     <td>{value.id}</td>
-                    <td><img src={require('../../images/' + value.image)} alt="" width="80px" /></td>
+                    <td><img src={getImageSrc(value.image)} alt="" width="80px" onError={(e) => { e.currentTarget.src = fallbackImage; }} /></td>
                     <td>{value.title}</td>
                     <td>{value.description}</td>
                     <td>{renderAuthor(value.idAuth)}</td>
