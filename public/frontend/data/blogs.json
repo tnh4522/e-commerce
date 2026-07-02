@@ -1,0 +1,42 @@
+[
+  {
+    "id": 1,
+    "title": "5 Xu Hướng Thời Trang Nổi Bật Mùa Hè 2025",
+    "description": "Khám phá những xu hướng thời trang được yêu thích nhất mùa hè năm nay, từ màu sắc rực rỡ đến các kiểu dáng thoải mái.",
+    "image": "blog1.jpg",
+    "createdAt": "2025-06-01",
+    "author": "Admin"
+  },
+  {
+    "id": 2,
+    "title": "Cách Phối Đồ Casual Đẹp Mà Không Cần Tốn Nhiều Tiền",
+    "description": "Hướng dẫn mix-match trang phục casual hàng ngày sao cho vừa đẹp vừa tiết kiệm chi phí.",
+    "image": "blog2.jpg",
+    "createdAt": "2025-05-20",
+    "author": "Admin"
+  },
+  {
+    "id": 3,
+    "title": "Top 10 Outfit Văn Phòng Thanh Lịch Cho Nữ Công Sở",
+    "description": "Tổng hợp những bộ outfit công sở thanh lịch, chuyên nghiệp mà vẫn thoải mái cho các nàng công sở.",
+    "image": "blog3.jpg",
+    "createdAt": "2025-05-10",
+    "author": "Admin"
+  },
+  {
+    "id": 4,
+    "title": "Bí Quyết Bảo Quản Quần Áo Luôn Như Mới",
+    "description": "Chia sẻ những mẹo đơn giản giúp quần áo của bạn luôn giữ được màu sắc và form dáng đẹp.",
+    "image": "blog4.jpg",
+    "createdAt": "2025-04-28",
+    "author": "Admin"
+  },
+  {
+    "id": 5,
+    "title": "Streetwear 2025: Phong Cách Đường Phố Lên Ngôi",
+    "description": "Phong cách streetwear tiếp tục thống trị làng thời trang 2025 với những thiết kế táo bạo và cá tính.",
+    "image": "blog5.jpg",
+    "createdAt": "2025-04-15",
+    "author": "Admin"
+  }
+]

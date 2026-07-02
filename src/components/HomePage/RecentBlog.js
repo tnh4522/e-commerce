@@ -1,17 +1,12 @@
 import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
-
-import API from "../API/API";
+import dataService from '../../services/dataService';
 function RecentBlog() {
     const [getData, setData] = useState([]);
     useEffect(() => {
-        API.get('blog/list')
-            .then(res => {
-                setData(res.data);
-            })
-            .catch(err => {
-                console.log(err);
-            })
+        dataService.getBlogs()
+            .then(data => setData(Array.isArray(data) ? data : []))
+            .catch(() => setData([]));
     }, []);
     function fetchBlog() {
         const data = getData.slice(0, 3);
@@ -22,7 +17,12 @@ function RecentBlog() {
                         <article className="post-item card border-0 shadow-sm p-3">
                             <div className="image-holder zoom-effect">
                                 <Link to={"/blog/detail/" + item.id}>
-                                    <img src={require('../../images/' + item.image)} alt="post" className="card-img-top" />
+                            <img
+                                    src={item.image ? require('../../images/' + item.image) : require('../../images/basket.png')}
+                                    alt="post"
+                                    className="card-img-top"
+                                    onError={(e) => { e.target.src = require('../../images/basket.png'); }}
+                                />
                                 </Link>
                             </div>
                             <div className="card-body" >

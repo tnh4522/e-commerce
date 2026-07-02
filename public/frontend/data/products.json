@@ -1,0 +1,102 @@
+[
+  {
+    "id": 1,
+    "name": "Áo Polo Nam Classic Fit",
+    "price": 299000,
+    "image": "[\"1_img1.jpg\"]",
+    "idCategory": 1,
+    "idBrand": 1,
+    "detail": "Áo polo nam chất liệu cotton 100%, thiết kế cổ bẻ trẻ trung, phù hợp mọi hoạt động hàng ngày lẫn dã ngoại. Form regular fit thoải mái.",
+    "status": 1
+  },
+  {
+    "id": 2,
+    "name": "Quần Jean Slim Fit",
+    "price": 459000,
+    "image": "[\"2_img2.jpg\"]",
+    "idCategory": 1,
+    "idBrand": 2,
+    "detail": "Quần jean ôm vừa, chất vải co giãn tốt, màu xanh indigo cổ điển. Kiểu dáng trẻ trung phù hợp nhiều dịp.",
+    "status": 1
+  },
+  {
+    "id": 3,
+    "name": "Áo Khoác Bomber Unisex",
+    "price": 689000,
+    "image": "[\"3_img3.jpg\"]",
+    "idCategory": 2,
+    "idBrand": 1,
+    "detail": "Áo khoác bomber unisex phong cách streetwear, chất liệu polyester chống gió nhẹ. Thiết kế gọn gàng tiện lợi.",
+    "status": 1
+  },
+  {
+    "id": 4,
+    "name": "Váy Midi Floral",
+    "price": 399000,
+    "image": "[\"4_img4.jpg\"]",
+    "idCategory": 3,
+    "idBrand": 3,
+    "detail": "Váy midi họa tiết hoa nhẹ nhàng, chất vải lụa mềm mại. Phù hợp đi dạo hoặc dự tiệc nhẹ.",
+    "status": 1
+  },
+  {
+    "id": 5,
+    "name": "Áo Thun Oversize Graphic",
+    "price": 249000,
+    "image": "[\"5_img5.jpg\"]",
+    "idCategory": 1,
+    "idBrand": 2,
+    "detail": "Áo thun form rộng in họa tiết graphic độc đáo, chất cotton mềm thoáng mát. Phù hợp phong cách casual.",
+    "status": 1
+  },
+  {
+    "id": 6,
+    "name": "Quần Jogger Thể Thao",
+    "price": 349000,
+    "image": "[\"6_img6.jpg\"]",
+    "idCategory": 4,
+    "idBrand": 4,
+    "detail": "Quần jogger co giãn 4 chiều, phù hợp tập gym, chạy bộ hoặc mặc hàng ngày. Cạp chun điều chỉnh dễ dàng.",
+    "status": 1
+  },
+  {
+    "id": 7,
+    "name": "Áo Sơ Mi Linen Dài Tay",
+    "price": 519000,
+    "image": "[\"7_img7.jpg\"]",
+    "idCategory": 1,
+    "idBrand": 3,
+    "detail": "Áo sơ mi linen dài tay thoáng mát, kiểu dáng regular fit thanh lịch. Chất liệu linen tự nhiên giúp thoáng khí tốt.",
+    "status": 1
+  },
+  {
+    "id": 8,
+    "name": "Đầm Maxi Boho",
+    "price": 549000,
+    "image": "[\"8_img8.jpg\"]",
+    "idCategory": 3,
+    "idBrand": 3,
+    "detail": "Đầm maxi phong cách boho dài chấm đất, chất vải chiffon bay bổng lãng mạn. Thích hợp đi biển hoặc dạo phố.",
+    "status": 1
+  },
+  {
+    "id": 9,
+    "name": "Áo Hoodie Cotton Fleece",
+    "price": 479000,
+    "image": "[\"9_img9.jpg\"]",
+    "idCategory": 2,
+    "idBrand": 4,
+    "detail": "Áo hoodie lót lông bên trong giữ ấm tốt, túi kangaroo tiện lợi. Phù hợp mặc mùa đông hoặc khi ra ngoài tối.",
+    "status": 1
+  },
+  {
+    "id": 10,
+    "name": "Chân Váy Jean A-Line",
+    "price": 379000,
+    "image": "[\"10_img10.jpg\"]",
+    "idCategory": 3,
+    "idBrand": 2,
+    "detail": "Chân váy jean xòe A-line phong cách retro, đính cúc đồng bắt mắt. Dễ phối cùng nhiều kiểu áo.",
+    "status": 1
+  }
+]

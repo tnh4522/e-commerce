@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useState, useEffect, useRef } from 'react';
-import API from '../API/API';
+import dataService from '../../services/dataService';
 import { getCartTotalItems, safeParseJSON } from '../utils/cartUtils';
 import { getProductImageSrc, getProductName } from '../utils/productUtils';
 
@@ -90,9 +90,9 @@ function Header() {
     const [record, setRecord] = useState([]);
 
     useEffect(() => {
-        API.get('product/list')
-            .then(res => { setProduct(Array.isArray(res.data) ? res.data : []); })
-            .catch(() => { setProduct([]); })
+        dataService.getProducts()
+            .then(data => { setProduct(Array.isArray(data) ? data : []); })
+            .catch(() => { setProduct([]); });
     }, []);
 
     const searchFilter = (e) => {

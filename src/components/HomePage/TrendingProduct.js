@@ -2,7 +2,9 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 
 import Modal from '../Modal/Modal';
-import API from "../API/API";
+import { addProductToCart } from '../utils/cartUtils';
+import { getProductImageSrc, getProductName, getProductPriceLabel } from '../utils/productUtils';
+import dataService from '../../services/dataService';
 
 function TrendingProduct() {
     const [products, setProducts] = useState([]);
@@ -14,18 +16,14 @@ function TrendingProduct() {
     let navigater = useNavigate();
 
     useEffect(() => {
-        API.get('product/list')
-            .then(res => {
-                setProducts(res.data);
-            })
-            .catch(error => { console.log(error) })
+        dataService.getProducts()
+            .then(data => setProducts(Array.isArray(data) ? data : []))
+            .catch(() => setProducts([]));
     }, []);
     useEffect(() => {
-        API.get('category')
-            .then(res => {
-                setCategories(res.data);
-            })
-            .catch(error => { console.log(error) })
+        dataService.getCategories()
+            .then(data => setCategories(Array.isArray(data) ? data : []))
+            .catch(() => setCategories([]));
     }, []);
     useEffect(() => {
         const localStorageWishlist = JSON.parse(localStorage.getItem('wishlist'));
@@ -52,12 +50,12 @@ function TrendingProduct() {
                             <Link to="" onClick={addToWishlist} className={`btn-wishlist ${isWishlistItem ? 'red-heart' : ''}`}><svg width={24} height={24}><use xlinkHref="#heart" /></svg></Link>
                             <figure>
                                 <Link to={'/product/detail/' + item.id} title="Product Title">
-                                    <img src={require('../../images/' + extractFilenames(item.image)[0])} alt="Product Thumbnail" className="tab-image" />
+                                <img src={getProductImageSrc(item)} alt={getProductName(item)} className="tab-image" />
                                 </Link>
                             </figure>
-                            <Link to={'/product/detail/' + item.id} className="text-decoration-none"><h3>{item.name}</h3></Link>
+                            <Link to={'/product/detail/' + item.id} className="text-decoration-none"><h3>{getProductName(item)}</h3></Link>
                             <span className="qty">Reviews</span><span className="rating"><svg width={24} height={24} className="text-primary"><use xlinkHref="#star-solid" /></svg> 4.5</span>
-                            <span className="price">${item.price}</span>
+                            <span className="price">{getProductPriceLabel(item)}</span>
                             <div className="d-flex align-items-center justify-content-between">
                                 <div className="input-group product-qty">
                                     <span className="input-group-btn">
@@ -90,12 +88,12 @@ function TrendingProduct() {
                         <Link to="" onClick={addToWishlist} className={`btn-wishlist ${isWishlistItem ? 'red-heart' : ''}`}><svg width={24} height={24}><use xlinkHref="#heart" /></svg></Link>
                         <figure>
                             <Link to={'/product/detail/' + item.id} title="Product Title">
-                                <img src={require('../../images/' + extractFilenames(item.image)[0])} alt="Product Thumbnail" className="tab-image" />
+                        <img src={getProductImageSrc(item)} alt={getProductName(item)} className="tab-image" />
                             </Link>
                         </figure>
-                        <Link to={'/product/detail/' + item.id} className="text-decoration-none"><h3>{item.name}</h3></Link>
+                        <Link to={'/product/detail/' + item.id} className="text-decoration-none"><h3>{getProductName(item)}</h3></Link>
                         <span className="qty">Reviews</span><span className="rating"><svg width={24} height={24} className="text-primary"><use xlinkHref="#star-solid" /></svg> 4.5</span>
-                        <span className="price">${item.price}</span>
+                        <span className="price">{getProductPriceLabel(item)}</span>
                         <div className="d-flex align-items-center justify-content-between">
                             <div className="input-group product-qty">
                                 <span className="input-group-btn">
@@ -128,52 +126,14 @@ function TrendingProduct() {
             )
         })
     };
-    function extractFilenames(inputString) {
-        try {
-            const inputArray = JSON.parse(inputString);
-            const resultArray = [];
-            for (let i = 0; i < inputArray.length; i++) {
-                const filename = inputArray[i];
-                const startIndex = filename.indexOf("_") + 1;
-                const newFilename = filename.slice(startIndex);
-                resultArray.push(newFilename);
-            }
-            return resultArray;
-        } catch (error) {
-            console.error("Invalid input JSON string.");
-            return [];
-        }
-    };
+
     function addToCart(e) {
-        let productId = e.target.closest('.product-item').id;
+        let productId = e.target.closest('.product-item')?.id;
+        if (!productId) return;
         productId = parseInt(productId);
-        var cartData = {
-            id: productId,
-            quantity: 1
-        }
-        var cart = {};
-        if (localStorage.getItem('cart')) {
-            cart = JSON.parse(localStorage.getItem('cart'));
-        }
-        if (!cart[productId]) {
-            cart[productId] = cartData;
-        } else {
-            cart[productId].quantity += 1;
-        }
-        localStorage.setItem('cart', JSON.stringify(cart));
-        updateCartTotalItem();
+        addProductToCart(productId, 1);
         setModalMessage('Add to cart successfully!');
         setShowModal(true);
-    };
-    function updateCartTotalItem() {
-        let cart = JSON.parse(localStorage.getItem('cart'));
-        let total = 0;
-        if (cart) {
-            Object.keys(cart).forEach(function (key) {
-                total += cart[key].quantity;
-            });
-        }
-        localStorage.setItem('cartTotalItem', total);
     };
     function addToWishlist(e) {
         const getUser = localStorage.getItem('user');

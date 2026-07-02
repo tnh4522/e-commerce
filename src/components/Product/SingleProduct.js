@@ -10,9 +10,9 @@ import 'swiper/css/navigation';
 import 'swiper/css/thumbs';
 import Modal from "../Modal/Modal";
 import style from './style.module.css';
-import API from '../API/API';
 import { addProductToCart, sanitizeQuantity } from '../utils/cartUtils';
 import { getProductDescription, getProductImageList, getProductName, getProductPriceLabel } from '../utils/productUtils';
+import dataService from '../../services/dataService';
 
 function SingleProduct() {
     let productID = useParams().id;
@@ -47,10 +47,10 @@ function SingleProduct() {
             return;
         }
         setLoading(true);
-        API.get('product/detail/' + productID)
-            .then(res => {
-                if (res.data && res.data.id) {
-                    setProduct(res.data);
+        dataService.getProductDetail(productID)
+            .then(data => {
+                if (data && data.id) {
+                    setProduct(data);
                     setError('');
                 } else {
                     setProduct('');
@@ -62,16 +62,12 @@ function SingleProduct() {
                 setError('Product not found.');
             })
             .finally(() => setLoading(false));
-        API.get('category')
-            .then(res => {
-                setCategories(Array.isArray(res.data) ? res.data : []);
-            })
-            .catch(() => { setCategories([]) });
-        API.get('brand')
-            .then(res => {
-                setBrands(Array.isArray(res.data) ? res.data : []);
-            })
-            .catch(() => { setBrands([]) })
+        dataService.getCategories()
+            .then(data => setCategories(Array.isArray(data) ? data : []))
+            .catch(() => setCategories([]));
+        dataService.getBrands()
+            .then(data => setBrands(Array.isArray(data) ? data : []))
+            .catch(() => setBrands([]));
     }, [productID]);
 
     function renderProduct() {
@@ -123,33 +119,13 @@ function SingleProduct() {
                         <div className="product-info">
                             <div className="element-header">
                                 <h2 itemProp="name" className="display-6">{getProductName(getProduct)}</h2>
-                                {/* <div className="rating-container d-flex gap-0 align-items-center">
-                                    <div className="rating" data-rating={1}>
-                                        <svg width={32} height={32} className="text-primary"><use xlinkHref="#star-solid" /></svg>
-                                    </div>
-                                    <div className="rating" data-rating={2}>
-                                        <svg width={32} height={32} className="text-primary"><use xlinkHref="#star-solid" /></svg>
-                                    </div>
-                                    <div className="rating" data-rating={3}>
-                                        <svg width={32} height={32} className="text-primary"><use xlinkHref="#star-solid" /></svg>
-                                    </div>
-                                    <div className="rating" data-rating={4}>
-                                        <svg width={32} height={32} className="text-secondary"><use xlinkHref="#star-solid" /></svg>
-                                    </div>
-                                    <div className="rating" data-rating={5}>
-                                        <svg width={32} height={32} className="text-secondary"><use xlinkHref="#star-solid" /></svg>
-                                    </div>
-                                    <span className="rating-count">(4.5)</span>
-                                </div> */}
                             </div>
                             <div className="product-price pt-3 pb-3">
                                 <strong className="text-primary display-6 fw-bold">{getProductPriceLabel(getProduct)}</strong>
-                                {/* <del className="ms-2">$940.00</del> */}
                             </div>
                             <p>{getProductDescription(getProduct)}</p>
                             <div className="cart-wrap py-5">
                                 <div className="product-quantity pt-3">
-                                    {/* <div className="stock-number text-dark"><em>{getProduct.status === 1 ? 'In stock' : 'Sale'}</em></div> */}
                                     <div className="stock-button-wrap">
                                         <div className="input-group product-qty" style={{ maxWidth: '150px' }}>
                                             <span className="input-group-btn">
@@ -208,8 +184,6 @@ function SingleProduct() {
         }
     };
 
-
-
     function addToCart(e) {
         const productID = e.currentTarget.value;
         if (!productID) return;
@@ -225,8 +199,6 @@ function SingleProduct() {
     function downQuantityInput() {
         setQuantity(Math.max(1, sanitizeQuantity(getQuantity) - 1));
     };
-
-
 
     useEffect(() => {
         if (showModal) {

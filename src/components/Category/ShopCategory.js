@@ -5,9 +5,10 @@ import backgroundPattern from '../../images/background-pattern.jpg';
 import SideBar from "./SideBar";
 import ShopPagination from "../shop/ShopPagination";
 import Modal from "../Modal/Modal";
-import API from "../API/API";
+import dataService from '../../services/dataService';
 import { addProductToCart, safeParseJSON } from "../utils/cartUtils";
 import { getProductImageSrc, getProductName, getProductPrice, getProductPriceLabel } from "../utils/productUtils";
+
 function ShopCategory() {
     let idCategory = useParams().id;
     const [products, setProducts] = useState([]);
@@ -20,14 +21,17 @@ function ShopCategory() {
     const navigater = useNavigate();
     useEffect(() => {
         setLoading(true);
-        API.get('product/list')
-            .then(res => {
-                const list = Array.isArray(res.data) ? res.data.filter(val => String(val.idCategory) === String(idCategory)) : [];
-                setProducts(list);
-                setRecords(list);
+        dataService.getProducts()
+            .then(data => {
+                const all = Array.isArray(data) ? data : [];
+                const filtered = all.filter(val => String(val.idCategory) === String(idCategory));
+                setProducts(filtered);
+                setRecords(filtered);
                 setError('');
             })
-            .catch(() => { setError('We could not load this category right now. Please try again later.'); })
+            .catch(() => {
+                setError('We could not load this category right now. Please try again later.');
+            })
             .finally(() => setLoading(false));
         const localStorageWishlist = safeParseJSON(localStorage.getItem('wishlist'), []);
         if (Array.isArray(localStorageWishlist)) {

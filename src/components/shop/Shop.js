@@ -4,9 +4,9 @@ import backgroundPattern from '../../images/background-pattern.jpg';
 import SideBar from "../Category/SideBar";
 import ShopPagination from "./ShopPagination";
 import Modal from "../Modal/Modal";
-import API from "../API/API";
 import { addProductToCart, safeParseJSON } from '../utils/cartUtils';
 import { getProductImageSrc, getProductName, getProductPrice, getProductPriceLabel } from '../utils/productUtils';
+import dataService from '../../services/dataService';
 function Shop(props) {
     const [products, setProducts] = useState([]);
     const [records, setRecords] = useState([]);
@@ -17,11 +17,11 @@ function Shop(props) {
     const [wishlist, setWishlist] = useState([]);
     const navigater = useNavigate();
     useEffect(() => {
-        API.get('product/list')
-            .then(res => {
-                const list = Array.isArray(res.data) ? res.data : [];
-                setProducts(list);
-                setRecords(list);
+        dataService.getProducts()
+            .then(list => {
+                const data = Array.isArray(list) ? list : [];
+                setProducts(data);
+                setRecords(data);
                 setError('');
             })
             .catch(() => {

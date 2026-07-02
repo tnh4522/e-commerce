@@ -1,15 +1,24 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import API from "../API/API";
+import dataService from '../../services/dataService';
+
 function SideBar(props) {
     let { searchFilter } = props;
     const [categories, setCategories] = React.useState([]);
     const [brands, setBrands] = React.useState([]);
+
     React.useEffect(() => {
-        API.get('category')
-            .then(res => { setCategories(Array.isArray(res.data) ? res.data : []) })
-            .catch(() => { setCategories([]) })
+        dataService.getCategories()
+            .then(data => setCategories(Array.isArray(data) ? data : []))
+            .catch(() => setCategories([]));
     }, []);
+
+    React.useEffect(() => {
+        dataService.getBrands()
+            .then(data => setBrands(Array.isArray(data) ? data : []))
+            .catch(() => setBrands([]));
+    }, []);
+
     function renderCategory() {
         return categories.map((item, index) => {
             return (
@@ -19,11 +28,7 @@ function SideBar(props) {
             )
         })
     }
-    React.useEffect(() => {
-        API.get('brand')
-            .then(res => { setBrands(Array.isArray(res.data) ? res.data : []) })
-            .catch(() => { setBrands([]) })
-    }, []);
+
     function renderBrand() {
         return brands.map((item, index) => {
             return (
@@ -33,6 +38,7 @@ function SideBar(props) {
             )
         })
     }
+
     return (
         <div className="sidebar">
             <div className="widget-menu">
@@ -49,49 +55,12 @@ function SideBar(props) {
                     {renderCategory()}
                 </ul>
             </div>
-            {/* <div className="widget-product-tags pt-3">
-                <h5 className="widget-title">Tags</h5>
-                <ul className="product-tags sidebar-list list-unstyled">
-                    <li className="tags-item">
-                        <Link to="#" className="nav-link">White</Link>
-                    </li>
-                    <li className="tags-item">
-                        <Link to="#" className="nav-link">Cheap</Link>
-                    </li>
-                    <li className="tags-item">
-                        <Link to="#" className="nav-link">Mobile</Link>
-                    </li>
-                    <li className="tags-item">
-                        <Link to="#" className="nav-link">Modern</Link>
-                    </li>
-                </ul>
-            </div> */}
             <div className="widget-product-brands pt-3">
                 <h5 className="widget-title">Brands</h5>
                 <ul className="product-tags sidebar-list list-unstyled">
                     {renderBrand()}
                 </ul>
             </div>
-            {/* <div className="widget-price-filter pt-3">
-                <h5 className="widget-titlewidget-title">Filter By Price</h5>
-                <ul className="product-tags sidebar-list list-unstyled">
-                    <li className="tags-item">
-                        <Link to="#" className="nav-link">Less than $10</Link>
-                    </li>
-                    <li className="tags-item">
-                        <Link to="#" className="nav-link">$10- $20</Link>
-                    </li>
-                    <li className="tags-item">
-                        <Link to="#" className="nav-link">$20- $30</Link>
-                    </li>
-                    <li className="tags-item">
-                        <Link to="#" className="nav-link">$30- $40</Link>
-                    </li>
-                    <li className="tags-item">
-                        <Link to="#" className="nav-link">$40- $50</Link>
-                    </li>
-                </ul>
-            </div> */}
         </div>
     )
 }

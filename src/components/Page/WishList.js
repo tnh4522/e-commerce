@@ -3,20 +3,17 @@ import { Link } from "react-router-dom";
 
 import backgroundPattern from '../../images/background-pattern.jpg';
 import Modal from "../Modal/Modal";
-import API from "../API/API";
+import dataService from '../../services/dataService';
+import { getProductImageSrc, getProductName, getProductPriceLabel } from '../utils/productUtils';
 
 function Wishlist() {
     const [getData, setData] = useState([]);
     const [modalMessage, setModalMessage] = useState('');
     const [showModal, setShowModal] = useState(false);
     useEffect(() => {
-        API.get('product/list')
-            .then(res => {
-                setData(res.data);
-            })
-            .catch(err => {
-                console.log(err);
-            })
+        dataService.getProducts()
+            .then(data => setData(Array.isArray(data) ? data : []))
+            .catch(() => setData([]));
     }, []);
 
     function renderWishlist() {
@@ -31,12 +28,12 @@ function Wishlist() {
                         <div className="product-item" id={item.id}>
                             <figure>
                                 <Link to={'/product/detail/' + item.id} title="Product Title">
-                                    <img alt='' src={require('../../images/' + extractFilenames(item.image)[0])} className="tab-image" />
+                                    <img alt={getProductName(item)} src={getProductImageSrc(item)} className="tab-image" />
                                 </Link>
                             </figure>
-                            <Link to={'/product/detail/' + item.id} className="text-decoration-none"><h3>{item.name}</h3></Link>
+                            <Link to={'/product/detail/' + item.id} className="text-decoration-none"><h3>{getProductName(item)}</h3></Link>
                             <span className="qty">Reviews</span><span className="rating"><svg width={24} height={24} className="text-primary"><use xlinkHref="#star-solid" /></svg> 4.5</span>
-                            <span className="price">${item.price}</span>
+                            <span className="price">{getProductPriceLabel(item)}</span>
                             <div className="d-flex align-items-center justify-content-between">
                                 <Link to="" className="btn btn-outline-primary btn-sm" id={item.id} onClick={deleteWishList}>Delete</Link>
                                 <Link to="" className="nav-link" onClick={addToCart}>Add to Cart <svg width={24} height={24}><use xlinkHref="#cart" /></svg></Link>
@@ -90,22 +87,8 @@ function Wishlist() {
         }
         localStorage.setItem('cartTotalItem', total);
     }
-    function extractFilenames(inputString) {
-        try {
-            const inputArray = JSON.parse(inputString);
-            const resultArray = [];
-            for (let i = 0; i < inputArray.length; i++) {
-                const filename = inputArray[i];
-                const startIndex = filename.indexOf("_") + 1;
-                const newFilename = filename.slice(startIndex);
-                resultArray.push(newFilename);
-            }
-            return resultArray;
-        } catch (error) {
-            console.error("Invalid input JSON string.");
-            return [];
-        }
-    }
+
+
     function deleteWishList(e) {
         let product_id = e.target.id;
         let wishlist = JSON.parse(localStorage.getItem('wishlist'));

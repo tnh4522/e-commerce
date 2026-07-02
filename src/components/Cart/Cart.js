@@ -1,9 +1,9 @@
 import { Link } from 'react-router-dom';
 import backgroundPattern from '../../images/background-pattern.jpg';
 import { useState, useEffect } from 'react';
-import API from '../API/API';
 import { calculateCartTotal, formatCurrency, getStoredCart, removeCartItem, sanitizeQuantity, updateCartItemQuantity } from '../utils/cartUtils';
 import { getProductImageSrc, getProductName, getProductPrice } from '../utils/productUtils';
+import dataService from '../../services/dataService';
 
 function Cart() {
     const [getData, setData] = useState([]);
@@ -24,9 +24,8 @@ function Cart() {
             return;
         }
 
-        API.post('product/cart', cartData)
-            .then(res => {
-                const products = Array.isArray(res.data) ? res.data : [];
+        dataService.getCartProducts(cartData)
+            .then(products => {
                 const normalizedProducts = products.map((item) => ({
                     ...item,
                     quantity: sanitizeQuantity(cart[String(item.id)]?.quantity ?? item.quantity),
