@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import backgroundPattern from '../../images/background-pattern.jpg';
 import { useEffect, useState } from 'react';
 import API from '../API/API';
+import { fallbackImage, getImageSrc } from '../utils/imageUtils';
 
 function AdminUserPage() {
     const [getData, setData] = useState([]);
@@ -18,11 +19,11 @@ function AdminUserPage() {
 
     function renderRole(role) {
         if (role === 1) {
-            return 'Admin';
+            return 'Quản trị viên';
         } else if (role === 2) {
-            return 'Seller';
+            return 'Người bán';
         } else {
-            return 'User';
+            return 'Khách hàng';
         }
     };
 
@@ -31,14 +32,27 @@ function AdminUserPage() {
             return (
                 <tr key={key}>
                     <td>{value.id}</td>
-                    <td><img src={require('../../images/' + value.avatar)} alt="" width="70px" /></td>
-                    <td>{value.name}</td>
+                    <td>
+                        <img 
+                            src={getImageSrc(value.avatar)} 
+                            alt={value.name} 
+                            width="60px" 
+                            height="60px" 
+                            style={{ objectFit: 'cover', borderRadius: '50%' }}
+                            onError={(e) => { e.currentTarget.src = fallbackImage; }} 
+                        />
+                    </td>
+                    <td className="fw-semibold">{value.name}</td>
                     <td>{value.email}</td>
                     <td>{value.phone}</td>
                     <td>{value.address}</td>
-                    <td id={value.level}>{renderRole(value.level)}</td>
-                    <td><Link to={'/admin/update/' + value.id}><button type="button" className="btn btn-primary">Update</button></Link></td>
-                    <td><button id={value.id} type="button" className="btn btn-danger" onClick={deleteUser}>Delete</button></td>
+                    <td id={value.level}>
+                        <span className={`badge ${value.level === 1 ? 'bg-danger' : value.level === 2 ? 'bg-warning text-dark' : 'bg-success'}`}>
+                            {renderRole(value.level)}
+                        </span>
+                    </td>
+                    <td><Link to={'/admin/update/' + value.id}><button type="button" className="btn btn-primary btn-sm">Cập nhật</button></Link></td>
+                    <td><button id={value.id} type="button" className="btn btn-danger btn-sm" onClick={deleteUser}>Xóa</button></td>
                 </tr>
             )
         })
@@ -48,14 +62,14 @@ function AdminUserPage() {
         const id = e.target.id;
         const level = e.target.parentNode.parentNode.childNodes[6].id;
         if (level === '1' || level === '2') {
-            alert('You cannot delete this user!');
+            alert('Bạn không thể xóa tài khoản Quản trị viên hoặc Người bán!');
             return;
         };
-        if (window.confirm('Are you sure you want to delete this blog?')) {
+        if (window.confirm('Bạn có chắc chắn muốn xóa người dùng này không?')) {
             API.delete(`user/${id}`)
                 .then(function (response) {
                     if (response.status === 200) {
-                        e.target.parentNode.parentNode.remove();
+                        setData(prev => prev.filter(u => String(u.id) !== String(id)));
                     }
                 })
                 .catch(function (error) {
@@ -69,33 +83,37 @@ function AdminUserPage() {
             <section className="py-5 mb-5" style={{ background: `url(${backgroundPattern})` }}>
                 <div className="container-fluid">
                     <div className="d-flex justify-content-between">
-                        <h1 className="page-title pb-2">User Admin Page</h1>
+                        <h1 className="page-title pb-2">Quản lý người dùng</h1>
                         <nav className="breadcrumb fs-6">
-                            <Link className="breadcrumb-item nav-link" to="/">Home</Link>
-                            <Link className="breadcrumb-item nav-link" to="">Pages</Link>
-                            <span className="breadcrumb-item active" aria-current="page">Admin</span>
+                            <Link className="breadcrumb-item nav-link" to="/">Trang chủ</Link>
+                            <Link className="breadcrumb-item nav-link" to="/admin">Quản trị</Link>
+                            <span className="breadcrumb-item active" aria-current="page">Người dùng</span>
                         </nav>
                     </div>
                 </div>
             </section>
-            <table className="table">
-                <thead>
-                    <tr>
-                        <th scope="col">ID</th>
-                        <th scope='col'>Avatar</th>
-                        <th scope="col">Name</th>
-                        <th scope="col">Email</th>
-                        <th scope='col'>Phone</th>
-                        <th scope="col">Adress</th>
-                        <th scope="col">Role</th>
-                        <th scope="col">Update</th>
-                        <th scope="col">Delete</th>
-                    </tr>
-                </thead>
-                <tbody className="table-group-divider">
-                    {renderData()}
-                </tbody>
-            </table>
+            <div className="container-fluid">
+                <div className="table-responsive">
+                    <table className="table table-hover align-middle">
+                        <thead className="table-light">
+                            <tr>
+                                <th scope="col">Mã ID</th>
+                                <th scope='col'>Ảnh đại diện</th>
+                                <th scope="col">Họ và tên</th>
+                                <th scope="col">Địa chỉ Email</th>
+                                <th scope='col'>Số điện thoại</th>
+                                <th scope="col">Địa chỉ</th>
+                                <th scope="col">Vai trò</th>
+                                <th scope="col">Cập nhật</th>
+                                <th scope="col">Xóa</th>
+                            </tr>
+                        </thead>
+                        <tbody className="table-group-divider">
+                            {renderData()}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
     );
 }

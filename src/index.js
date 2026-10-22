@@ -34,6 +34,7 @@ import GeminiModal from './components/gemini/gemini_modal';
 import OrderList from './components/Order/OrderList';
 import OrderDetail from './components/Order/OrderDetail';
 import NotFound from './components/Page/NotFound';
+import ErrorBoundary from './components/Resilience/ErrorBoundary';
 
 // Protected route component that checks auth level on every render
 function ProtectedRoute({ level, children }) {
@@ -51,47 +52,49 @@ function ProtectedRoute({ level, children }) {
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
-    <Router>
-      <App>
-        <Routes>
-          <Route exact path="/" element={<Home />} />
-          <Route path="/about" element={<About />} />
-          <Route path="/shop" element={<Shop />} />
-          <Route path="/single-product" element={<SingleProduct />} />
-          <Route path='/cart' element={<Cart />} />
-          <Route path='/checkout' element={<CheckOut />} />
-          <Route path='/blog' element={<Blog />} />
-          <Route path='/blog/page/:id' element={<Blog />} />
-          <Route path='/blog/detail/:id' element={<BlogDetail />} />
-          <Route path='/single-blog' element={<SingleBlog />} />
-          <Route path='/contact' element={<Contact />} />
-          <Route path='/thank-you' element={<ThankYou />} />
-          <Route path='/login' element={<Login />} />
-          <Route path='/register' element={<Register />} />
-          <Route path='/account' element={<MyAccount />} />
-          <Route path='product/detail/:id' element={<SingleProduct />} />
-          <Route path='/wish-list' element={<Wishlist />} />
-          <Route path='shop-category/:id' element={<ShopCategory />} />
-          <Route path='payment' element={<Payment />} />
-          <Route path='gemini-modal' element={<GeminiModal />} />
-          <Route path='order' element={<OrderList />} />
-          <Route path='/order/detail' element={<OrderDetail />} />
-          {/* Admin routes */}
-          <Route path='/admin' element={<ProtectedRoute level={1}><AdminUserPage /></ProtectedRoute>} />
-          <Route path='/admin/update/:id' element={<ProtectedRoute level={1}><UpdateUser /></ProtectedRoute>} />
-          <Route path='/admin/add-blog' element={<ProtectedRoute level={1}><AddBlog /></ProtectedRoute>} />
-          <Route path='/admin/manage-blog' element={<ProtectedRoute level={1}><ManageBlogs /></ProtectedRoute>} />
-          <Route path='/admin/update-blog/:id' element={<ProtectedRoute level={1}><UpdateBlog /></ProtectedRoute>} />
-          {/* Seller routes */}
-          <Route path='/seller' element={<ProtectedRoute level={2}><SellerPage /></ProtectedRoute>} />
-          <Route path='/seller/update/:id' element={<ProtectedRoute level={2}><UpdateProduct /></ProtectedRoute>} />
-          <Route path='/seller/add-product' element={<ProtectedRoute level={2}><AddProduct /></ProtectedRoute>} />
-          <Route path='/seller/manage-order' element={<ProtectedRoute level={2}><ManageOrders /></ProtectedRoute>} />
-          {/* Catch-all route - must be LAST */}
-          <Route path='*' element={<NotFound />} />
-        </Routes>
-      </App>
-    </Router>
+    <ErrorBoundary>
+      <Router>
+        <App>
+          <Routes>
+            <Route exact path="/" element={<Home />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/shop" element={<Shop />} />
+            <Route path="/single-product" element={<SingleProduct />} />
+            <Route path='/cart' element={<Cart />} />
+            <Route path='/checkout' element={<CheckOut />} />
+            <Route path='/blog' element={<Blog />} />
+            <Route path='/blog/page/:id' element={<Blog />} />
+            <Route path='/blog/detail/:id' element={<BlogDetail />} />
+            <Route path='/single-blog' element={<SingleBlog />} />
+            <Route path='/contact' element={<Contact />} />
+            <Route path='/thank-you' element={<ThankYou />} />
+            <Route path='/login' element={<Login />} />
+            <Route path='/register' element={<Register />} />
+            <Route path='/account' element={<MyAccount />} />
+            <Route path='product/detail/:id' element={<SingleProduct />} />
+            <Route path='/wish-list' element={<Wishlist />} />
+            <Route path='shop-category/:id' element={<ShopCategory />} />
+            <Route path='payment' element={<Payment />} />
+            <Route path='gemini-modal' element={<GeminiModal />} />
+            <Route path='order' element={<OrderList />} />
+            <Route path='/order/detail' element={<OrderDetail />} />
+            {/* Admin routes */}
+            <Route path='/admin' element={<ProtectedRoute level={1}><AdminUserPage /></ProtectedRoute>} />
+            <Route path='/admin/update/:id' element={<ProtectedRoute level={1}><UpdateUser /></ProtectedRoute>} />
+            <Route path='/admin/add-blog' element={<ProtectedRoute level={1}><AddBlog /></ProtectedRoute>} />
+            <Route path='/admin/manage-blog' element={<ProtectedRoute level={1}><ManageBlogs /></ProtectedRoute>} />
+            <Route path='/admin/update-blog/:id' element={<ProtectedRoute level={1}><UpdateBlog /></ProtectedRoute>} />
+            {/* Seller routes */}
+            <Route path='/seller' element={<ProtectedRoute level={2}><SellerPage /></ProtectedRoute>} />
+            <Route path='/seller/update/:id' element={<ProtectedRoute level={2}><UpdateProduct /></ProtectedRoute>} />
+            <Route path='/seller/add-product' element={<ProtectedRoute level={2}><AddProduct /></ProtectedRoute>} />
+            <Route path='/seller/manage-order' element={<ProtectedRoute level={2}><ManageOrders /></ProtectedRoute>} />
+            {/* Catch-all route - must be LAST */}
+            <Route path='*' element={<NotFound />} />
+          </Routes>
+        </App>
+      </Router>
+    </ErrorBoundary>
   </React.StrictMode>
 );
 

@@ -5,9 +5,10 @@ import CryptoJS from 'crypto-js'
 import axios from "axios";
 import dayjs from "dayjs";
 import emailjs from '@emailjs/browser';
-import API from "../API/API";
+import dataService from "../../services/dataService";
 import { calculateCartTotal, formatCurrency, getStoredCart, safeParseJSON, sanitizeQuantity } from "../utils/cartUtils";
 import { getProductImageSrc, getProductName, getProductPrice } from "../utils/productUtils";
+
 function CheckOut() {
     const form = useRef();
     let navigater = useNavigate();
@@ -17,6 +18,7 @@ function CheckOut() {
     const [submitError, setSubmitError] = useState('');
     const [submitting, setSubmitting] = useState(false);
     const [orderItems, setOrderItems] = useState([]);
+
     function getRandomNumber() {
         return Math.floor(Math.random() * 100000) + 1;
     };
@@ -39,10 +41,10 @@ function CheckOut() {
 
         if (Object.keys(cartData).length === 0) return;
 
-        API.post('product/cart', cartData)
-            .then((res) => {
-                const products = Array.isArray(res.data) ? res.data : [];
-                setOrderItems(products.map((item) => ({
+        dataService.getCartProducts(cartData)
+            .then((products) => {
+                const list = Array.isArray(products) ? products : [];
+                setOrderItems(list.map((item) => ({
                     ...item,
                     quantity: sanitizeQuantity(cart[String(item.id)]?.quantity ?? item.quantity),
                 })));
@@ -55,12 +57,13 @@ function CheckOut() {
     if (!cart || Object.keys(cart).length === 0) {
         return (
             <div className="container-fluid py-5 text-center">
-                <h3>Your cart is empty</h3>
-                <p>Please add some products before checking out.</p>
-                <Link to="/shop" className="btn btn-primary">Go to Shop</Link>
+                <h3>Giỏ hàng của bạn đang trống</h3>
+                <p>Vui lòng thêm sản phẩm vào giỏ trước khi thanh toán.</p>
+                <Link to="/shop" className="btn btn-primary">Đến cửa hàng</Link>
             </div>
         );
     }
+
     function handleChange(e) {
         const newData = { ...data }
         newData[e.target.name] = e.target.value;
@@ -73,11 +76,11 @@ function CheckOut() {
 
     function validateForm() {
         const errors = {};
-        if (!data.name.trim()) errors.name = 'Full name is required.';
-        if (!data.address.trim()) errors.address = 'Address is required.';
-        if (!/^[0-9+\-\s()]{8,15}$/.test(data.phone.trim())) errors.phone = 'Enter a valid phone number.';
-        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email.trim())) errors.email = 'Enter a valid email address.';
-        if (priceTotalAll <= 0) errors.cart = 'Your cart total is invalid. Please review your cart.';
+        if (!data.name.trim()) errors.name = 'Vui lòng nhập họ và tên.';
+        if (!data.address.trim()) errors.address = 'Vui lòng nhập địa chỉ nhận hàng.';
+        if (!/^[0-9+\-\s()]{8,15}$/.test(data.phone.trim())) errors.phone = 'Vui lòng nhập số điện thoại hợp lệ.';
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email.trim())) errors.email = 'Vui lòng nhập địa chỉ email hợp lệ.';
+        if (priceTotalAll <= 0) errors.cart = 'Tổng tiền đơn hàng không hợp lệ. Vui lòng kiểm tra lại giỏ hàng.';
         setFormErrors(errors);
         return Object.keys(errors).length === 0;
     }
@@ -107,8 +110,6 @@ function CheckOut() {
         const secretKey = 'f0509838332245e2d4a79db36909ef4efdfd7de34725206d40b4dfb01c750c0b';
         const signature = CryptoJS.HmacSHA256(sortedData, secretKey).toString(CryptoJS.enc.Hex);
 
-
-
         const formData = {
             'orderCode': orderCode,
             'amount': amount,
@@ -131,8 +132,8 @@ function CheckOut() {
             'description': description,
             'total': amount,
             'date': new Date().toISOString(),
-            'status': 'payment',
-            'paymentMethod': 'QR VNPay',
+            'status': 'Đang giao hàng',
+            'paymentMethod': 'VNPay QR',
             'orderDetails': Object.keys(cart).map((key) => {
                 return {
                     'productId': parseInt(cart[key].id, 10),
@@ -147,7 +148,7 @@ function CheckOut() {
                 localStorage.setItem('orderData', JSON.stringify(orderData));
                 navigater('/payment');
             }).catch(err => {
-                setSubmitError('Checkout failed. Please review your information and try again.');
+                setSubmitError('Thanh toán không thành công. Vui lòng kiểm tra lại thông tin và thử lại.');
             }).finally(() => {
                 setSubmitting(false);
             });
@@ -164,11 +165,11 @@ function CheckOut() {
             <section className="py-5 mb-5" style={{ background: `url(${backgroundPattern})` }}>
                 <div className="container-fluid">
                     <div className="d-flex justify-content-between">
-                        <h1 className="page-title pb-2">Checkout</h1>
+                        <h1 className="page-title pb-2">Thanh toán</h1>
                         <nav className="breadcrumb fs-6">
-                            <Link className="breadcrumb-item nav-link" to="/">Home</Link>
-                            <Link className="breadcrumb-item nav-link" to="/shop">Pages</Link>
-                            <span className="breadcrumb-item active" aria-current="page">Checkout</span>
+                            <Link className="breadcrumb-item nav-link" to="/">Trang chủ</Link>
+                            <Link className="breadcrumb-item nav-link" to="/shop">Trang</Link>
+                            <span className="breadcrumb-item active" aria-current="page">Thanh toán</span>
                         </nav>
                     </div>
                 </div>
@@ -178,25 +179,25 @@ function CheckOut() {
                     <form className="form-group was-validated" method="post" ref={form} onSubmit={handleSubmit} noValidate>
                         <div className="row d-flex flex-wrap">
                             <div className="col-lg-6">
-                                <h4 className="text-dark pb-4">Billing Details</h4>
+                                <h4 className="text-dark pb-4">Thông tin đặt hàng</h4>
                                 <div className="billing-details">
                                     <input type="hidden" name="idOrder" value={data.idOrder} />
                                     {user ? '' : <input type="hidden" name="userId" value={user ? user.id : ''} />}
-                                    <label htmlFor="fname">Full Name*</label>
+                                    <label htmlFor="fname">Họ và tên *</label>
                                     <input type="text" id="fname" name="name" className={`form-control mt-2 ps-3 ${formErrors.name ? 'is-invalid' : ''}`} value={data.name} onChange={handleChange} required />
                                     {formErrors.name && <div className="invalid-feedback d-block mb-3">{formErrors.name}</div>}
-                                    <label htmlFor="address">Address*</label>
+                                    <label htmlFor="address">Địa chỉ nhận hàng *</label>
                                     <input type="text" id="address" name="address" className={`form-control mt-3 ps-3 ${formErrors.address ? 'is-invalid' : ''}`} value={data.address} onChange={handleChange} required />
                                     {formErrors.address && <div className="invalid-feedback d-block mb-3">{formErrors.address}</div>}
-                                    <label htmlFor="phone">Phone*</label>
+                                    <label htmlFor="phone">Số điện thoại *</label>
                                     <input type="tel" id="phone" name="phone" className={`form-control mt-2 ps-3 ${formErrors.phone ? 'is-invalid' : ''}`} value={data.phone} onChange={handleChange} required />
                                     {formErrors.phone && <div className="invalid-feedback d-block mb-3">{formErrors.phone}</div>}
-                                    <label htmlFor="email">Email*</label>
+                                    <label htmlFor="email">Địa chỉ Email *</label>
                                     <input type="email" id="email" name="email" className={`form-control mt-2 ps-3 ${formErrors.email ? 'is-invalid' : ''}`} value={data.email} onChange={handleChange} required />
                                     {formErrors.email && <div className="invalid-feedback d-block mb-3">{formErrors.email}</div>}
-                                    <label htmlFor="order-notes">Order notes (optional)</label>
+                                    <label htmlFor="order-notes">Ghi chú đơn hàng (tùy chọn)</label>
                                     <input type="hidden" name="description" value={data.description} />
-                                    <textarea id="order-notes" className="form-control pt-3 pb-3 ps-3 mt-2" aria-label="Order notes"></textarea>
+                                    <textarea id="order-notes" className="form-control pt-3 pb-3 ps-3 mt-2" placeholder="Lưu ý cho shipper khi giao hàng..."></textarea>
                                     <input type="hidden" name="total" value={priceTotalAll} />
                                     <input type="hidden" name="date" value={date} />
                                     <input type="hidden" name="estimate_date" value={estimate_date} />
@@ -204,7 +205,7 @@ function CheckOut() {
                             </div>
                             <div className="col-lg-6">
                                 <div className="your-order mt-5">
-                                    <h4 className="display-7 text-dark pb-4">Cart Totals</h4>
+                                    <h4 className="display-7 text-dark pb-4">Đơn hàng của bạn</h4>
                                     <div className="total-price">
                                         {submitError && <div className="alert alert-danger" role="alert">{submitError}</div>}
                                         {formErrors.cart && <div className="alert alert-danger" role="alert">{formErrors.cart}</div>}
@@ -214,18 +215,18 @@ function CheckOut() {
                                                     <img src={getProductImageSrc(item)} alt={getProductName(item)} width={56} height={56} className="object-fit-cover rounded" />
                                                     <div className="flex-grow-1">
                                                         <strong>{getProductName(item)}</strong>
-                                                        <div className="text-muted small">Qty: {sanitizeQuantity(item.quantity)} x {formatCurrency(getProductPrice(item))}</div>
+                                                        <div className="text-muted small">SL: {sanitizeQuantity(item.quantity)} x {formatCurrency(getProductPrice(item))}</div>
                                                     </div>
                                                     <span>{formatCurrency(getProductPrice(item) * sanitizeQuantity(item.quantity))}</span>
                                                 </div>
                                             )) : (
-                                                <p className="text-muted">Product details are loading. Your order total is still shown below.</p>
+                                                <p className="text-muted">Đang tải chi tiết sản phẩm. Tổng tiền đơn hàng được hiển thị bên dưới.</p>
                                             )}
                                         </div>
                                         <table cellSpacing={0} className="table">
                                             <tbody>
                                                 <tr className="order-total border-bottom pt-2 pb-2 text-uppercase">
-                                                    <th>Total</th>
+                                                    <th>Tổng cộng</th>
                                                     <td data-title="Total">
                                                         <span className="price-amount amount ps-5">
                                                             <bdi>
@@ -239,34 +240,34 @@ function CheckOut() {
                                             <label className="list-group-item d-flex gap-2 border-0">
                                                 <input className="form-check-input flex-shrink-0" type="radio" name="listGroupRadios" id="listGroupRadios1" defaultValue defaultChecked />
                                                 <span>
-                                                    <strong className="text-uppercase">Direct bank transfer</strong>
-                                                    <small className="d-block text-body-secondary">Make your payment directly into our bank account. Please use your Order ID. Your order will shipped after funds have cleared in our account.</small>
+                                                    <strong className="text-uppercase">Chuyển khoản ngân hàng / VNPay QR</strong>
+                                                    <small className="d-block text-body-secondary">Quét mã QR thanh toán nhanh chóng qua VNPay hoặc chuyển khoản ngân hàng trực tiếp.</small>
                                                 </span>
                                             </label>
                                             <label className="list-group-item d-flex gap-2 border-0">
                                                 <input className="form-check-input flex-shrink-0" type="radio" name="listGroupRadios" id="listGroupRadios2" defaultValue />
                                                 <span>
-                                                    <strong className="text-uppercase">Check payments</strong>
-                                                    <small className="d-block text-body-secondary">Please send a check to Store Name, Store Street, Store Town, Store State / County, Store Postcode.</small>
+                                                    <strong className="text-uppercase">Ví điện tử MoMo / ZaloPay</strong>
+                                                    <small className="d-block text-body-secondary">Thanh toán tiện lợi qua các ví điện tử phổ biến tại Việt Nam.</small>
                                                 </span>
                                             </label>
                                             <label className="list-group-item d-flex gap-2 border-0">
                                                 <input className="form-check-input flex-shrink-0" type="radio" name="listGroupRadios" id="listGroupRadios3" defaultValue />
                                                 <span>
-                                                    <strong className="text-uppercase">Cash on delivery</strong>
-                                                    <small className="d-block text-body-secondary">Pay with cash upon delivery.</small>
+                                                    <strong className="text-uppercase">Thanh toán khi nhận hàng (COD)</strong>
+                                                    <small className="d-block text-body-secondary">Thanh toán tiền mặt cho nhân viên giao hàng khi nhận được kiện hàng.</small>
                                                 </span>
                                             </label>
                                             <label className="list-group-item d-flex gap-2 border-0">
                                                 <input className="form-check-input flex-shrink-0" type="radio" name="listGroupRadios" id="listGroupRadios4" defaultValue />
                                                 <span>
-                                                    <strong className="text-uppercase">Paypal</strong>
-                                                    <small className="d-block text-body-secondary">Pay via PayPal; you can pay with your credit card if you don’t have a PayPal account.</small>
+                                                    <strong className="text-uppercase">Thẻ quốc tế (Visa / Mastercard)</strong>
+                                                    <small className="d-block text-body-secondary">Hỗ trợ thẻ thanh toán quốc tế bảo mật theo chuẩn an ninh PCI-DSS.</small>
                                                 </span>
                                             </label>
                                         </div>
                                         <button type="submit" name="submit" className="btn btn-dark btn-lg text-uppercase btn-rounded-none w-100" disabled={submitting}>
-                                            {submitting ? 'Processing...' : 'Place an order'}
+                                            {submitting ? 'Đang xử lý...' : 'Đặt hàng ngay'}
                                         </button>
                                     </div>
                                 </div>

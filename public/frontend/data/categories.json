@@ -1,7 +1,9 @@
 [
-  { "id": 1, "category": "Áo Nam" },
-  { "id": 2, "category": "Áo Khoác" },
-  { "id": 3, "category": "Váy & Đầm" },
-  { "id": 4, "category": "Đồ Thể Thao" },
-  { "id": 5, "category": "Phụ Kiện" }
+  { "id": 1, "category": "Rau củ hữu cơ" },
+  { "id": 2, "category": "Bánh mì tươi" },
+  { "id": 3, "category": "Nước ép trái cây" },
+  { "id": 4, "category": "Đồ uống & Sữa" },
+  { "id": 5, "category": "Thịt & Hải sản" },
+  { "id": 6, "category": "Đồ ngọt & Mật ong" },
+  { "id": 7, "category": "Trái cây tươi" }
 ]

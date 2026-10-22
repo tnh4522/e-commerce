@@ -5,6 +5,7 @@ import { notification, Card } from 'antd';
 import { useState } from "react";
 import FormError from "../Error/FormError";
 import API from "../API/API";
+import { fallbackImage, getImageSrc } from '../utils/imageUtils';
 
 function MyAccount() {
     const [getInput, setInput] = useState({
@@ -21,7 +22,8 @@ function MyAccount() {
     const [api, contextHolder] = notification.useNotification();
     const openNotificationWithIcon = (type) => {
         api[type]({
-            description: type === 'success' ? 'Update successfully!' : 'Update failed!',
+            message: type === 'success' ? 'Thành công' : 'Thất bại',
+            description: type === 'success' ? 'Cập nhật thông tin thành công!' : 'Cập nhật thất bại! Vui lòng thử lại.',
         });
     };
 
@@ -64,34 +66,30 @@ function MyAccount() {
         let errorSubmit = {};
         let flag = true;
         if (getInput.name === '') {
-            errorSubmit.name = 'Name is required!';
+            errorSubmit.name = 'Vui lòng nhập họ và tên!';
             flag = false;
         }
         if (getInput.email === '') {
-            errorSubmit.email = 'Email is required!';
+            errorSubmit.email = 'Vui lòng nhập địa chỉ email!';
             flag = false;
         }
         if (getInput.phone === '') {
-            errorSubmit.phone = 'Phone is required!';
+            errorSubmit.phone = 'Vui lòng nhập số điện thoại!';
             flag = false;
         }
         if (getInput.address === '') {
-            errorSubmit.address = 'Address is required!';
+            errorSubmit.address = 'Vui lòng nhập địa chỉ!';
             flag = false;
         }
         if (getInput.country === '') {
-            errorSubmit.country = 'Country is required!';
+            errorSubmit.country = 'Vui lòng nhập quốc gia!';
             flag = false;
         }
         const typeFile = ['image/png', 'image/jpg', 'image/jpeg', 'image/svg'];
         if (getInput.file && typeFile.indexOf(getInput.file.type) === -1) {
-            errorSubmit.avatar = 'Avatar is not valid!';
+            errorSubmit.avatar = 'Định dạng ảnh không hợp lệ!';
             flag = false;
         }
-        // if (getInput.file && getInput.file.size > 1024 * 1024) {
-        //     errorSubmit.avatar = 'Avatar is too large!';
-        //     flag = false;
-        // }
         if (!flag) {
             setError(errorSubmit);
         }
@@ -113,7 +111,7 @@ function MyAccount() {
                     openNotificationWithIcon('success');
                 })
                 .catch(err => {
-                    errorSubmit.email = "Something went wrong!";
+                    errorSubmit.email = "Đã xảy ra lỗi, vui lòng thử lại!";
                     setError(errorSubmit);
                     openNotificationWithIcon('error');
                 });
@@ -122,6 +120,7 @@ function MyAccount() {
 
     function handleInputFile(e) {
         const fileInput = e.target.files;
+        if (!fileInput || fileInput.length === 0) return;
         let reader = new FileReader();
         reader.onload = function (e) {
             setInput((state) => {
@@ -135,14 +134,8 @@ function MyAccount() {
         reader.readAsDataURL(fileInput[0]);
     };
 
-    const avatar = getInput.file ? getInput.file.name : getInput.avatar;
-    let imgSrc;
-    try {
-        imgSrc = require('../../images/' + avatar);
-    } catch (error) {
-        console.warn('Image not found, using default or leaving it blank');
-        imgSrc = require('../../images/logo.png');
-    }
+    const avatar = getInput.avatar;
+    const imgSrc = avatar?.startsWith('data:') ? avatar : getImageSrc(avatar);
 
     return (
         <div>
@@ -150,11 +143,11 @@ function MyAccount() {
             <section className="py-5 mb-5" style={{ background: `url(${backgroundPattern})` }}>
                 <div className="container-fluid">
                     <div className="d-flex justify-content-between">
-                        <h1 className="page-title pb-2">My Account</h1>
+                        <h1 className="page-title pb-2">Tài khoản của tôi</h1>
                         <nav className="breadcrumb fs-6">
-                            <Link className="breadcrumb-item nav-link" href="#">Home</Link>
-                            <Link className="breadcrumb-item nav-link" href="#">Pages</Link>
-                            <span className="breadcrumb-item active" aria-current="page">My Account</span>
+                            <Link className="breadcrumb-item nav-link" to="/">Trang chủ</Link>
+                            <Link className="breadcrumb-item nav-link" to="/shop">Trang</Link>
+                            <span className="breadcrumb-item active" aria-current="page">Tài khoản của tôi</span>
                         </nav>
                     </div>
                 </div>
@@ -162,58 +155,58 @@ function MyAccount() {
             <section id="login-form" className="py-5">
                 <div className="container-sm">
                     <div className="row justify-content-center">
-                        <div className="col-sm-8 p-5 border shadow-sm">
-                            <h5 className="text-uppercase mb-4">Update My Profile</h5>
+                        <div className="col-sm-8 p-5 border shadow-sm rounded-3 bg-white">
+                            <h5 className="text-uppercase mb-4 fw-bold">Cập nhật thông tin cá nhân</h5>
                             <form id="form" className="form-group flex-wrap" method='post' onSubmit={handleSubmit} encType='multipart/form-data'>
                                 <div className="col-12 pb-3">
-                                    <label className="d-flex">Full Name</label>
+                                    <label className="form-label">Họ và tên *</label>
                                     <input type="text" name="name" value={getInput.name} className="form-control" onChange={handleInput} autoFocus />
                                 </div>
                                 <div className="col-12 pb-3">
-                                    <label className="d-flex">Email address</label>
+                                    <label className="form-label">Địa chỉ Email</label>
                                     <input type="email" name="email" value={getInput.email} className="form-control" onChange={handleInput} readOnly />
                                 </div>
                                 <div className="col-12 pb-3">
-                                    <label className="d-flex">New Password</label>
-                                    <input type="password" name="password" className="form-control" onChange={handleInput} placeholder='Enter new password' />
+                                    <label className="form-label">Mật khẩu mới</label>
+                                    <input type="password" name="password" className="form-control" onChange={handleInput} placeholder='Nhập mật khẩu mới (để trống nếu không đổi)' />
                                 </div>
                                 <div className="col-12 pb-3">
-                                    <label className="d-flex">Telephone Number</label>
+                                    <label className="form-label">Số điện thoại *</label>
                                     <input type="text" name="phone" className="form-control" onChange={handleInput} value={getInput.phone} />
                                 </div>
                                 <div className="col-12 pb-3">
-                                    <label className="d-flex">Your Address</label>
+                                    <label className="form-label">Địa chỉ nhận hàng *</label>
                                     <input type="text" name="address" className="form-control" onChange={handleInput} value={getInput.address} />
                                 </div>
                                 <div className="col-12 pb-3">
-                                    <label className="d-flex">Country</label>
+                                    <label className="form-label">Quốc gia *</label>
                                     <input type="text" name="country" className="form-control" onChange={handleInput} value={getInput.country} />
                                 </div>
                                 <div className="col-12 pb-3">
                                     <input type="file" name="avatar" style={{ display: 'none' }} className="form-control" onChange={handleInputFile} ref={inputFileRef} />
                                 </div>
                                 <div className="col-12">
-                                    <button type="submit" name="submit" className="btn btn-primary text-uppercase w-100">Update</button>
+                                    <button type="submit" name="submit" className="btn btn-primary text-uppercase w-100 py-2">Lưu thay đổi</button>
                                 </div>
                             </form>
                             <FormError error={getError} />
                         </div>
-                        <div className="col-md-4 p-5 border shadow-sm">
-                            <div className="card">
+                        <div className="col-md-4 p-5 border shadow-sm rounded-3 bg-white ms-md-3 mt-4 mt-md-0">
+                            <div className="card border-0">
                                 <div className="card-body text-center">
-                                    <img src={imgSrc} className="img-fluid rounded-circle mb-2" width="128" height="128" alt="Avatar" />
-                                    <h5 className="card-title mb-0">{getInput.name}</h5>
-                                    <div className="text-muted mb-2">{getInput.email}</div>
+                                    <img src={imgSrc} className="img-fluid rounded-circle mb-3 shadow-sm" width="128" height="128" alt="Avatar" onError={(e) => { e.currentTarget.src = fallbackImage; }} style={{ objectFit: 'cover' }} />
+                                    <h5 className="card-title mb-1 fw-bold">{getInput.name}</h5>
+                                    <div className="text-muted mb-3">{getInput.email}</div>
                                     <div>
-                                        <Link className="btn btn-primary btn-sm" to="" onClick={handlePhotoChangeClick}>Change Photo</Link>
+                                        <Link className="btn btn-primary btn-sm px-3" to="" onClick={handlePhotoChangeClick}>Đổi ảnh đại diện</Link>
                                     </div>
                                 </div>
                             </div>
-                            <Card type="inner" style={{ marginTop: 16 }} title="Delivery Address" >
-                                <p>Address: {getInput.address}</p>
-                                <p>Country: {getInput.country}</p>
-                                <p>Phone: {getInput.phone}</p>
-                                <p>Email: {getInput.email}</p>
+                            <Card type="inner" style={{ marginTop: 16 }} title="Địa chỉ giao hàng mặc định" >
+                                <p><strong>Địa chỉ:</strong> {getInput.address}</p>
+                                <p><strong>Quốc gia:</strong> {getInput.country}</p>
+                                <p><strong>Điện thoại:</strong> {getInput.phone}</p>
+                                <p><strong>Email:</strong> {getInput.email}</p>
                             </Card>
                         </div>
                     </div>

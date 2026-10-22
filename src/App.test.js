@@ -11,7 +11,7 @@ jest.mock('./components/Layout/Footer', () => function FooterMock() {
 
 import App from './App';
 
-test('renders e-commerce layout', () => {
+test('renders e-commerce layout without outage banner', () => {
   render(
     <MemoryRouter>
       <App>

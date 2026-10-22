@@ -34,7 +34,7 @@ function Cart() {
                 setError('');
             })
             .catch(() => {
-                setError('We could not load your cart right now. Please try again later.');
+                setError('Không thể tải giỏ hàng lúc này. Vui lòng thử lại sau.');
             })
             .finally(() => {
                 setLoading(false);
@@ -72,11 +72,11 @@ function Cart() {
                     </td>
                     <td className="py-4">
                         <div className="input-group product-qty w-50">
-                            <button type="button" className="input-group-btn quantity-left-minus btn btn-light btn-number" onClick={() => updateQuantity(item.id, item.quantity - 1)} aria-label={`Decrease quantity for ${getProductName(item)}`}>
+                            <button type="button" className="input-group-btn quantity-left-minus btn btn-light btn-number" onClick={() => updateQuantity(item.id, item.quantity - 1)} aria-label={`Giảm số lượng cho ${getProductName(item)}`}>
                                 -
                             </button>
-                            <input type="number" name="quantity" className="cart-quantity-input form-control text-center" value={item.quantity} min={1} onChange={(event) => updateQuantity(item.id, event.target.value)} aria-label={`Quantity for ${getProductName(item)}`} />
-                            <button type="button" className="input-group-btn quantity-right-plus btn btn-light btn-number" onClick={() => updateQuantity(item.id, item.quantity + 1)} aria-label={`Increase quantity for ${getProductName(item)}`}>
+                            <input type="number" name="quantity" className="cart-quantity-input form-control text-center" value={item.quantity} min={1} onChange={(event) => updateQuantity(item.id, event.target.value)} aria-label={`Số lượng cho ${getProductName(item)}`} />
+                            <button type="button" className="input-group-btn quantity-right-plus btn btn-light btn-number" onClick={() => updateQuantity(item.id, item.quantity + 1)} aria-label={`Tăng số lượng cho ${getProductName(item)}`}>
                                 +
                             </button>
                         </div>
@@ -88,7 +88,7 @@ function Cart() {
                     </td>
                     <td className="py-4">
                         <div className="cart-remove">
-                            <button type="button" className="btn btn-link p-0" onClick={() => deleteItem(item.id)} aria-label={`Remove ${getProductName(item)} from cart`}>
+                            <button type="button" className="btn btn-link p-0" onClick={() => deleteItem(item.id)} aria-label={`Xóa ${getProductName(item)} khỏi giỏ hàng`}>
                                 <svg width={24} height={24}>
                                     <use xlinkHref="#trash" />
                                 </svg>
@@ -122,11 +122,11 @@ function Cart() {
             <section className="py-5 mb-5" style={{ background: `url(${backgroundPattern})` }}>
                 <div className="container-fluid">
                     <div className="d-flex justify-content-between">
-                        <h1 className="page-title pb-2">Cart</h1>
+                        <h1 className="page-title pb-2">Giỏ hàng</h1>
                         <nav className="breadcrumb fs-6">
-                            <Link className="breadcrumb-item nav-link" to="/">Home</Link>
-                            <Link className="breadcrumb-item nav-link" to="/shop">Pages</Link>
-                            <span className="breadcrumb-item active" aria-current="page">Cart</span>
+                            <Link className="breadcrumb-item nav-link" to="/">Trang chủ</Link>
+                            <Link className="breadcrumb-item nav-link" to="/shop">Trang</Link>
+                            <span className="breadcrumb-item active" aria-current="page">Giỏ hàng</span>
                         </nav>
                     </div>
                 </div>
@@ -138,25 +138,25 @@ function Cart() {
                             {loading ? (
                                 <div className="text-center py-5">
                                     <div className="spinner-border text-primary" role="status">
-                                        <span className="visually-hidden">Loading...</span>
+                                        <span className="visually-hidden">Đang tải...</span>
                                     </div>
                                 </div>
                             ) : error ? (
                                 <div className="alert alert-danger" role="alert">{error}</div>
                             ) : getData.length === 0 ? (
                                 <div className="text-center py-5">
-                                    <h3>Your cart is empty</h3>
-                                    <p className="text-muted">Looks like you haven't added anything to your cart yet.</p>
-                                    <Link to="/shop" className="btn btn-primary mt-3">Continue Shopping</Link>
+                                    <h3>Giỏ hàng của bạn đang trống</h3>
+                                    <p className="text-muted">Có vẻ như bạn chưa thêm sản phẩm nào vào giỏ hàng.</p>
+                                    <Link to="/shop" className="btn btn-primary mt-3">Tiếp tục mua sắm</Link>
                                 </div>
                             ) : (
                             <div className="table-responsive cart">
                                 <table className="table">
                                     <thead>
                                         <tr>
-                                            <th scope="col" className="card-title text-uppercase text-muted">Product</th>
-                                            <th scope="col" className="card-title text-uppercase text-muted">Quantity</th>
-                                            <th scope="col" className="card-title text-uppercase text-muted">Subtotal</th>
+                                            <th scope="col" className="card-title text-uppercase text-muted">Sản phẩm</th>
+                                            <th scope="col" className="card-title text-uppercase text-muted">Số lượng</th>
+                                            <th scope="col" className="card-title text-uppercase text-muted">Thành tiền</th>
                                             <th scope="col" className="card-title text-uppercase text-muted" />
                                         </tr>
                                     </thead>
@@ -169,12 +169,12 @@ function Cart() {
                         </div>
                         <div className="col-md-4">
                             <div className="cart-totals bg-grey py-5">
-                                <h4 className="text-dark pb-4">Cart Total</h4>
+                                <h4 className="text-dark pb-4">Tổng giỏ hàng</h4>
                                 <div className="total-price pb-5">
                                     <table cellSpacing={0} className="table text-uppercase">
                                         <tbody>
                                             <tr className="subtotal pt-2 pb-2 border-top border-bottom">
-                                                <th>Subtotal</th>
+                                                <th>Tạm tính</th>
                                                 <td data-title="Subtotal">
                                                     <span className="price-amount amount text-dark ps-5">
                                                         <bdi>
@@ -184,7 +184,7 @@ function Cart() {
                                                 </td>
                                             </tr>
                                             <tr className="order-total pt-2 pb-2 border-bottom">
-                                                <th>Total</th>
+                                                <th>Tổng cộng</th>
                                                 <td data-title="Total">
                                                     <span className="price-amount amount text-dark ps-5">
                                                         <bdi>
@@ -197,9 +197,9 @@ function Cart() {
                                     </table>
                                 </div>
                                 <div className="button-wrap row g-2">
-                                    <div className="col-md-6"><button type="button" className="btn btn-dark py-3 px-4 text-uppercase btn-rounded-none w-100" disabled>Cart Updated</button></div>
-                                    <Link to="/shop" className="col-md-6"><button type="button" className="btn btn-dark py-3 px-4 text-uppercase btn-rounded-none w-100">Continue Shopping</button></Link>
-                                    <Link to={getData.length === 0 ? "/cart" : "/checkout"} className="col-md-12"><button type="button" className="btn btn-primary py-3 px-4 text-uppercase btn-rounded-none w-100" disabled={getData.length === 0}>Proceed to checkout</button></Link>
+                                    <div className="col-md-6"><button type="button" className="btn btn-dark py-3 px-4 text-uppercase btn-rounded-none w-100" disabled>Giỏ hàng đã cập nhật</button></div>
+                                    <Link to="/shop" className="col-md-6"><button type="button" className="btn btn-dark py-3 px-4 text-uppercase btn-rounded-none w-100">Tiếp tục mua hàng</button></Link>
+                                    <Link to={getData.length === 0 ? "/cart" : "/checkout"} className="col-md-12"><button type="button" className="btn btn-primary py-3 px-4 text-uppercase btn-rounded-none w-100" disabled={getData.length === 0}>Tiến hành thanh toán</button></Link>
                                 </div>
                             </div>
                         </div>

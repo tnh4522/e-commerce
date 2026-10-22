@@ -4,42 +4,16 @@ import TrendingProduct from './TrendingProduct';
 import BannerCenter from './BannerCenter';
 import GetDiscount from './GetDiscount';
 import RecentBlog from './RecentBlog';
+
 function Home() {
     return (
         <div>
             <Banner />
             <Category />
-            {/* <NewlyBrands /> */}
             <TrendingProduct />
             <BannerCenter />
             <GetDiscount />
-            {/* <BestSelling />
-            <PopularProduct />
-            <JustArrived /> */}
             <RecentBlog />
-            {/* <section className="py-5">
-                <div className="container-fluid">
-                    <h2 className="my-5">People are also looking for</h2>
-                    <Link to="#" className="btn btn-warning me-2 mb-2">Blue diamon almonds</Link>
-                    <Link to="#" className="btn btn-warning me-2 mb-2">Angie’s Boomchickapop Corn</Link>
-                    <Link to="#" className="btn btn-warning me-2 mb-2">Salty kettle Corn</Link>
-                    <Link to="#" className="btn btn-warning me-2 mb-2">Chobani Greek Yogurt</Link>
-                    <Link to="#" className="btn btn-warning me-2 mb-2">Sweet Vanilla Yogurt</Link>
-                    <Link to="#" className="btn btn-warning me-2 mb-2">Foster Farms Takeout Crispy wings</Link>
-                    <Link to="#" className="btn btn-warning me-2 mb-2">Warrior Blend Organic</Link>
-                    <Link to="#" className="btn btn-warning me-2 mb-2">Chao Cheese Creamy</Link>
-                    <Link to="#" className="btn btn-warning me-2 mb-2">Chicken meatballs</Link>
-                    <Link to="#" className="btn btn-warning me-2 mb-2">Blue diamon almonds</Link>
-                    <Link to="#" className="btn btn-warning me-2 mb-2">Angie’s Boomchickapop Corn</Link>
-                    <Link to="#" className="btn btn-warning me-2 mb-2">Salty kettle Corn</Link>
-                    <Link to="#" className="btn btn-warning me-2 mb-2">Chobani Greek Yogurt</Link>
-                    <Link to="#" className="btn btn-warning me-2 mb-2">Sweet Vanilla Yogurt</Link>
-                    <Link to="#" className="btn btn-warning me-2 mb-2">Foster Farms Takeout Crispy wings</Link>
-                    <Link to="#" className="btn btn-warning me-2 mb-2">Warrior Blend Organic</Link>
-                    <Link to="#" className="btn btn-warning me-2 mb-2">Chao Cheese Creamy</Link>
-                    <Link to="#" className="btn btn-warning me-2 mb-2">Chicken meatballs</Link>
-                </div>
-            </section> */}
             <section className="py-5">
                 <div className="container-fluid">
                     <div className="row row-cols-1 row-cols-sm-3 row-cols-lg-5">
@@ -51,8 +25,8 @@ function Home() {
                                     </div>
                                     <div className="col-md-10">
                                         <div className="card-body p-0">
-                                            <h5>Free delivery</h5>
-                                            <p className="card-text">Lorem ipsum dolor sit amet, consectetur adipi elit.</p>
+                                            <h5>Giao hàng miễn phí</h5>
+                                            <p className="card-text">Miễn phí giao hàng cho đơn từ 200.000đ trong nội thành.</p>
                                         </div>
                                     </div>
                                 </div>
@@ -66,8 +40,8 @@ function Home() {
                                     </div>
                                     <div className="col-md-10">
                                         <div className="card-body p-0">
-                                            <h5>100% secure payment</h5>
-                                            <p className="card-text">Lorem ipsum dolor sit amet, consectetur adipi elit.</p>
+                                            <h5>Thanh toán an toàn 100%</h5>
+                                            <p className="card-text">Hỗ trợ đa dạng phương thức thanh toán bảo mật tuyệt đối.</p>
                                         </div>
                                     </div>
                                 </div>
@@ -81,8 +55,8 @@ function Home() {
                                     </div>
                                     <div className="col-md-10">
                                         <div className="card-body p-0">
-                                            <h5>Quality guarantee</h5>
-                                            <p className="card-text">Lorem ipsum dolor sit amet, consectetur adipi elit.</p>
+                                            <h5>Cam kết chất lượng</h5>
+                                            <p className="card-text">Thực phẩm tươi sạch hữu cơ đạt chứng nhận tiêu chuẩn an toàn.</p>
                                         </div>
                                     </div>
                                 </div>
@@ -96,8 +70,8 @@ function Home() {
                                     </div>
                                     <div className="col-md-10">
                                         <div className="card-body p-0">
-                                            <h5>guaranteed savings</h5>
-                                            <p className="card-text">Lorem ipsum dolor sit amet, consectetur adipi elit.</p>
+                                            <h5>Tiết kiệm tối đa</h5>
+                                            <p className="card-text">Giá cả cạnh tranh cùng nhiều chương trình tích điểm đổi quà.</p>
                                         </div>
                                     </div>
                                 </div>
@@ -111,8 +85,8 @@ function Home() {
                                     </div>
                                     <div className="col-md-10">
                                         <div className="card-body p-0">
-                                            <h5>Daily offers</h5>
-                                            <p className="card-text">Lorem ipsum dolor sit amet, consectetur adipi elit.</p>
+                                            <h5>Ưu đãi mỗi ngày</h5>
+                                            <p className="card-text">Cập nhật khuyến mãi và giảm giá sốc hàng ngày cho bạn.</p>
                                         </div>
                                     </div>
                                 </div>

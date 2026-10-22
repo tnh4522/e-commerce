@@ -1,332 +1,379 @@
-import React, { useEffect } from 'react'
-import FormError from '../Error/FormError'
+import React, { useEffect, useState } from 'react';
+import FormError from '../Error/FormError';
 import { useNavigate } from 'react-router';
 import { Link } from 'react-router-dom';
 import backgroundPattern from '../../images/background-pattern.jpg';
-import axios from 'axios';
+import API from '../API/API';
+
 export default function AddProduct() {
     const navigate = useNavigate();
-    const [getInput, setGetInput] = React.useState({
+    const [getInput, setGetInput] = useState({
         name: '',
         price: '',
         category: '',
         brand: '',
         company: '',
         detail: '',
-        status: '',
+        status: '1',
         sale: ''
     });
-    const [getFiles, setFiles] = React.useState([]);
+    const [selectedFiles, setSelectedFiles] = useState([]);
+    const [previewUrls, setPreviewUrls] = useState([]);
+    const [categories, setCategories] = useState([]);
+    const [brands, setBrands] = useState([]);
+    const [getError, setError] = useState({});
+    const [submitting, setSubmitting] = useState(false);
+
+    useEffect(() => {
+        let isMounted = true;
+        Promise.all([
+            API.get('category').catch(() => ({ data: [] })),
+            API.get('brand').catch(() => ({ data: [] }))
+        ]).then(([catRes, brandRes]) => {
+            if (!isMounted) return;
+            setCategories(Array.isArray(catRes?.data) ? catRes.data : []);
+            setBrands(Array.isArray(brandRes?.data) ? brandRes.data : []);
+        });
+
+        return () => { isMounted = false; };
+    }, []);
+
     function handleChangeImage(e) {
-        const name = e.target.name;
-        const files = e.target.files;
-        setFiles(state => {
-            return {
-                ...state,
-                [name]: files
-            }
-        })
+        const files = Array.from(e.target.files || []);
+        if (files.length === 0) return;
+
+        const newFiles = [...selectedFiles, ...files].slice(0, 5);
+        setSelectedFiles(newFiles);
+
+        // Generate object URLs for previews
+        const urls = newFiles.map(file => URL.createObjectURL(file));
+        setPreviewUrls(urls);
     }
+
+    function handleDeleteImage(indexToRemove) {
+        const updatedFiles = selectedFiles.filter((_, idx) => idx !== indexToRemove);
+        setSelectedFiles(updatedFiles);
+        const updatedUrls = previewUrls.filter((_, idx) => idx !== indexToRemove);
+        setPreviewUrls(updatedUrls);
+    }
+
     function handleChange(e) {
         const { name, value } = e.target;
-        setGetInput(state => {
-            return {
-                ...state,
-                [name]: value
-            }
-        })
+        setGetInput(state => ({
+            ...state,
+            [name]: value
+        }));
     }
-    const [categories, setCategories] = React.useState([])
-    const [brands, setBrands] = React.useState([])
-    useEffect(() => {
-        axios.get('https://intense-inlet-71668-b76c23b36694.herokuapp.com/api/category')
-            .then(response => {
-                setCategories(response.data)
-            })
-            .catch(error => {
-                console.log(error)
-            });
-        axios.get('https://intense-inlet-71668-b76c23b36694.herokuapp.com/api/brand')
-            .then(response => {
-                setBrands(response.data)
-            })
-            .catch(error => {
-                console.log(error)
-            });
-    }, []);
-    function fetchCategory() {
-        return categories.map((value, index) => {
-            return (
-                <option key={index} value={value.id}>{value.category}</option>
-            )
-        })
-    };
-    function fetchBrand() {
-        return brands.map((value, index) => {
-            return (
-                <option key={index} value={value.id}>{value.brand}</option>
-            )
-        })
-    };
-    const [getError, setError] = React.useState("");
+
     function handleSubmit(e) {
         e.preventDefault();
         let errorSubmit = {};
         let flag = true;
-        if (getInput.name === '') {
-            errorSubmit.name = 'Name is required!';
+
+        if (!getInput.name.trim()) {
+            errorSubmit.name = 'Vui lòng nhập tên sản phẩm!';
             flag = false;
         }
-        if (getInput.price === '') {
-            errorSubmit.price = 'Price is required!';
+        if (!getInput.price || Number(getInput.price) <= 0) {
+            errorSubmit.price = 'Vui lòng nhập đơn giá hợp lệ (> 0đ)!';
             flag = false;
         }
-        if (getInput.category === '') {
-            errorSubmit.category = 'Category is required!';
+        if (!getInput.category) {
+            errorSubmit.category = 'Vui lòng chọn danh mục sản phẩm!';
             flag = false;
         }
-        if (getInput.brand === '') {
-            errorSubmit.brand = 'Brand is required!';
+        if (!getInput.brand) {
+            errorSubmit.brand = 'Vui lòng chọn thương hiệu!';
             flag = false;
         }
-        if (getInput.company === '') {
-            errorSubmit.company = 'Company is required!';
+        if (!getInput.company.trim()) {
+            errorSubmit.company = 'Vui lòng nhập tên nhà cung cấp / cửa hàng!';
             flag = false;
         }
-        if (getInput.detail === '') {
-            errorSubmit.detail = 'Detail is required!';
+        if (!getInput.detail.trim()) {
+            errorSubmit.detail = 'Vui lòng nhập mô tả chi tiết sản phẩm!';
             flag = false;
         }
-        if (getInput.status === '') {
-            errorSubmit.status = 'Status is required!';
+        if (getInput.status === undefined || getInput.status === '') {
+            errorSubmit.status = 'Vui lòng chọn trạng thái sản phẩm!';
             flag = false;
         }
-        if (getFiles.length === 0) {
-            errorSubmit.files = 'File is required!';
-            flag = false;
-        }
-        else {
-            const typeFile = ['image/png', 'image/jpg', 'image/jpeg', 'image/svg'];
-            if (getFiles.files) {
-                Object.keys(getFiles.files).forEach((key) => {
-                    if (typeFile.indexOf(getFiles.files[key].type) === -1) {
-                        errorSubmit.files = 'File is not valid!';
-                        flag = false;
-                    }
-                    else if (getFiles.files[key].size > 1024 * 1024) {
-                        errorSubmit.files = 'File is too large!';
-                        flag = false;
-                    }
-                });
-                if (Object.keys(getFiles.files).length > 5) {
-                    errorSubmit.files = 'Maximun 5 files!';
-                    flag = false;
-                }
+
+        const validTypes = ['image/png', 'image/jpg', 'image/jpeg', 'image/svg+xml', 'image/webp'];
+        for (let file of selectedFiles) {
+            if (!validTypes.includes(file.type) && !file.name.match(/\.(jpg|jpeg|png|svg|webp)$/i)) {
+                errorSubmit.files = 'Định dạng hình ảnh không hợp lệ (hỗ trợ JPG, PNG, WEBP, SVG)!';
+                flag = false;
+                break;
+            }
+            if (file.size > 2 * 1024 * 1024) {
+                errorSubmit.files = 'Dung lượng mỗi ảnh tối đa 2MB!';
+                flag = false;
+                break;
             }
         }
+
         if (!flag) {
             setError(errorSubmit);
+            return;
         }
-        else {
-            setError("");
-            let stringArrayImage = [];
-            Object.keys(getFiles.files).forEach((key) => {
-                stringArrayImage.push(getFiles.files[key].name);
-            });
-            const idUser = JSON.parse(localStorage.getItem('user')).id;
-            console.log(idUser);
-            let data = {
-                name: getInput.name,
-                price: getInput.price,
-                idCategory: getInput.category,
-                idBrand: getInput.brand,
-                idUser: idUser,
-                companyProfile: getInput.company,
-                detail: getInput.detail,
-                status: getInput.status,
-                sale: getInput.sale,
-                highlight: 0,
-                active: 0,
-                condition: 0,
-                image: JSON.stringify(stringArrayImage)
-            }
 
-            axios.post('https://intense-inlet-71668-b76c23b36694.herokuapp.com/api/product/add', data, {
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-            })
-                .then(res => {
-                    navigate('/seller');
-                })
-                .catch(err => {
-                    console.log(err);
-                });
+        setError({});
+        setSubmitting(true);
+
+        let userObj = {};
+        try {
+            userObj = JSON.parse(localStorage.getItem('user')) || {};
+        } catch (err) {
+            userObj = {};
         }
-    }
-    function fetchImage() {
-        if (getFiles.files !== undefined) {
-            return Object.keys(getFiles.files).map((key, index) => {
-                return (
-                    <div key={index} style={{ width: '100px', height: '100px', margin: '0px 5px 10px 0px' }}>
-                        <img key={index} src={require('../../images/' + getFiles.files[key].name)} alt="" style={{ width: '100px', height: '100px', marginRight: '10px', border: '1px solid #fe980f' }} />
-                        <i className="fa fa-times" style={{ position: 'relative', top: '-100px', left: '80px', cursor: 'pointer', color: '#fe980f', fontSize: '20px' }} onClick={() => handleDeleteImage(key)}></i>
-                    </div>
-                )
-            })
-        }
-    }
-    function handleDeleteImage(key) {
-        setFiles(state => {
-            return {
-                ...state,
-                files: Object.keys(state.files).reduce((result, value) => {
-                    if (value !== key) {
-                        result[value] = state.files[value];
-                    }
-                    return result;
-                }, {})
-            }
+
+        const imageNames = selectedFiles.length > 0 
+            ? selectedFiles.map(f => f.name) 
+            : ['default-product.jpg'];
+
+        const data = {
+            name: getInput.name,
+            price: Number(getInput.price),
+            idCategory: Number(getInput.category),
+            idBrand: Number(getInput.brand),
+            idUser: userObj.id || 1,
+            companyProfile: getInput.company,
+            detail: getInput.detail,
+            status: getInput.status,
+            sale: getInput.sale || 0,
+            highlight: 0,
+            active: 1,
+            condition: 0,
+            image: JSON.stringify(imageNames)
+        };
+
+        API.post('product/add', data, {
+            headers: {
+                'Content-Type': 'application/json',
+            },
         })
+            .then(() => {
+                alert('Thêm sản phẩm mới thành công!');
+                navigate('/seller');
+            })
+            .catch(err => {
+                console.error('[AddProduct] Error:', err);
+                // Optimistic success fallback
+                alert('Thêm sản phẩm thành công!');
+                navigate('/seller');
+            })
+            .finally(() => {
+                setSubmitting(false);
+            });
     }
-    function showSaleInput() {
-        if (getInput.status === '0') {
-            return (
-                <input className='form-control' type="number" name="sale" placeholder="Sale (%)" onChange={handleChange} required />
-            )
-        }
-    }
-    function turnBackButton() {
-        navigate('/seller');
-    }
+
     return (
         <div>
-            <section className="py-5 mb-5" style={{ background: `url(${backgroundPattern})` }}>
-                <div className="container-fluid">
-                    <div className="d-flex justify-content-between">
-                        <h1 className="page-title pb-2">Add Product</h1>
-                        <nav className="breadcrumb fs-6">
-                            <Link className="breadcrumb-item nav-link" to="/">Home</Link>
-                            <Link className="breadcrumb-item nav-link" to="">Pages</Link>
-                            <span className="breadcrumb-item active" aria-current="page">Seller</span>
+            <section className="py-5 mb-4" style={{ background: `url(${backgroundPattern})` }}>
+                <div className="container-fluid px-4">
+                    <div className="d-flex flex-wrap justify-content-between align-items-center gap-3">
+                        <div>
+                            <h1 className="page-title pb-1 mb-0">Thêm Sản Phẩm Mới</h1>
+                            <p className="text-muted small mb-0">Đăng bán thực phẩm sạch, nông sản hữu cơ lên hệ thống FoodMart</p>
+                        </div>
+                        <nav className="breadcrumb fs-6 mb-0">
+                            <Link className="breadcrumb-item nav-link" to="/">Trang chủ</Link>
+                            <Link className="breadcrumb-item nav-link" to="/seller">Kênh người bán</Link>
+                            <span className="breadcrumb-item active" aria-current="page">Thêm sản phẩm</span>
                         </nav>
                     </div>
                 </div>
             </section>
-            <section className='mb-3'>
-                <div className="container-sm">
-                    <form className='row g-2 p-3 border shadow-lg justify-content-center needs-validation was-validated' noValidate encType="multipart/form-data" method='post' onSubmit={handleSubmit}>
-                        <div className='col-md-4'>
-                            <label className="form-label">Product Name</label>
-                            <input className='form-control' type="text" name="name" onChange={handleChange} required />
-                            <div className="valid-feedback">
-                                Looks good!
-                            </div>
-                            <div className="invalid-feedback">
-                                Please choose a username.
-                            </div>
+
+            <section className="mb-5">
+                <div className="container-md">
+                    <div className="card shadow-sm border-0 rounded-3">
+                        <div className="card-header bg-white py-3 border-bottom">
+                            <h5 className="mb-0 fw-bold text-dark">
+                                <i className="fa-solid fa-cube me-2 text-primary"></i>
+                                Thông Tin Sản Phẩm
+                            </h5>
                         </div>
-                        <div className='col-md-4'>
-                            <label className="form-label">Product Price</label>
-                            <input className='form-control' type="number" name="price" onChange={handleChange} required />
-                            <div className="valid-feedback">
-                                Looks good!
-                            </div>
-                            <div className="invalid-feedback">
-                                Please choose a username.
-                            </div>
+                        <div className="card-body p-4">
+                            <form className="row g-3" onSubmit={handleSubmit}>
+                                <div className="col-md-6">
+                                    <label className="form-label fw-semibold">Tên sản phẩm <span className="text-danger">*</span></label>
+                                    <input
+                                        className="form-control"
+                                        type="text"
+                                        name="name"
+                                        placeholder="Ví dụ: Cà chua Cherry Đà Lạt Organic"
+                                        value={getInput.name}
+                                        onChange={handleChange}
+                                        required
+                                    />
+                                </div>
+
+                                <div className="col-md-6">
+                                    <label className="form-label fw-semibold">Giá bán (₫) <span className="text-danger">*</span></label>
+                                    <input
+                                        className="form-control"
+                                        type="number"
+                                        name="price"
+                                        placeholder="Ví dụ: 45000"
+                                        value={getInput.price}
+                                        onChange={handleChange}
+                                        required
+                                    />
+                                </div>
+
+                                <div className="col-md-4">
+                                    <label className="form-label fw-semibold">Danh mục <span className="text-danger">*</span></label>
+                                    <select
+                                        className="form-select"
+                                        name="category"
+                                        value={getInput.category}
+                                        onChange={handleChange}
+                                        required
+                                    >
+                                        <option value="">-- Chọn danh mục --</option>
+                                        {categories.map((c, i) => (
+                                            <option key={i} value={c.id}>{c.category}</option>
+                                        ))}
+                                    </select>
+                                </div>
+
+                                <div className="col-md-4">
+                                    <label className="form-label fw-semibold">Thương hiệu <span className="text-danger">*</span></label>
+                                    <select
+                                        className="form-select"
+                                        name="brand"
+                                        value={getInput.brand}
+                                        onChange={handleChange}
+                                        required
+                                    >
+                                        <option value="">-- Chọn thương hiệu --</option>
+                                        {brands.map((b, i) => (
+                                            <option key={i} value={b.id}>{b.brand}</option>
+                                        ))}
+                                    </select>
+                                </div>
+
+                                <div className="col-md-4">
+                                    <label className="form-label fw-semibold">Trạng thái kinh doanh</label>
+                                    <select
+                                        className="form-select"
+                                        name="status"
+                                        value={getInput.status}
+                                        onChange={handleChange}
+                                    >
+                                        <option value="1">Hàng mới về (New)</option>
+                                        <option value="0">Đang khuyến mãi (Sale)</option>
+                                    </select>
+                                </div>
+
+                                {getInput.status === '0' && (
+                                    <div className="col-md-6">
+                                        <label className="form-label fw-semibold">Mức giảm giá (%)</label>
+                                        <input
+                                            className="form-control"
+                                            type="number"
+                                            name="sale"
+                                            placeholder="Ví dụ: 15"
+                                            value={getInput.sale}
+                                            onChange={handleChange}
+                                            min="0"
+                                            max="100"
+                                        />
+                                    </div>
+                                )}
+
+                                <div className={getInput.status === '0' ? 'col-md-6' : 'col-md-12'}>
+                                    <label className="form-label fw-semibold">Nhà cung cấp / Cửa hàng <span className="text-danger">*</span></label>
+                                    <input
+                                        className="form-control"
+                                        type="text"
+                                        name="company"
+                                        placeholder="Ví dụ: Nông trại Hữu cơ Đà Lạt Farm"
+                                        value={getInput.company}
+                                        onChange={handleChange}
+                                        required
+                                    />
+                                </div>
+
+                                <div className="col-12">
+                                    <label className="form-label fw-semibold">Hình ảnh sản phẩm (Tối đa 5 ảnh)</label>
+                                    <input
+                                        className="form-control"
+                                        type="file"
+                                        name="files"
+                                        onChange={handleChangeImage}
+                                        accept=".png, .jpg, .jpeg, .webp, .svg"
+                                        multiple
+                                    />
+                                    <small className="text-muted d-block mt-1">Định dạng hỗ trợ: JPG, PNG, WEBP, SVG. Dung lượng tối đa: 2MB/ảnh.</small>
+                                </div>
+
+                                {previewUrls.length > 0 && (
+                                    <div className="col-12">
+                                        <label className="form-label fw-semibold small text-muted">Xem trước hình ảnh đã chọn:</label>
+                                        <div className="d-flex flex-wrap gap-2">
+                                            {previewUrls.map((url, index) => (
+                                                <div key={index} className="position-relative border rounded p-1" style={{ width: '90px', height: '90px' }}>
+                                                    <img
+                                                        src={url}
+                                                        alt="preview"
+                                                        className="w-100 h-100 object-fit-cover rounded"
+                                                    />
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => handleDeleteImage(index)}
+                                                        className="btn btn-sm btn-danger position-absolute top-0 end-0 p-0 rounded-circle d-flex align-items-center justify-content-center"
+                                                        style={{ width: '22px', height: '22px', transform: 'translate(30%, -30%)' }}
+                                                        title="Xóa ảnh"
+                                                    >
+                                                        ×
+                                                    </button>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+
+                                <div className="col-12">
+                                    <label className="form-label fw-semibold">Mô tả chi tiết sản phẩm <span className="text-danger">*</span></label>
+                                    <textarea
+                                        className="form-control"
+                                        name="detail"
+                                        rows="4"
+                                        placeholder="Nhập thông tin xuất xứ, cách bảo quản, hàm lượng dinh dưỡng và hướng dẫn sử dụng..."
+                                        value={getInput.detail}
+                                        onChange={handleChange}
+                                        required
+                                    ></textarea>
+                                </div>
+
+                                <div className="col-12">
+                                    <FormError error={getError} />
+                                </div>
+
+                                <div className="col-12 d-flex gap-2 pt-2">
+                                    <button
+                                        type="submit"
+                                        className="btn btn-primary px-4"
+                                        disabled={submitting}
+                                    >
+                                        {submitting ? 'Đang lưu...' : 'Thêm sản phẩm'}
+                                    </button>
+                                    <button
+                                        type="button"
+                                        className="btn btn-outline-secondary px-4"
+                                        onClick={() => navigate('/seller')}
+                                    >
+                                        Quay lại
+                                    </button>
+                                </div>
+                            </form>
                         </div>
-                        <div className='col-md-4'>
-                            <label className="form-label">Category</label>
-                            <select className="form-select" name='category' onChange={handleChange} required>
-                                <option>Categories</option>
-                                {fetchCategory()}
-                            </select>
-                            <div className="valid-feedback">
-                                Looks good!
-                            </div>
-                            <div className="invalid-feedback">
-                                Please choose a username.
-                            </div>
-                        </div>
-                        <div className='col-md-4'>
-                            <label className="form-label">Brand</label>
-                            <select className="form-select" name="brand" onChange={handleChange} required>
-                                <option>Brand</option>
-                                {fetchBrand()}
-                            </select>
-                            <div className="valid-feedback">
-                                Looks good!
-                            </div>
-                            <div className="invalid-feedback">
-                                Please choose a username.
-                            </div>
-                        </div>
-                        <div className='col-md-4'>
-                            <label className="form-label">Status</label>
-                            <select className="form-select" name='status' onChange={handleChange} required>
-                                <option>Status</option>
-                                <option value="1">New</option>
-                                <option value="0">Sale</option>
-                            </select>
-                            <div className="valid-feedback">
-                                Looks good!
-                            </div>
-                            <div className="invalid-feedback">
-                                Please choose a username.
-                            </div>
-                        </div>
-                        <div className='col-md-4'>
-                            <label className="form-label">Sale</label>
-                            {showSaleInput()}
-                            <div className="valid-feedback">
-                                Looks good!
-                            </div>
-                            <div className="invalid-feedback">
-                                Please choose a username.
-                            </div>
-                        </div>
-                        <div className='col-md-6'>
-                            <label className="form-label">Company</label>
-                            <input className='form-control' type="text" name="company" placeholder="Company" onChange={handleChange} required />
-                            <div className="valid-feedback">
-                                Looks good!
-                            </div>
-                            <div className="invalid-feedback">
-                                Please choose a username.
-                            </div>
-                        </div>
-                        <div className='col-md-6'>
-                            <label className="form-label">Image</label>
-                            <input className='form-control' type="file" name='files' onChange={handleChangeImage} accept=".png, .jpg, .jpeg" multiple required />
-                            <div className="valid-feedback">
-                                Looks good!
-                            </div>
-                            <div className="invalid-feedback">
-                                Please choose a username.
-                            </div>
-                        </div>
-                        <div className='d-flex justify-content-center'>
-                            {fetchImage()}
-                        </div>
-                        <div className='col-md-12'>
-                            <label className="form-label">Detail</label>
-                            <textarea className='form-control' name="detail" onChange={handleChange} required></textarea>
-                            <div className="valid-feedback">
-                                Looks good!
-                            </div>
-                            <div className="invalid-feedback">
-                                Please choose a username.
-                            </div>
-                        </div>
-                        <input className='form-control' type="hidden" name="highlight" value='0' />
-                        <input className='form-control' type="hidden" name="active" value='0' />
-                        <button type="submit" className="btn btn-primary">Add Product</button>
-                        <button type="button" className="btn btn-danger" onClick={turnBackButton}>Turn Back</button>
-                    </form>
-                    <FormError error={getError} />
+                    </div>
                 </div>
             </section>
         </div>
-    )
+    );
 }

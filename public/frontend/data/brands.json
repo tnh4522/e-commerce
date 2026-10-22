@@ -1,7 +1,9 @@
 [
-  { "id": 1, "brand": "FashionPro" },
-  { "id": 2, "brand": "UrbanStyle" },
-  { "id": 3, "brand": "ElegantWear" },
-  { "id": 4, "brand": "SportZone" },
-  { "id": 5, "brand": "BasicCo" }
+  { "id": 1, "brand": "Organic Valley" },
+  { "id": 2, "brand": "Sunstar" },
+  { "id": 3, "brand": "Amber Jar" },
+  { "id": 4, "brand": "Heinz" },
+  { "id": 5, "brand": "Fresh Nature" },
+  { "id": 6, "brand": "Pure Harvest" },
+  { "id": 7, "brand": "Love Corn" }
 ]

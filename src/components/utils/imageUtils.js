@@ -20,3 +20,4 @@ export function getImageSrc(imageName, fallback = fallbackImage) {
 }
 
 export { fallbackImage };
+export { getProductImageSrc } from './productUtils';

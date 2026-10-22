@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useState, useEffect, useRef } from 'react';
 import dataService from '../../services/dataService';
 import { getCartTotalItems, safeParseJSON } from '../utils/cartUtils';
-import { getProductImageSrc, getProductName } from '../utils/productUtils';
+import { getProductImageSrc, getProductName, getCategoryName } from '../utils/productUtils';
 
 function Header() {
     const navigate = useNavigate();
@@ -48,16 +48,16 @@ function Header() {
             return (
                 <ul className="d-flex justify-content-end list-unstyled m-0" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-around' }}>
                     <li className="dropdown" style={{ display: 'flex', alignItems: 'center' }}>
-                        <span>Welcome, {user.name}</span>
-                        <button type="button" className="p-2 mx-2 dropdown-toggle border-0 bg-transparent" id="user" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Open user menu">
+                        <span>Xin chào, {user.name}</span>
+                        <button type="button" className="p-2 mx-2 dropdown-toggle border-0 bg-transparent" id="user" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Menu tài khoản">
                             <svg width={24} height={24} viewBox="0 0 24 24"><use xlinkHref="#user" /></svg>
                         </button>
                         <ul className="dropdown-menu" aria-labelledby="user">
-                            <li><Link to="/account" className="dropdown-item">My Account</Link></li>
-                            <li><Link to="/wish-list" className="dropdown-item">Wishlist</Link></li>
-                            <li><Link to="/cart" className="dropdown-item">Cart</Link></li>
-                            <li><Link to="/order" className="dropdown-item">Orders</Link></li>
-                            <li><Link to="/login" className="dropdown-item" onClick={handleLogout}>Logout</Link></li>
+                            <li><Link to="/account" className="dropdown-item">Tài khoản của tôi</Link></li>
+                            <li><Link to="/wish-list" className="dropdown-item">Danh sách yêu thích</Link></li>
+                            <li><Link to="/cart" className="dropdown-item">Giỏ hàng</Link></li>
+                            <li><Link to="/order" className="dropdown-item">Đơn hàng của tôi</Link></li>
+                            <li><Link to="/login" className="dropdown-item" onClick={handleLogout}>Đăng xuất</Link></li>
                         </ul>
                     </li>
                     <li>
@@ -87,12 +87,16 @@ function Header() {
         }
     }
     const [product, setProduct] = useState([]);
+    const [categories, setCategories] = useState([]);
     const [record, setRecord] = useState([]);
 
     useEffect(() => {
         dataService.getProducts()
             .then(data => { setProduct(Array.isArray(data) ? data : []); })
             .catch(() => { setProduct([]); });
+        dataService.getCategories()
+            .then(data => { setCategories(Array.isArray(data) ? data : []); })
+            .catch(() => { setCategories([]); });
     }, []);
 
     const searchFilter = (e) => {
@@ -139,11 +143,11 @@ function Header() {
                     <div className="offcanvas-body">
                         <div className="order-md-last">
                             <h4 className="d-flex justify-content-between align-items-center mb-3">
-                                <span className="text-primary">Search</span>
+                                <span className="text-primary">Tìm kiếm</span>
                             </h4>
                             <form role="search" className="d-flex mt-3 gap-0" onSubmit={(e) => e.preventDefault()}>
-                                <input className="form-control rounded-start rounded-0 bg-light" type="text" placeholder="What are you looking for?" aria-label="What are you looking for?" />
-                                <button className="btn btn-dark rounded-end rounded-0" type="submit">Search</button>
+                                <input className="form-control rounded-start rounded-0 bg-light" type="text" placeholder="Bạn đang tìm kiếm sản phẩm gì?" aria-label="Bạn đang tìm kiếm sản phẩm gì?" />
+                                <button className="btn btn-dark rounded-end rounded-0" type="submit">Tìm</button>
                             </form>
                         </div>
                     </div>
@@ -163,7 +167,7 @@ function Header() {
                             <div className="search-bar row bg-light p-2 my-2 rounded-4">
                                 <div className="col-11 col-md-11">
                                     <form id="search-form" className="text-center" onSubmit={(e) => e.preventDefault()}>
-                                        <input type="text" className="form-control border-0 bg-transparent" placeholder="Search for more than 20,000 products" onChange={searchFilter} onBlur={handleBlur} />
+                                        <input type="text" className="form-control border-0 bg-transparent" placeholder="Tìm kiếm hơn 20.000 sản phẩm hữu cơ tươi ngon..." onChange={searchFilter} onBlur={handleBlur} />
                                         <div className="col-sm-4 search-results position-absolute bg-light z-3">
                                             <ul className="list-unstyled m-0 p-0">
                                                 {renderData()}
@@ -172,7 +176,7 @@ function Header() {
                                     </form>
                                 </div>
                                 <div className="col-1">
-                                    <button type="button" className="rounded-circle bg-light p-2 mx-1 border-0" data-bs-toggle="offcanvas" data-bs-target="#offcanvasSearch" aria-controls="offcanvasSearch" aria-label="Open search">
+                                    <button type="button" className="rounded-circle bg-light p-2 mx-1 border-0" data-bs-toggle="offcanvas" data-bs-target="#offcanvasSearch" aria-controls="offcanvasSearch" aria-label="Mở tìm kiếm">
                                         <svg width={24} height={24} viewBox="0 0 24 24"><use xlinkHref="#search" /></svg>
                                     </button>
                                 </div>
@@ -192,69 +196,52 @@ function Header() {
                                 </button>
                                 <div className="offcanvas offcanvas-end" tabIndex={-1} id="offcanvasNavbar" aria-labelledby="offcanvasNavbarLabel">
                                     <div className="offcanvas-header justify-content-center">
-                                        <button type="button" className="btn-close" data-bs-dismiss="offcanvas" aria-label="Close" />
+                                        <button type="button" className="btn-close" data-bs-dismiss="offcanvas" aria-label="Đóng" />
                                     </div>
                                     <div className="offcanvas-body">
-                                        <select className="filter-categories border-0 mb-0 me-5">
-                                            <option>Shop by Departments</option>
-                                            <option>Groceries</option>
-                                            <option>Drinks</option>
-                                            <option>Chocolates</option>
+                                        <select className="filter-categories border-0 mb-0 me-5" onChange={(e) => { if (e.target.value) navigate('/shop-category/' + e.target.value); }} defaultValue="">
+                                            <option value="" disabled>Danh mục sản phẩm</option>
+                                            {categories.map((c) => (
+                                                <option key={c.id} value={c.id}>{getCategoryName(c.category)}</option>
+                                            ))}
                                         </select>
                                         <ul className="navbar-nav justify-content-end menu-list list-unstyled d-flex gap-md-3 mb-0">
                                             <li className="nav-item active">
-                                                <Link to="/" className="nav-link">Home</Link>
+                                                <Link to="/" className="nav-link">Trang chủ</Link>
                                             </li>
                                             <li className="nav-item dropdown">
-                                                <Link to="/shop" className="nav-link">Shop</Link>
+                                                <Link to="/shop" className="nav-link">Cửa hàng</Link>
                                             </li>
                                             <li className="nav-item">
-                                                <Link to="/blog" className="nav-link">Blog</Link>
+                                                <Link to="/blog" className="nav-link">Bài viết</Link>
                                             </li>
                                             <li className="nav-item">
-                                                <Link to="/gemini-modal" className="nav-link">Recipe</Link>
+                                                <Link to="/gemini-modal" className="nav-link">Gợi ý món ngon</Link>
                                             </li>
                                             <li className="nav-item">
-                                                <Link to="/contact" className="nav-link">Contact </Link>
+                                                <Link to="/contact" className="nav-link">Liên hệ</Link>
                                             </li>
-                                            {/* <li className="nav-item dropdown">
-                                                <Link to="" className="nav-link dropdown-toggle" role="button" id="pages" data-bs-toggle="dropdown" aria-expanded="false">Pages</Link>
-                                                <ul className="dropdown-menu" aria-labelledby="pages">
-                                                    <li><Link to="/about" className="dropdown-item">About Us <span className="badge bg-success text-dark ms-2">PRO</span></Link></li>
-                                                    <li><Link to="/shop" className="dropdown-item">Shop <span className="badge bg-success text-dark ms-2">PRO</span></Link></li>
-                                                    <li><Link to="/single-product" className="dropdown-item">Single Product <span className="badge bg-success text-dark ms-2">PRO</span></Link></li>
-                                                    <li><Link to="/cart" className="dropdown-item">Cart <span className="badge bg-success text-dark ms-2">PRO</span></Link></li>
-                                                    <li><Link to="/checkout" className="dropdown-item">Checkout <span className="badge bg-success text-dark ms-2">PRO</span></Link></li>
-                                                    <li><Link to="/blog" className="dropdown-item">Blog <span className="badge bg-success text-dark ms-2">PRO</span></Link></li>
-                                                    <li><Link to="/single-blog" className="dropdown-item">Single Post <span className="badge bg-success text-dark ms-2">PRO</span></Link></li>
-                                                    <li><Link to="" className="dropdown-item">Styles <span className="badge bg-success text-dark ms-2">PRO</span></Link></li>
-                                                    <li><Link to="/contact" className="dropdown-item">Contact <span className="badge bg-success text-dark ms-2">PRO</span></Link></li>
-                                                    <li><Link to="/thank-you" className="dropdown-item">Thank You <span className="badge bg-success text-dark ms-2">PRO</span></Link></li>
-                                                    <li><Link to="/login" className="dropdown-item">My Account <span className="badge bg-success text-dark ms-2">PRO</span></Link></li>
-                                                    <li><Link to="" className="dropdown-item">404 Error <span className="badge bg-success text-dark ms-2">PRO</span></Link></li>
-                                                </ul>
-                                            </li> */}
                                             {checkAuthenticate() === 1 ?
                                                 <li className="nav-item dropdown">
-                                                    <Link to="/admin" className="nav-link dropdown-toggle" role="button" id="pages" data-bs-toggle="dropdown" aria-expanded="false">Admin</Link>
+                                                    <Link to="/admin" className="nav-link dropdown-toggle" role="button" id="pages" data-bs-toggle="dropdown" aria-expanded="false">Quản trị</Link>
                                                     <ul className="dropdown-menu" aria-labelledby="pages">
-                                                        <li><Link to="/admin" className="dropdown-item">Manage Users</Link></li>
-                                                        <li><Link to="/admin/manage-blog" className="dropdown-item">Manage Blogs</Link></li>
-                                                        <li><Link to="/admin/add-blog" className="dropdown-item">Add Blog</Link></li>
+                                                        <li><Link to="/admin" className="dropdown-item">Quản lý người dùng</Link></li>
+                                                        <li><Link to="/admin/manage-blog" className="dropdown-item">Quản lý bài viết</Link></li>
+                                                        <li><Link to="/admin/add-blog" className="dropdown-item">Thêm bài viết mới</Link></li>
                                                     </ul>
                                                 </li> : ''}
                                             {checkAuthenticate() === 2 ?
                                                 <li className="nav-item dropdown">
-                                                    <Link to="/seller" className="nav-link dropdown-toggle" role="button" id="pages" data-bs-toggle="dropdown" aria-expanded="false">Seller</Link>
+                                                    <Link to="/seller" className="nav-link dropdown-toggle" role="button" id="pages" data-bs-toggle="dropdown" aria-expanded="false">Kênh người bán</Link>
                                                     <ul className="dropdown-menu" aria-labelledby="pages">
-                                                        <li><Link to="/seller" className="dropdown-item">Manage Products</Link></li>
-                                                        <li><Link to="/seller/manage-order" className="dropdown-item">Manage Orders</Link></li>
-                                                        <li><Link to="/seller/add-product" className="dropdown-item">Add Product</Link></li>
+                                                        <li><Link to="/seller" className="dropdown-item">Quản lý sản phẩm</Link></li>
+                                                        <li><Link to="/seller/manage-order" className="dropdown-item">Quản lý đơn hàng</Link></li>
+                                                        <li><Link to="/seller/add-product" className="dropdown-item">Thêm sản phẩm mới</Link></li>
                                                     </ul>
                                                 </li> : ''
                                             }
                                             <li className="nav-item">
-                                                <Link to="/about" className="nav-link">Info</Link>
+                                                <Link to="/about" className="nav-link">Giới thiệu</Link>
                                             </li>
                                         </ul>
                                     </div>

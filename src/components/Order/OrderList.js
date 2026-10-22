@@ -7,7 +7,8 @@ import { TinyColor } from '@ctrl/tinycolor';
 import VirtualList from 'rc-virtual-list';
 import API from '../API/API';
 import { TruckOutlined } from '@ant-design/icons';
-import { getProductImageSrc } from '../utils/productUtils';
+import { getProductImageSrc, getProductName, getProductPrice } from '../utils/productUtils';
+import { formatCurrency } from '../utils/cartUtils';
 
 export default function OrderList() {
     const { Text } = Typography;
@@ -27,7 +28,6 @@ export default function OrderList() {
         colors.map((color) => new TinyColor(color).darken(5).toString());
 
     const [ghost] = useState(true);
-
     const [orderList, setOrderList] = useState([]);
 
     useEffect(() => {
@@ -58,13 +58,13 @@ export default function OrderList() {
                                 onScroll={onScroll}
                             >
                                 {(item) => (
-                                    <List.Item key={item.product.id}>
+                                    <List.Item key={item.product?.id || Math.random()}>
                                         <List.Item.Meta
                                             avatar={<Avatar src={getProductImageSrc(item.product)} />}
-                                            title={<a href="https://ant.design">{item.product.name}</a>}
-                                            description={item.product.price + ' x ' + item.quantity}
+                                            title={<Link to={`/product/detail/${item.product?.id}`}>{getProductName(item.product)}</Link>}
+                                            description={formatCurrency(getProductPrice(item.product)) + ' x ' + (item.quantity || 1)}
                                         />
-                                        <div>{(item.product.price * item.quantity)}</div>
+                                        <div>{formatCurrency(getProductPrice(item.product) * (item.quantity || 1))}</div>
                                     </List.Item>
                                 )}
                             </VirtualList>
@@ -78,15 +78,15 @@ export default function OrderList() {
                         >
                             <TruckOutlined />
                             <Progress percent={70} size="small" style={{ width: 250 }} showInfo={false} status='success' />
-                            <Text type="success">Shipping</Text>
+                            <Text type="success">Đang vận chuyển</Text>
                         </Flex>
                     </div>
                     <div style={{ width: 230 }}>
-                        <p>Payment Method: <Text type="warning">{value.paymentMethod}</Text></p>
-                        <p>Status: <Badge status="success" text={value.status} style={{ marginLeft: 20 }} /></p>
+                        <p>Phương thức thanh toán: <Text type="warning">{value.paymentMethod}</Text></p>
+                        <p>Trạng thái: <Badge status="success" text={value.status} style={{ marginLeft: 10 }} /></p>
                         <Row gutter={16}>
                             <Col span={12}>
-                                <Statistic title="Total Price" value={value.total} precision={2} />
+                                <Statistic title="Tổng tiền" value={value.total} formatter={(val) => formatCurrency(val)} />
                             </Col>
                         </Row>
                         <ConfigProvider
@@ -102,7 +102,7 @@ export default function OrderList() {
                             }}
                         >
                             <Button type="primary" size="large" style={{ marginRight: 10 }}>
-                                <Link to={`/order/detail`} state={value}>View Detail</Link>
+                                <Link to={`/order/detail`} state={value}>Xem chi tiết</Link>
                             </Button>
                         </ConfigProvider>
                         <ConfigProvider
@@ -118,7 +118,7 @@ export default function OrderList() {
                             }}
                         >
                             <Button type="primary" size="large" style={{ marginTop: 20 }}>
-                                Buy Again
+                                <Link to="/shop" style={{ color: 'white' }}>Mua lại</Link>
                             </Button>
                         </ConfigProvider>
                     </div>
@@ -132,11 +132,11 @@ export default function OrderList() {
             <section className="py-5 mb-5" style={{ background: `url(${backgroundPattern})` }}>
                 <div className="container-fluid">
                     <div className="d-flex justify-content-between">
-                        <h1 className="page-title pb-2">Orders</h1>
+                        <h1 className="page-title pb-2">Đơn hàng của tôi</h1>
                         <nav className="breadcrumb fs-6">
-                            <Link className="breadcrumb-item nav-link" to="/">Home</Link>
-                            <Link className="breadcrumb-item nav-link" to="">Pages</Link>
-                            <span className="breadcrumb-item active" aria-current="page">Orders</span>
+                            <Link className="breadcrumb-item nav-link" to="/">Trang chủ</Link>
+                            <Link className="breadcrumb-item nav-link" to="/shop">Trang</Link>
+                            <span className="breadcrumb-item active" aria-current="page">Đơn hàng</span>
                         </nav>
                     </div>
                 </div>
@@ -148,30 +148,6 @@ export default function OrderList() {
                     padding: 24,
                 }}
             >
-                {/* <ProFormRadio.Group
-                    label="actions"
-                    options={[
-                        {
-                            label: 'action',
-                            value: 'actions',
-                        },
-                        {
-                            label: 'extra',
-                            value: 'extra',
-                        },
-                    ]}
-                    fieldProps={{
-                        value: cardActionProps,
-                        onChange: (e) => setCardActionProps(e.target.value),
-                    }}
-                />
-                <ProFormSwitch
-                    label="ghost"
-                    fieldProps={{
-                        checked: ghost,
-                        onChange: (e) => setGhost(e),
-                    }}
-                /> */}
                 <ProList
                     ghost={ghost}
                     itemCardProps={{

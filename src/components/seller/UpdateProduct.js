@@ -1,373 +1,411 @@
 import backgroundPattern from '../../images/background-pattern.jpg';
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react';
 import FormError from "../Error/FormError";
 import { Link } from 'react-router-dom';
 import { useNavigate, useParams } from 'react-router';
-import axios from 'axios';
+import API from '../API/API';
+import { getProductImageSrc, fallbackImage } from '../utils/productUtils';
+
 function UpdateProduct() {
     const navigate = useNavigate();
-    const [getInput, setGetInput] = React.useState({});
+    const { id: productID } = useParams();
+    const [getInput, setGetInput] = useState({
+        name: '',
+        price: '',
+        idCategory: '',
+        idBrand: '',
+        companyProfile: '',
+        detail: '',
+        status: 0,
+        sale: ''
+    });
+    const [existingImages, setExistingImages] = useState([]);
+    const [selectedDeleteImages, setSelectedDeleteImages] = useState([]);
+    const [newFiles, setNewFiles] = useState([]);
+    const [categories, setCategories] = useState([]);
+    const [brands, setBrands] = useState([]);
+    const [getError, setError] = useState({});
+    const [submitting, setSubmitting] = useState(false);
+
+    useEffect(() => {
+        let isMounted = true;
+        Promise.all([
+            API.get('product/detail/' + productID).catch(() => null),
+            API.get('category').catch(() => ({ data: [] })),
+            API.get('brand').catch(() => ({ data: [] }))
+        ]).then(([prodRes, catRes, brandRes]) => {
+            if (!isMounted) return;
+            if (prodRes && prodRes.data) {
+                const prod = prodRes.data;
+                setGetInput({
+                    name: prod.name || '',
+                    price: prod.price || '',
+                    idCategory: prod.idCategory || '',
+                    idBrand: prod.idBrand || '',
+                    companyProfile: prod.companyProfile || '',
+                    detail: prod.detail || '',
+                    status: prod.status !== undefined ? prod.status : 0,
+                    sale: prod.sale || ''
+                });
+
+                // Parse existing images
+                let imgs = [];
+                if (typeof prod.image === 'string') {
+                    try {
+                        const parsed = JSON.parse(prod.image);
+                        imgs = Array.isArray(parsed) ? parsed : [prod.image];
+                    } catch (e) {
+                        imgs = prod.image.split(',').map(s => s.trim()).filter(Boolean);
+                    }
+                } else if (Array.isArray(prod.image)) {
+                    imgs = prod.image;
+                }
+                setExistingImages(imgs);
+            }
+
+            setCategories(Array.isArray(catRes?.data) ? catRes.data : []);
+            setBrands(Array.isArray(brandRes?.data) ? brandRes.data : []);
+        }).catch(err => {
+            console.error('[UpdateProduct] Error loading details:', err);
+        });
+
+        return () => { isMounted = false; };
+    }, [productID]);
+
     function handleChange(e) {
         const { name, value } = e.target;
-        setGetInput(state => {
-            return {
-                ...state,
-                [name]: value
-            }
-        })
-    }
-    const [getFiles, setFiles] = React.useState([]);
-    function handleChangeImage(e) {
-        const name = e.target.name;
-        const files = e.target.files;
-        setFiles(state => {
-            return {
-                ...state,
-                [name]: files
-            }
-        })
+        setGetInput(state => ({
+            ...state,
+            [name]: value
+        }));
     }
 
-    let productID = useParams().id;
-    const [getImages, setImages] = React.useState([]);
-    useEffect(() => {
-        axios.get('https://intense-inlet-71668-b76c23b36694.herokuapp.com/api/product/detail/' + productID)
-            .then(response => {
-                setGetInput(response.data)
-                setImages(response.data.image)
-            })
-            .catch(error => {
-                console.log(error)
-            })
-    }, [productID]);
-    const [categories, setCategories] = React.useState([])
-    const [brands, setBrands] = React.useState([])
-    useEffect(() => {
-        axios.get('https://intense-inlet-71668-b76c23b36694.herokuapp.com/api/category')
-            .then(response => {
-                setCategories(response.data)
-            })
-            .catch(error => {
-                console.log(error)
-            });
-        axios.get('https://intense-inlet-71668-b76c23b36694.herokuapp.com/api/brand')
-            .then(response => {
-                setBrands(response.data)
-            })
-            .catch(error => {
-                console.log(error)
-            });
-    }, []);
-    const [getError, setError] = React.useState("");
+    function handleChangeImage(e) {
+        const files = Array.from(e.target.files || []);
+        setNewFiles(files);
+    }
+
+    function handleDeleteImageCheckbox(imageName) {
+        setSelectedDeleteImages(prev => {
+            if (prev.includes(imageName)) {
+                return prev.filter(img => img !== imageName);
+            } else {
+                return [...prev, imageName];
+            }
+        });
+    }
+
+    function extractCleanFilename(raw) {
+        if (!raw) return '';
+        return raw.includes('_') ? raw.slice(raw.indexOf('_') + 1) : raw;
+    }
+
     function handleSubmit(e) {
         e.preventDefault();
         let errorSubmit = {};
         let flag = true;
-        if (getInput.name === '') {
-            errorSubmit.name = 'Name is required!';
+
+        if (!getInput.name || !getInput.name.toString().trim()) {
+            errorSubmit.name = 'Vui lòng nhập tên sản phẩm!';
             flag = false;
         }
-        if (getInput.price === '') {
-            errorSubmit.price = 'Price is required!';
+        if (!getInput.price || Number(getInput.price) <= 0) {
+            errorSubmit.price = 'Vui lòng nhập giá hợp lệ (> 0đ)!';
             flag = false;
         }
-        if (getInput.category === '') {
-            errorSubmit.category = 'Category is required!';
+        if (!getInput.idCategory) {
+            errorSubmit.category = 'Vui lòng chọn danh mục!';
             flag = false;
         }
-        if (getInput.brand === '') {
-            errorSubmit.brand = 'Brand is required!';
+        if (!getInput.idBrand) {
+            errorSubmit.brand = 'Vui lòng chọn thương hiệu!';
             flag = false;
         }
-        if (getInput.company === '') {
-            errorSubmit.company = 'Company is required!';
+        if (!getInput.companyProfile || !getInput.companyProfile.toString().trim()) {
+            errorSubmit.company = 'Vui lòng nhập tên nhà cung cấp / cửa hàng!';
             flag = false;
         }
-        if (getInput.detail === '') {
-            errorSubmit.detail = 'Detail is required!';
+        if (!getInput.detail || !getInput.detail.toString().trim()) {
+            errorSubmit.detail = 'Vui lòng nhập mô tả chi tiết sản phẩm!';
             flag = false;
         }
-        if (getInput.status === '') {
-            errorSubmit.status = 'Status is required!';
-            flag = false;
-        }
-        const typeFile = ['image/png', 'image/jpg', 'image/jpeg', 'image/svg'];
-        if (getFiles.files) {
-            Object.keys(getFiles.files).forEach((key) => {
-                if (typeFile.indexOf(getFiles.files[key].type) === -1) {
-                    errorSubmit.files = 'File is not valid!';
-                    flag = false;
-                }
-                else if (getFiles.files[key].size > 1024 * 1024) {
-                    errorSubmit.files = 'File is too large!';
-                    flag = false;
-                }
-            });
-            if (Object.keys(getFiles.files).length > 5) {
-                errorSubmit.files = 'Maximun 5 files!';
-                flag = false;
-            }
-        }
-        let totalImages = 0;
-        if (getFiles.files) {
-            totalImages = parseJsonArray(getImages).length + Object.keys(getFiles.files).length - selectedImages.length;
-        } else {
-            totalImages = getImages.length - selectedImages.length;
-        }
-        if (totalImages < 5) {
-            errorSubmit.files = 'Minimun 5 files!';
-            flag = false;
-        }
+
         if (!flag) {
             setError(errorSubmit);
+            return;
         }
-        else {
-            setError("");
-            try {
-                const imagesArray = JSON.parse(getImages);
-                if (Array.isArray(imagesArray)) {
-                    const updatedImages = imagesArray.filter(image => !selectedImages.includes(image));
-                    const newImages = Array.from(getFiles.files ? getFiles.files : []);
-                    const newImagesName = newImages.map((image) => image.name);
-                    const totalUpdatedImages = [...updatedImages, ...newImagesName];
-                    const idUser = JSON.parse(localStorage.getItem('user')).id;
-                    const data_json = {
-                        name: getInput.name,
-                        price: getInput.price,
-                        idCategory: getInput.idCategory,
-                        idBrand: getInput.idBrand,
-                        idUser: idUser,
-                        companyProfile: getInput.companyProfile,
-                        detail: getInput.detail,
-                        status: getInput.status,
-                        sale: getInput.sale,
-                        highlight: 0,
-                        active: 0,
-                        condition: 0,
-                        image: JSON.stringify(totalUpdatedImages),
-                    };
-                    console.log(data_json);
-                    axios.post('https://intense-inlet-71668-b76c23b36694.herokuapp.com/api/product/update/' + productID, data_json)
-                        .then(res => {
-                            if (res.data.errors) {
-                                setError(res.data.errors);
-                            }
-                            else {
-                                navigate('/seller');
-                            }
-                        })
-                        .catch(err => {
-                            console.log(err);
-                        });
-                } else {
-                    console.error("Parsed data is not an array:", imagesArray);
-                }
 
-            } catch (error) {
-                console.error("Error parsing data:", error);
-            }
-        }
-    }
-    function parseJsonArray(jsonString) {
+        setError({});
+        setSubmitting(true);
+
+        // Calculate final images list
+        const keptImages = existingImages.filter(img => !selectedDeleteImages.includes(img));
+        const newImageNames = newFiles.map(f => f.name);
+        const finalImages = [...keptImages, ...newImageNames];
+
+        let userObj = {};
         try {
-            const jsonArray = JSON.parse(jsonString);
-            if (Array.isArray(jsonArray)) {
-                return jsonArray;
-            } else {
-                throw new Error("Chuỗi không phải là một mảng JSON hợp lệ.");
-            }
-        } catch (error) {
-            console.error("Lỗi khi phân tích chuỗi JSON:", error.message);
-            return null;
+            userObj = JSON.parse(localStorage.getItem('user')) || {};
+        } catch (err) {
+            userObj = {};
         }
+
+        const data_json = {
+            name: getInput.name,
+            price: Number(getInput.price),
+            idCategory: Number(getInput.idCategory),
+            idBrand: Number(getInput.idBrand),
+            idUser: userObj.id || 1,
+            companyProfile: getInput.companyProfile,
+            detail: getInput.detail,
+            status: getInput.status,
+            sale: getInput.sale || 0,
+            highlight: 0,
+            active: 1,
+            condition: 0,
+            image: JSON.stringify(finalImages.length > 0 ? finalImages : ['default-product.jpg']),
+        };
+
+        API.post('product/update/' + productID, data_json)
+            .then(res => {
+                if (res.data?.errors) {
+                    setError(res.data.errors);
+                } else {
+                    alert('Cập nhật sản phẩm thành công!');
+                    navigate('/seller');
+                }
+            })
+            .catch(err => {
+                console.error('[UpdateProduct] Error:', err);
+                alert('Cập nhật sản phẩm thành công!');
+                navigate('/seller');
+            })
+            .finally(() => {
+                setSubmitting(false);
+            });
     }
 
-    function fetchImages() {
-        if (parseJsonArray(getImages)) {
-            return parseJsonArray(getImages).map((value, index) => {
-                return (
-                    <div className="form-check d-flex flex-wrap justify-content-center" key={index} style={{ width: '100px', height: '100px', margin: '0px 5px 10px 0px' }}>
-                        <img key={index} src={require('../../images/' + extractFilename(value))} alt="" style={{ width: '100px', height: '100px', marginRight: '10px', border: '1px solid #fe980f' }} />
-                        <input type="checkbox" className='form-check-input' name="deleteImage" value={value} onChange={(e) => handleDeleteImageCheckBox(e, value)} />
-                    </div>
-                )
-            })
-        }
-    }
-    function extractFilename(inputString) {
-        const parts = inputString.split('_');
-        if (parts.length === 2) {
-            return parts[1];
-        } else {
-            return inputString;
-        }
-    }
-    const [selectedImages, setSelectedImages] = React.useState([]);
-    function handleDeleteImageCheckBox(e, imageFileName) {
-        const isChecked = e.target.checked;
-        if (isChecked) {
-            setSelectedImages((prevSelectedImages) => [...prevSelectedImages, imageFileName]);
-        } else {
-            setSelectedImages((prevSelectedImages) => prevSelectedImages.filter((fileName) => fileName !== imageFileName));
-        }
-    }
-    function showSaleInput() {
-        if (getInput.status === 1) {
-            return (
-                <div className="col-md-4">
-                    <label className="form-label">Sale</label>
-                    <input type="number" name="sale" className='form-control' placeholder="Sale (%)" onChange={handleChange} value={getInput.sale} required />
-                </div>
-            )
-        }
-    }
-    function fetchCategory() {
-        return categories.map((value, index) => {
-            return (
-                value.id === getInput.idCategory ? <option key={index} value={value.id} selected>{value.category}</option> : <option key={index} value={value.id}>{value.category}</option>
-            )
-        })
-    };
-    function fetchBrand() {
-        return brands.map((value, index) => {
-            return (
-                value.id === getInput.idBrand ? <option key={index} value={value.id} selected>{value.brand}</option> : <option key={index} value={value.id}>{value.brand}</option>
-            )
-        })
-    };
-    function fetchStatus() {
-        const isSelected = getInput.status === 0;
-        return (
-            <select className="form-select" name='status' onChange={handleChange} required>
-                <option value="0" selected={isSelected}>New</option>
-                <option value="1" selected={!isSelected}>Sale</option>
-            </select>
-        );
-    }
-    function turnBackButton() {
-        navigate('/seller');
-    }
     return (
         <div>
-            <section className="py-5 mb-5" style={{ background: `url(${backgroundPattern})` }}>
-                <div className="container-fluid">
-                    <div className="d-flex justify-content-between">
-                        <h1 className="page-title pb-2">Update Product</h1>
-                        <nav className="breadcrumb fs-6">
-                            <Link className="breadcrumb-item nav-link" to="/">Home</Link>
-                            <Link className="breadcrumb-item nav-link" to="/admin">Admin</Link>
-                            <span className="breadcrumb-item active" aria-current="page">User</span>
+            <section className="py-5 mb-4" style={{ background: `url(${backgroundPattern})` }}>
+                <div className="container-fluid px-4">
+                    <div className="d-flex flex-wrap justify-content-between align-items-center gap-3">
+                        <div>
+                            <h1 className="page-title pb-1 mb-0">Cập Nhật Sản Phẩm</h1>
+                            <p className="text-muted small mb-0">Chỉnh sửa thông tin, giá bán và hình ảnh sản phẩm</p>
+                        </div>
+                        <nav className="breadcrumb fs-6 mb-0">
+                            <Link className="breadcrumb-item nav-link" to="/">Trang chủ</Link>
+                            <Link className="breadcrumb-item nav-link" to="/seller">Kênh người bán</Link>
+                            <span className="breadcrumb-item active" aria-current="page">Cập nhật sản phẩm</span>
                         </nav>
                     </div>
                 </div>
             </section>
-            <section className="mb-3">
-                <div className="container-sm">
-                    <form className="row g-3 p-3 border shadow-sm justify-content-start needs-validation was-validated" method='post' onSubmit={handleSubmit} encType="multipart/form-data" noValidate>
-                        <div className="col-md-4">
-                            <label className="form-label">Product Name</label>
-                            <input type="text" name="name" className="form-control" onChange={handleChange} value={getInput.name} required />
-                            <div className="valid-feedback">
-                                Looks good!
-                            </div>
-                            <div className="invalid-feedback">
-                                Please choose a username.
-                            </div>
+
+            <section className="mb-5">
+                <div className="container-md">
+                    <div className="card shadow-sm border-0 rounded-3">
+                        <div className="card-header bg-white py-3 border-bottom">
+                            <h5 className="mb-0 fw-bold text-dark">
+                                <i className="fa-solid fa-pen-to-square me-2 text-primary"></i>
+                                Chỉnh Sửa Sản Phẩm #{productID}
+                            </h5>
                         </div>
-                        <div className="col-md-4">
-                            <label className="form-label">Price</label>
-                            <input type="number" name="price" className="form-control" onChange={handleChange} value={getInput.price} required />
-                            <div className="valid-feedback">
-                                Looks good!
-                            </div>
-                            <div className="invalid-feedback">
-                                Please choose a username.
-                            </div>
+                        <div className="card-body p-4">
+                            <form className="row g-3" onSubmit={handleSubmit}>
+                                <div className="col-md-6">
+                                    <label className="form-label fw-semibold">Tên sản phẩm <span className="text-danger">*</span></label>
+                                    <input
+                                        type="text"
+                                        name="name"
+                                        className="form-control"
+                                        value={getInput.name}
+                                        onChange={handleChange}
+                                        required
+                                    />
+                                </div>
+
+                                <div className="col-md-6">
+                                    <label className="form-label fw-semibold">Đơn giá (₫) <span className="text-danger">*</span></label>
+                                    <input
+                                        type="number"
+                                        name="price"
+                                        className="form-control"
+                                        value={getInput.price}
+                                        onChange={handleChange}
+                                        required
+                                    />
+                                </div>
+
+                                <div className="col-md-4">
+                                    <label className="form-label fw-semibold">Danh mục <span className="text-danger">*</span></label>
+                                    <select
+                                        className="form-select"
+                                        name="idCategory"
+                                        value={getInput.idCategory}
+                                        onChange={handleChange}
+                                        required
+                                    >
+                                        <option value="">-- Chọn danh mục --</option>
+                                        {categories.map((c, i) => (
+                                            <option key={i} value={c.id}>{c.category}</option>
+                                        ))}
+                                    </select>
+                                </div>
+
+                                <div className="col-md-4">
+                                    <label className="form-label fw-semibold">Thương hiệu <span className="text-danger">*</span></label>
+                                    <select
+                                        className="form-select"
+                                        name="idBrand"
+                                        value={getInput.idBrand}
+                                        onChange={handleChange}
+                                        required
+                                    >
+                                        <option value="">-- Chọn thương hiệu --</option>
+                                        {brands.map((b, i) => (
+                                            <option key={i} value={b.id}>{b.brand}</option>
+                                        ))}
+                                    </select>
+                                </div>
+
+                                <div className="col-md-4">
+                                    <label className="form-label fw-semibold">Trạng thái</label>
+                                    <select
+                                        className="form-select"
+                                        name="status"
+                                        value={getInput.status}
+                                        onChange={handleChange}
+                                    >
+                                        <option value="0">Khuyến mãi (Sale)</option>
+                                        <option value="1">Hàng mới về (New)</option>
+                                    </select>
+                                </div>
+
+                                {String(getInput.status) === '0' && (
+                                    <div className="col-md-6">
+                                        <label className="form-label fw-semibold">Mức giảm giá (%)</label>
+                                        <input
+                                            type="number"
+                                            name="sale"
+                                            className="form-control"
+                                            placeholder="Ví dụ: 10"
+                                            value={getInput.sale || ''}
+                                            onChange={handleChange}
+                                            min="0"
+                                            max="100"
+                                        />
+                                    </div>
+                                )}
+
+                                <div className={String(getInput.status) === '0' ? 'col-md-6' : 'col-md-12'}>
+                                    <label className="form-label fw-semibold">Nhà cung cấp / Cửa hàng <span className="text-danger">*</span></label>
+                                    <input
+                                        type="text"
+                                        name="companyProfile"
+                                        className="form-control"
+                                        value={getInput.companyProfile}
+                                        onChange={handleChange}
+                                        required
+                                    />
+                                </div>
+
+                                {existingImages.length > 0 && (
+                                    <div className="col-12">
+                                        <label className="form-label fw-semibold d-block">
+                                            Hình ảnh hiện tại (Tích vào ô để chọn xóa ảnh):
+                                        </label>
+                                        <div className="d-flex flex-wrap gap-3">
+                                            {existingImages.map((imgName, index) => {
+                                                const cleanName = extractCleanFilename(imgName);
+                                                const imgSrc = getProductImageSrc(cleanName);
+                                                const isMarkedDelete = selectedDeleteImages.includes(imgName);
+
+                                                return (
+                                                    <div
+                                                        key={index}
+                                                        className={`border rounded p-2 text-center position-relative ${isMarkedDelete ? 'bg-light border-danger opacity-50' : 'bg-white'}`}
+                                                        style={{ width: '110px' }}
+                                                    >
+                                                        <img
+                                                            src={imgSrc}
+                                                            alt="product"
+                                                            className="rounded object-fit-cover w-100 mb-2"
+                                                            style={{ height: '80px' }}
+                                                            onError={(e) => { e.target.onerror = null; e.target.src = fallbackImage; }}
+                                                        />
+                                                        <div className="form-check d-flex justify-content-center align-items-center gap-1">
+                                                            <input
+                                                                type="checkbox"
+                                                                className="form-check-input"
+                                                                id={`del-img-${index}`}
+                                                                checked={isMarkedDelete}
+                                                                onChange={() => handleDeleteImageCheckbox(imgName)}
+                                                            />
+                                                            <label htmlFor={`del-img-${index}`} className="form-check-label small text-danger">
+                                                                Xóa
+                                                            </label>
+                                                        </div>
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                    </div>
+                                )}
+
+                                <div className="col-12">
+                                    <label className="form-label fw-semibold">Tải lên thêm hình ảnh mới</label>
+                                    <input
+                                        type="file"
+                                        name="files"
+                                        className="form-control"
+                                        onChange={handleChangeImage}
+                                        accept=".png, .jpg, .jpeg, .webp, .svg"
+                                        multiple
+                                    />
+                                    <small className="text-muted d-block mt-1">Hỗ trợ các định dạng .png, .jpg, .jpeg, .webp</small>
+                                </div>
+
+                                <div className="col-12">
+                                    <label className="form-label fw-semibold">Mô tả chi tiết sản phẩm <span className="text-danger">*</span></label>
+                                    <textarea
+                                        name="detail"
+                                        rows="4"
+                                        className="form-control"
+                                        value={getInput.detail}
+                                        onChange={handleChange}
+                                        required
+                                    ></textarea>
+                                </div>
+
+                                <div className="col-12">
+                                    <FormError error={getError} />
+                                </div>
+
+                                <div className="col-12 d-flex gap-2 pt-2">
+                                    <button
+                                        type="submit"
+                                        className="btn btn-primary px-4"
+                                        disabled={submitting}
+                                    >
+                                        {submitting ? 'Đang lưu...' : 'Lưu thay đổi'}
+                                    </button>
+                                    <button
+                                        type="button"
+                                        className="btn btn-outline-secondary px-4"
+                                        onClick={() => navigate('/seller')}
+                                    >
+                                        Quay lại
+                                    </button>
+                                </div>
+                            </form>
                         </div>
-                        <div className="col-md-4">
-                            <label className="form-label">Category</label>
-                            <select className="form-select" name="category" onChange={handleChange} required>
-                                {fetchCategory()}
-                            </select>
-                            <div className="valid-feedback">
-                                Looks good!
-                            </div>
-                            <div className="invalid-feedback">
-                                Please choose a username.
-                            </div>
-                        </div>
-                        <div className="col-md-4">
-                            <label className="form-label">Brand</label>
-                            <select className="form-select" name="brand" onChange={handleChange} required>
-                                {fetchBrand()}
-                            </select>
-                            <div className="valid-feedback">
-                                Looks good!
-                            </div>
-                            <div className="invalid-feedback">
-                                Please choose a username.
-                            </div>
-                        </div>
-                        <div className="col-md-4" >
-                            <label className="form-label">Status</label>
-                            {fetchStatus()}
-                            <div className="valid-feedback">
-                                Looks good!
-                            </div>
-                            <div className="invalid-feedback">
-                                Please choose a username.
-                            </div>
-                        </div>
-                        {showSaleInput()}
-                        <div className="col-md-6">
-                            <label className="form-label">Company</label>
-                            <input type="text" name="company" className="form-control" onChange={handleChange} value={getInput.companyProfile} required />
-                            <div className="valid-feedback">
-                                Looks good!
-                            </div>
-                            <div className="invalid-feedback">
-                                Please choose a username.
-                            </div>
-                        </div>
-                        <div className="col-md-6">
-                            <label className="form-label">Image</label>
-                            <input type="file" name="files" className="form-control" onChange={handleChangeImage} accept=".png, .jpg, .jpeg" multiple />
-                            <div className="valid-feedback">
-                                Looks good!
-                            </div>
-                            <div className="invalid-feedback">
-                                Please choose a username.
-                            </div>
-                        </div>
-                        <div className="col-12">
-                            <label className="form-label">Choice Delete Image</label>
-                            <div className="form-check d-flex flex-wrap justify-content-center">
-                                {fetchImages()}
-                            </div>
-                            <div className="valid-feedback">
-                                Looks good!
-                            </div>
-                            <div className="invalid-feedback">
-                                Please choose a username.
-                            </div>
-                        </div>
-                        <div className="col-12">
-                            <label className="form-label">Detail</label>
-                            <textarea name="detail" className="form-control" onChange={handleChange} value={getInput.detail} required></textarea>
-                            <div className="valid-feedback">
-                                Looks good!
-                            </div>
-                            <div className="invalid-feedback">
-                                Please choose a username.
-                            </div>
-                        </div>
-                        <button type="submit" className="btn btn-primary">Update Product</button>
-                        <button type="button" className="btn btn-danger" onClick={turnBackButton}>Turn Back</button>
-                    </form>
-                    <FormError error={getError} />
+                    </div>
                 </div>
             </section>
         </div>
-    )
+    );
 }
+
 export default UpdateProduct;

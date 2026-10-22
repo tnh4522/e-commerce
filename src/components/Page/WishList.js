@@ -5,6 +5,7 @@ import backgroundPattern from '../../images/background-pattern.jpg';
 import Modal from "../Modal/Modal";
 import dataService from '../../services/dataService';
 import { getProductImageSrc, getProductName, getProductPriceLabel } from '../utils/productUtils';
+import { addProductToCart } from '../utils/cartUtils';
 
 function Wishlist() {
     const [getData, setData] = useState([]);
@@ -18,25 +19,33 @@ function Wishlist() {
 
     function renderWishlist() {
         let wishlist = JSON.parse(localStorage.getItem('wishlist'));
-        if (getData && wishlist) {
+        if (getData && wishlist && wishlist.length > 0) {
             var productWishList = getData.filter((item) => {
                 return wishlist.includes(item.id);
             });
+            if (productWishList.length === 0) {
+                return (
+                    <div className="col-12 py-5 text-center">
+                        <h3 className="text-muted">Danh sách yêu thích đang trống</h3>
+                        <Link to="/shop" className="btn btn-primary mt-3">Khám phá sản phẩm ngay</Link>
+                    </div>
+                );
+            }
             return productWishList.map((item, index) => {
                 return (
                     <div className="col" key={index}>
                         <div className="product-item" id={item.id}>
                             <figure>
-                                <Link to={'/product/detail/' + item.id} title="Product Title">
+                                <Link to={'/product/detail/' + item.id} title={getProductName(item)}>
                                     <img alt={getProductName(item)} src={getProductImageSrc(item)} className="tab-image" />
                                 </Link>
                             </figure>
                             <Link to={'/product/detail/' + item.id} className="text-decoration-none"><h3>{getProductName(item)}</h3></Link>
-                            <span className="qty">Reviews</span><span className="rating"><svg width={24} height={24} className="text-primary"><use xlinkHref="#star-solid" /></svg> 4.5</span>
+                            <span className="qty">Đánh giá</span><span className="rating"><svg width={24} height={24} className="text-primary"><use xlinkHref="#star-solid" /></svg> 4.5</span>
                             <span className="price">{getProductPriceLabel(item)}</span>
                             <div className="d-flex align-items-center justify-content-between">
-                                <Link to="" className="btn btn-outline-primary btn-sm" id={item.id} onClick={deleteWishList}>Delete</Link>
-                                <Link to="" className="nav-link" onClick={addToCart}>Add to Cart <svg width={24} height={24}><use xlinkHref="#cart" /></svg></Link>
+                                <button type="button" className="btn btn-outline-danger btn-sm" id={item.id} onClick={deleteWishList}>Xóa</button>
+                                <button type="button" className="nav-link border-0 bg-transparent" onClick={addToCart}>Thêm vào giỏ <svg width={24} height={24}><use xlinkHref="#cart" /></svg></button>
                             </div>
                         </div>
                     </div>
@@ -44,14 +53,10 @@ function Wishlist() {
             })
         } else {
             return (
-                <div className="col-sm-12">
-                    <div className="product-image-wrapper">
-                        <div className="single-products">
-                            <div className="productinfo">
-                                <h2 className="text-warning-emphasis">Wish list is empty</h2>
-                            </div>
-                        </div>
-                    </div>
+                <div className="col-12 py-5 text-center">
+                    <h3 className="text-muted">Danh sách yêu thích đang trống</h3>
+                    <p className="text-muted">Hãy thêm những món ăn yêu thích vào danh sách để xem lại bất cứ lúc nào!</p>
+                    <Link to="/shop" className="btn btn-primary mt-3">Khám phá sản phẩm ngay</Link>
                 </div>
             )
         }
@@ -59,45 +64,20 @@ function Wishlist() {
     function addToCart(e) {
         let productId = e.target.closest('.product-item').id;
         productId = parseInt(productId);
-        var cartData = {
-            id: productId,
-            quantity: 1
-        }
-        var cart = {};
-        if (localStorage.getItem('cart')) {
-            cart = JSON.parse(localStorage.getItem('cart'));
-        }
-        if (!cart[productId]) {
-            cart[productId] = cartData;
-        } else {
-            cart[productId].quantity += 1;
-        }
-        localStorage.setItem('cart', JSON.stringify(cart));
-        updateCartTotalItem();
-        setModalMessage('Add to cart successfully!');
+        addProductToCart(productId, 1);
+        setModalMessage('Đã thêm sản phẩm vào giỏ hàng thành công!');
         setShowModal(true);
     }
-    function updateCartTotalItem() {
-        let cart = JSON.parse(localStorage.getItem('cart'));
-        let total = 0;
-        if (cart) {
-            Object.keys(cart).forEach(function (key) {
-                total += cart[key].quantity;
-            });
-        }
-        localStorage.setItem('cartTotalItem', total);
-    }
-
 
     function deleteWishList(e) {
         let product_id = e.target.id;
-        let wishlist = JSON.parse(localStorage.getItem('wishlist'));
+        let wishlist = JSON.parse(localStorage.getItem('wishlist')) || [];
         let index = wishlist.indexOf(parseInt(product_id));
         if (index > -1) {
             wishlist.splice(index, 1);
         }
         localStorage.setItem('wishlist', JSON.stringify(wishlist));
-        e.target.parentNode.parentNode.parentNode.remove();
+        setData([...getData]);
     };
     useEffect(() => {
         if (showModal) {
@@ -116,17 +96,19 @@ function Wishlist() {
                 <section className="py-5 mb-5" style={{ background: `url(${backgroundPattern})` }}>
                     <div className="container-fluid">
                         <div className="d-flex justify-content-between">
-                            <h1 className="page-title pb-2">Wishlist</h1>
+                            <h1 className="page-title pb-2">Danh sách yêu thích</h1>
                             <nav className="breadcrumb fs-6">
-                                <Link className="breadcrumb-item nav-link" href="#">Home</Link>
-                                <Link className="breadcrumb-item nav-link" href="#">Pages</Link>
-                                <span className="breadcrumb-item active" aria-current="page">About Us</span>
+                                <Link className="breadcrumb-item nav-link" to="/">Trang chủ</Link>
+                                <Link className="breadcrumb-item nav-link" to="/shop">Trang</Link>
+                                <span className="breadcrumb-item active" aria-current="page">Yêu thích</span>
                             </nav>
                         </div>
                     </div>
                 </section>
-                <div className="product-grid row row-cols-sm-1 row-cols-md-2 row-cols-lg-3 row-cols-xl-4">
-                    {renderWishlist()}
+                <div className="container-fluid">
+                    <div className="product-grid row row-cols-sm-1 row-cols-md-2 row-cols-lg-3 row-cols-xl-4 g-4">
+                        {renderWishlist()}
+                    </div>
                 </div>
             </div>
         </div>

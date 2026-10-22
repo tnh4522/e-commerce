@@ -31,36 +31,36 @@ function Register() {
         let errorSubmit = {};
         let flag = true;
         if (getInput.name === '') {
-            errorSubmit.name = 'Name is required!';
+            errorSubmit.name = 'Vui lòng nhập họ và tên!';
             flag = false;
         }
         if (getInput.email === '') {
-            errorSubmit.email = 'Email is required!';
+            errorSubmit.email = 'Vui lòng nhập địa chỉ email!';
             flag = false;
         }
         if (getInput.password === '') {
-            errorSubmit.password = 'Password is required!';
+            errorSubmit.password = 'Vui lòng nhập mật khẩu!';
             flag = false;
         }
         if (getInput.phone === '') {
-            errorSubmit.phone = 'Phone is required!';
+            errorSubmit.phone = 'Vui lòng nhập số điện thoại!';
             flag = false;
         }
         if (getInput.address === '') {
-            errorSubmit.address = 'Address is required!';
+            errorSubmit.address = 'Vui lòng nhập địa chỉ!';
             flag = false;
         }
         if (getInput.avatar === '') {
-            errorSubmit.avatar = 'Avatar is required!';
+            errorSubmit.avatar = 'Vui lòng chọn ảnh đại diện!';
             flag = false;
-        } else {
+        } else if (getInput.file) {
             const typeFile = ['image/png', 'image/jpg', 'image/jpeg', 'image/svg'];
             if (typeFile.indexOf(getInput.file.type) === -1) {
-                errorSubmit.avatar = 'Avatar is not valid!';
+                errorSubmit.avatar = 'Định dạng ảnh không hợp lệ (hỗ trợ PNG, JPG, JPEG, SVG)!';
                 flag = false;
             }
             else if (getInput.file.size > 1024 * 1024) {
-                errorSubmit.avatar = 'Avatar is too large!';
+                errorSubmit.avatar = 'Dung lượng ảnh quá lớn (tối đa 1MB)!';
                 flag = false;
             }
         }
@@ -80,11 +80,11 @@ function Register() {
             }
             API.post('user/register', formData)
                 .then(res => {
+                    alert('Đăng ký tài khoản thành công! Vui lòng đăng nhập.');
                     navigate('/login');
-                    alert('Register success!');
                 })
                 .catch(err => {
-                    errorSubmit.email = err.response.data.message;
+                    errorSubmit.email = err.response?.data?.message || 'Đăng ký không thành công. Vui lòng thử lại!';
                     setError(errorSubmit);
                 });
         }
@@ -92,6 +92,7 @@ function Register() {
 
     function handleInputFile(e) {
         const fileInput = e.target.files;
+        if (!fileInput || fileInput.length === 0) return;
         let reader = new FileReader();
         reader.onload = function (e) {
             setInput((state) => {
@@ -110,11 +111,11 @@ function Register() {
             <section className="py-5 mb-5" style={{ background: `url(${backgroundPattern})` }}>
                 <div className="container-fluid">
                     <div className="d-flex justify-content-between">
-                        <h1 className="page-title pb-2">Register</h1>
+                        <h1 className="page-title pb-2">Đăng ký</h1>
                         <nav className="breadcrumb fs-6">
-                            <Link className="breadcrumb-item nav-link" href="#">Home</Link>
-                            <Link className="breadcrumb-item nav-link" href="#">Pages</Link>
-                            <span className="breadcrumb-item active" aria-current="page">Register</span>
+                            <Link className="breadcrumb-item nav-link" to="/">Trang chủ</Link>
+                            <Link className="breadcrumb-item nav-link" to="/shop">Trang</Link>
+                            <span className="breadcrumb-item active" aria-current="page">Đăng ký</span>
                         </nav>
                     </div>
                 </div>
@@ -122,36 +123,37 @@ function Register() {
             <section id="login-form" className="py-5">
                 <div className="container-sm">
                     <div className="row justify-content-center">
-                        <div className="col-lg-4 p-5 border shadow-sm">
-                            <h5 className="text-uppercase mb-4">Register</h5>
+                        <div className="col-lg-4 p-5 border shadow-sm rounded-3 bg-white">
+                            <h5 className="text-uppercase mb-4 fw-bold">Tạo tài khoản mới</h5>
                             <form id="form" className="form-group flex-wrap" method='post' onSubmit={handleSubmit} encType='multipart/form-data'>
                                 <div className="col-12 pb-3">
-                                    <label className="d-none">Full Name *</label>
-                                    <input type="text" name="name" placeholder="Full Name" className="form-control" onChange={handleInput} required autoFocus />
+                                    <label className="form-label">Họ và tên *</label>
+                                    <input type="text" name="name" placeholder="Nhập họ và tên..." className="form-control" onChange={handleInput} required autoFocus />
                                 </div>
                                 <div className="col-12 pb-3">
-                                    <label className="d-none">Email address *</label>
-                                    <input type="email" name="email" placeholder="Email" className="form-control" aria-describedby="emailHelp" onChange={handleInput} required />
+                                    <label className="form-label">Địa chỉ email *</label>
+                                    <input type="email" name="email" placeholder="Nhập email..." className="form-control" aria-describedby="emailHelp" onChange={handleInput} required />
                                 </div>
                                 <div className="col-12 pb-3">
-                                    <label className="d-none">Password *</label>
-                                    <input type="password" name="password" placeholder="Password" className="form-control" onChange={handleInput} required />
+                                    <label className="form-label">Mật khẩu *</label>
+                                    <input type="password" name="password" placeholder="Nhập mật khẩu..." className="form-control" onChange={handleInput} required />
                                 </div>
                                 <div className="col-12 pb-3">
-                                    <label className="d-none">Address *</label>
-                                    <input type="text" name="address" placeholder="Address" className="form-control" onChange={handleInput} required />
+                                    <label className="form-label">Địa chỉ giao hàng *</label>
+                                    <input type="text" name="address" placeholder="Nhập địa chỉ nhận hàng..." className="form-control" onChange={handleInput} required />
                                 </div>
                                 <div className="col-12 pb-3">
-                                    <label className="d-none">Phone *</label>
-                                    <input type="text" name="phone" placeholder="Phone" className="form-control" onChange={handleInput} required />
+                                    <label className="form-label">Số điện thoại *</label>
+                                    <input type="tel" name="phone" placeholder="Nhập số điện thoại..." className="form-control" onChange={handleInput} required />
                                 </div>
                                 <div className="col-12 pb-3">
-                                    <label className="d-none">Avatar *</label>
-                                    <input type="file" name="avatar" placeholder="Avatar" className="form-control" onChange={handleInputFile} required />
+                                    <label className="form-label">Ảnh đại diện *</label>
+                                    <input type="file" name="avatar" className="form-control" onChange={handleInputFile} required />
                                 </div>
-                                <input type="hidden" placeholder="Enter Your Level" name="level" onChange={handleInput} />
+                                <input type="hidden" name="level" onChange={handleInput} />
                                 <div className="col-12">
-                                    <button type="submit" name="submit" className="btn btn-primary text-uppercase w-100">Register</button>
+                                    <button type="submit" name="submit" className="btn btn-primary text-uppercase w-100 py-2">Đăng ký tài khoản</button>
+                                    <p className="mt-3 mb-0 text-center">Đã có tài khoản? <Link to="/login">Đăng nhập tại đây</Link></p>
                                 </div>
                             </form>
                             <FormError error={getError} />

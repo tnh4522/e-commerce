@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import backgroundPattern from '../../images/background-pattern.jpg';
 import FormError from '../Error/FormError';
 import API from '../API/API';
+
 function UpdateBlog() {
     const [data, setData] = useState({
         title: '',
@@ -16,16 +17,17 @@ function UpdateBlog() {
     useEffect(() => {
         API.get('blog/detail/' + id)
             .then(function (response) {
-                setData((state) => {
-                    return {
+                const blog = (response && response.data) ? response.data : response;
+                if (blog) {
+                    setData((state) => ({
                         ...state,
-                        title: response.data.title,
-                        content: response.data.content,
-                        description: response.data.description,
-                        idAuth: response.data.idAuth,
-                        image: response.data.image
-                    }
-                });
+                        title: blog.title || '',
+                        content: blog.content || '',
+                        description: blog.description || '',
+                        idAuth: blog.idAuth || 1,
+                        image: blog.image || ''
+                    }));
+                }
             })
             .catch(function (error) {
                 console.log(error);
@@ -34,15 +36,13 @@ function UpdateBlog() {
 
     function handleChangeImage(e) {
         const fileInput = e.target.files;
-        if (fileInput) {
+        if (fileInput && fileInput.length > 0) {
             let reader = new FileReader();
             reader.onload = function (e) {
-                setData((state) => {
-                    return {
-                        ...state,
-                        image: fileInput[0].name,
-                    }
-                });
+                setData((state) => ({
+                    ...state,
+                    image: fileInput[0].name,
+                }));
             };
             reader.readAsDataURL(fileInput[0]);
         }
@@ -50,12 +50,10 @@ function UpdateBlog() {
 
     function handleChange(e) {
         const { name, value } = e.target;
-        setData(state => {
-            return {
-                ...state,
-                [name]: value
-            }
-        })
+        setData(state => ({
+            ...state,
+            [name]: value
+        }));
     };
 
     const [getError, setError] = useState('');
@@ -79,7 +77,7 @@ function UpdateBlog() {
                     setError('');
                     navigate('/admin/manage-blog');
                 } else {
-                    setError(response.data.error);
+                    setError(response.data?.error || 'Cập nhật thất bại');
                 }
             })
             .catch((error) => {
@@ -97,72 +95,57 @@ function UpdateBlog() {
             <section className="py-5 mb-5" style={{ background: `url(${backgroundPattern})` }}>
                 <div className="container-fluid">
                     <div className="d-flex justify-content-between">
-                        <h1 className="page-title pb-2">Update Blog</h1>
+                        <h1 className="page-title pb-2">Cập nhật bài viết</h1>
                         <nav className="breadcrumb fs-6">
-                            <Link className="breadcrumb-item nav-link" to="/">Home</Link>
-                            <Link className="breadcrumb-item nav-link" to="">Pages</Link>
-                            <span className="breadcrumb-item active" aria-current="page">Admin</span>
+                            <Link className="breadcrumb-item nav-link" to="/">Trang chủ</Link>
+                            <Link className="breadcrumb-item nav-link" to="/admin">Quản trị</Link>
+                            <span className="breadcrumb-item active" aria-current="page">Cập nhật</span>
                         </nav>
                     </div>
                 </div>
             </section>
             <section className='mb-3'>
                 <div className="container-sm">
-                    <form className='row g-2 p-3 border shadow-lg needs-validation was-validated' noValidate encType="multipart/form-data" method='post' onSubmit={handleSubmit}>
+                    <form className='row g-3 p-4 border shadow-sm rounded-3 bg-white needs-validation was-validated' noValidate encType="multipart/form-data" method='post' onSubmit={handleSubmit}>
                         <div className='col-md-4'>
-                            <label className="form-label">ID Author</label>
+                            <label className="form-label fw-semibold">Mã tác giả</label>
                             <input className='form-control' type="text" name="idAuth" onChange={handleChange} value={data.idAuth} required />
-                            <div className="valid-feedback">
-                                Looks good!
-                            </div>
                             <div className="invalid-feedback">
-                                Please enter a title.
+                                Vui lòng nhập mã tác giả.
                             </div>
                         </div>
                         <div className='col-md-8'>
-                            <label className="form-label">Blog Title</label>
+                            <label className="form-label fw-semibold">Tiêu đề bài viết *</label>
                             <input className='form-control' type="text" name="title" onChange={handleChange} value={data.title} required />
-                            <div className="valid-feedback">
-                                Looks good!
-                            </div>
                             <div className="invalid-feedback">
-                                Please enter a title.
+                                Vui lòng nhập tiêu đề bài viết.
                             </div>
                         </div>
                         <div className='col-md-12'>
-                            <label className="form-label">Blog Description</label>
+                            <label className="form-label fw-semibold">Tóm tắt ngắn (Description) *</label>
                             <input className='form-control' type="text" name="description" onChange={handleChange} value={data.description} required />
-                            <div className="valid-feedback">
-                                Looks good!
-                            </div>
                             <div className="invalid-feedback">
-                                Please enter a description.
+                                Vui lòng nhập tóm tắt nội dung.
                             </div>
                         </div>
                         <div className='col-md-12'>
-                            <label className="form-label">Blog Image</label>
-                            <input className='form-control' type="file" name='image' onChange={handleChangeImage} accept=".png, .jpg, .jpeg" required />
-                            <div className="valid-feedback">
-                                Looks good!
-                            </div>
-                            <div className="invalid-feedback">
-                                Please choose a image.
-                            </div>
+                            <label className="form-label fw-semibold">Hình ảnh minh họa *</label>
+                            <input className='form-control' type="file" name='image' onChange={handleChangeImage} accept=".png, .jpg, .jpeg" />
+                            {data.image && <div className="form-text">Ảnh hiện tại: {data.image}</div>}
                         </div>
                         <div className='col-md-12'>
-                            <label className="form-label">Blog Content</label>
-                            <textarea className='form-control' name="content" onChange={handleChange} value={data.content} required></textarea>
-                            <div className="valid-feedback">
-                                Looks good!
-                            </div>
+                            <label className="form-label fw-semibold">Nội dung chi tiết bài viết *</label>
+                            <textarea className='form-control' name="content" rows={6} onChange={handleChange} value={data.content} required></textarea>
                             <div className="invalid-feedback">
-                                Please enter a content.
+                                Vui lòng nhập nội dung chi tiết bài viết.
                             </div>
                         </div>
-                        <button type="submit" className="btn btn-primary">Update Blog</button>
-                        <button type="button" className="btn btn-danger" onClick={turnBackButton}>Go Back</button>
+                        <div className="d-flex gap-2 mt-4">
+                            <button type="submit" className="btn btn-primary px-4 py-2">Lưu cập nhật</button>
+                            <button type="button" className="btn btn-secondary px-4 py-2" onClick={turnBackButton}>Quay lại</button>
+                        </div>
                     </form>
-                    <div className='col-md-12'>
+                    <div className='col-md-12 mt-3'>
                         <FormError error={getError} />
                     </div>
                 </div>

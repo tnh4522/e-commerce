@@ -45,11 +45,13 @@ export function extractFilenames(inputString) {
 }
 
 export function formatCurrency(value) {
-    return new Intl.NumberFormat('en-US', {
+    const num = sanitizePrice(value);
+    const vndPrice = num > 0 && num < 1000 ? Math.round(num * 10000) : num;
+    return new Intl.NumberFormat('vi-VN', {
         style: 'currency',
-        currency: 'USD',
-        maximumFractionDigits: 2,
-    }).format(sanitizePrice(value));
+        currency: 'VND',
+        maximumFractionDigits: 0,
+    }).format(vndPrice);
 }
 
 export function getStoredCart() {

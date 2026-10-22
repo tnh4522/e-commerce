@@ -40,14 +40,14 @@ function Payment() {
     if (!url) {
         return (
             <div className="container-fluid py-5 text-center">
-                <h3>Redirecting...</h3>
-                <p>No payment data found. Redirecting to checkout.</p>
+                <h3>Đang chuyển hướng...</h3>
+                <p>Không tìm thấy thông tin thanh toán. Đang chuyển hướng về trang thanh toán.</p>
             </div>
         );
     }
 
     return (
-        <iframe ref={iframeRef} src={url} width="100%" height={800} title="PayOS" style={{border: 'none'}}></iframe>
+        <iframe ref={iframeRef} src={url} width="100%" height={800} title="Thanh toán trực tuyến" style={{border: 'none'}}></iframe>
     );
 }
 

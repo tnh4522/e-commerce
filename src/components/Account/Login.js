@@ -6,7 +6,6 @@ import { useNavigate } from "react-router-dom";
 import API from '../API/API';
 
 function Login() {
-
     const [getInput, setInput] = useState({
         email: '',
         password: ''
@@ -26,11 +25,11 @@ function Login() {
         let errorSubmit = {};
         let flag = true;
         if (getInput.email === '') {
-            errorSubmit.email = 'Email is required!';
+            errorSubmit.email = 'Vui lòng nhập địa chỉ email!';
             flag = false;
         }
         if (getInput.password === '') {
-            errorSubmit.password = 'Password is required!';
+            errorSubmit.password = 'Vui lòng nhập mật khẩu!';
             flag = false;
         }
         if (flag === false) {
@@ -43,7 +42,7 @@ function Login() {
                     navigate('/');
                 })
                 .catch(err => {
-                    errorSubmit.email = 'Email or password is not correct!';
+                    errorSubmit.email = 'Email hoặc mật khẩu không chính xác!';
                     setError(errorSubmit);
                 })
         }
@@ -53,11 +52,11 @@ function Login() {
             <section className="py-5 mb-5" style={{ background: `url(${backgroundPattern})` }}>
                 <div className="container-fluid">
                     <div className="d-flex justify-content-between">
-                        <h1 className="page-title pb-2">Login</h1>
+                        <h1 className="page-title pb-2">Đăng nhập</h1>
                         <nav className="breadcrumb fs-6">
-                            <Link className="breadcrumb-item nav-link" href="#">Home</Link>
-                            <Link className="breadcrumb-item nav-link" href="#">Pages</Link>
-                            <span className="breadcrumb-item active" aria-current="page">Login</span>
+                            <Link className="breadcrumb-item nav-link" to="/">Trang chủ</Link>
+                            <Link className="breadcrumb-item nav-link" to="/shop">Trang</Link>
+                            <span className="breadcrumb-item active" aria-current="page">Đăng nhập</span>
                         </nav>
                     </div>
                 </div>
@@ -65,27 +64,27 @@ function Login() {
             <section id="login-form" className="py-5">
                 <div className="container-sm">
                     <div className="row justify-content-center">
-                        <div className="col-lg-4 p-5 border shadow-sm">
-                            <h5 className="text-uppercase mb-4">Login</h5>
+                        <div className="col-lg-4 p-5 border shadow-sm rounded-3 bg-white">
+                            <h5 className="text-uppercase mb-4 fw-bold">Đăng nhập tài khoản</h5>
                             <form id="form" className="form-group flex-wrap" onSubmit={handleSubmit} method="post">
                                 <div className="col-12 pb-3">
-                                    <label className="d-none">Username or email address *</label>
-                                    <input className="form-control" type="email" placeholder="Enter Your Email" name="email" value={getInput.email} onChange={handleInput} required autoComplete="email" autoFocus aria-describedby="emailHelp" />
+                                    <label className="form-label">Địa chỉ email *</label>
+                                    <input className="form-control" type="email" placeholder="Nhập địa chỉ email của bạn" name="email" value={getInput.email} onChange={handleInput} required autoComplete="email" autoFocus />
                                 </div>
                                 <div className="col-12 pb-3">
-                                    <label className="d-none">Password *</label>
-                                    <input className="form-control" type="password" placeholder="Enter Your Password" name="password" value={getInput.password} onChange={handleInput} required />
+                                    <label className="form-label">Mật khẩu *</label>
+                                    <input className="form-control" type="password" placeholder="Nhập mật khẩu" name="password" value={getInput.password} onChange={handleInput} required />
                                 </div>
                                 <FormError error={getError} />
                                 <div className="col-12 pb-3">
-                                    <label>
-                                        <input type="checkbox" />
-                                        <span className="label-body"> Remember me</span>
+                                    <label className="form-check-label">
+                                        <input type="checkbox" className="form-check-input me-2" />
+                                        <span>Ghi nhớ đăng nhập</span>
                                     </label>
                                 </div>
                                 <div className="col-12">
-                                    <button type="submit" name="submit" className="btn btn-primary text-uppercase w-100">Log in</button>
-                                    <p>You don't have an account? <Link to="/register">Register here</Link></p>
+                                    <button type="submit" name="submit" className="btn btn-primary text-uppercase w-100 py-2">Đăng nhập</button>
+                                    <p className="mt-3 mb-0 text-center">Bạn chưa có tài khoản? <Link to="/register">Đăng ký ngay</Link></p>
                                 </div>
                             </form>
                         </div>

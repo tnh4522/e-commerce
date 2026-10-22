@@ -1,118 +1,106 @@
-import { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate } from 'react-router-dom';
 import backgroundPattern from '../../images/background-pattern.jpg';
-import SideBar from "../Category/SideBar";
-import ShopPagination from "./ShopPagination";
-import Modal from "../Modal/Modal";
-import { addProductToCart, safeParseJSON } from '../utils/cartUtils';
-import { getProductImageSrc, getProductName, getProductPrice, getProductPriceLabel } from '../utils/productUtils';
+import { useEffect, useState } from 'react';
+import Modal from '../Modal/Modal';
+import { addProductToCart } from '../utils/cartUtils';
+import { getProductName, getProductPrice } from '../utils/productUtils';
 import dataService from '../../services/dataService';
-function Shop(props) {
+import ProductItem from '../Product/ProductItem';
+
+function Shop() {
     const [products, setProducts] = useState([]);
     const [records, setRecords] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState('');
     const [modalMessage, setModalMessage] = useState('');
     const [showModal, setShowModal] = useState(false);
     const [wishlist, setWishlist] = useState([]);
-    const navigater = useNavigate();
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState('');
+
+    let navigater = useNavigate();
+
     useEffect(() => {
+        let isMounted = true;
+        setLoading(true);
         dataService.getProducts()
-            .then(list => {
-                const data = Array.isArray(list) ? list : [];
-                setProducts(data);
-                setRecords(data);
+            .then(data => {
+                if (!isMounted) return;
+                const safeData = Array.isArray(data) ? data : [];
+                setProducts(safeData);
+                setRecords(safeData);
                 setError('');
             })
             .catch(() => {
-                setError('We could not load products right now. Please try again later.');
+                if (!isMounted) return;
+                setProducts([]);
+                setRecords([]);
+                setError('Không thể tải danh sách sản phẩm. Đang chuyển sang dữ liệu dự phòng.');
             })
-            .finally(() => setLoading(false));
-        const localStorageWishlist = safeParseJSON(localStorage.getItem('wishlist'), []);
-        if (Array.isArray(localStorageWishlist)) {
+            .finally(() => {
+                if (isMounted) setLoading(false);
+            });
+
+        return () => { isMounted = false; };
+    }, []);
+
+    useEffect(() => {
+        const localStorageWishlist = JSON.parse(localStorage.getItem('wishlist'));
+        if (localStorageWishlist) {
             setWishlist(localStorageWishlist);
         }
     }, []);
-    const searchFilter = (e) => {
+
+    const Filter = (e) => {
         const keyword = e.target.value.trim().toLowerCase();
         setRecords(products.filter(val => getProductName(val).toLowerCase().includes(keyword)));
-    }
-    function renderProducts(products) {
-        let currentProducts = products;
-        if (currentProducts) {
-            return currentProducts.map((item) => {
-                const isWishlistItem = wishlist.includes(item.id);
-                return (
-                    <div className="col" key={item.id}>
-                        <div className="product-item" id={item.id}>
-                            <button type="button" onClick={addToWishlist} className={`btn-wishlist border-0 ${isWishlistItem ? 'red-heart' : ''}`} aria-label={isWishlistItem ? 'Remove from wishlist' : 'Add to wishlist'}><svg width={24} height={24}><use xlinkHref="#heart" /></svg></button>
-                            <figure>
-                                <Link to={'/product/detail/' + item.id} title="Product Title">
-                                    <img alt={getProductName(item)} src={getProductImageSrc(item)} className="tab-image" loading="lazy" />
-                                </Link>
-                            </figure>
-                            <Link to={'/product/detail/' + item.id} className="text-decoration-none"><h3>{getProductName(item)}</h3></Link>
-                            <span className="qty">Reviews</span><span className="rating"><svg width={24} height={24} className="text-primary"><use xlinkHref="#star-solid" /></svg> 4.5</span>
-                            <span className="price">{getProductPriceLabel(item)}</span>
-                            <div className="d-flex align-items-center justify-content-between">
-                                <div className="input-group product-qty" aria-label="Default quantity is 1">
-                                    <span className="input-group-btn">
-                                        <button type="button" className="quantity-left-minus btn btn-danger btn-number" disabled aria-label="Decrease quantity">
-                                            <svg width={16} height={16}><use xlinkHref="#minus" /></svg>
-                                        </button>
-                                    </span>
-                                    <input type="text" name="quantity" className="form-control input-number" value={1} readOnly aria-label="Quantity" />
-                                    <span className="input-group-btn">
-                                        <button type="button" className="quantity-right-plus btn btn-success btn-number" disabled aria-label="Increase quantity">
-                                            <svg width={16} height={16}><use xlinkHref="#plus" /></svg>
-                                        </button>
-                                    </span>
-                                </div>
-                                <button type="button" className="nav-link border-0 bg-transparent" onClick={addToCart} disabled={getProductPrice(item) < 0}>Add to Cart <svg width={24} height={24}><use xlinkHref="#cart" /></svg></button>
-                            </div>
-                        </div>
-                    </div>
-                )
-            })
-        }
-    }
-    function addToCart(e) {
-        let productId = e.target.closest('.product-item').id;
-        productId = parseInt(productId);
-        addProductToCart(productId, 1);
-        setModalMessage('Add to cart successfully!');
+    };
+
+    function handleAddToCart(productId, quantity = 1) {
+        addProductToCart(productId, quantity);
+        setModalMessage(`Đã thêm ${quantity} sản phẩm vào giỏ hàng thành công!`);
         setShowModal(true);
     }
-    function addToWishlist(e) {
+
+    function handleWishlistToggle(e, productId) {
         const getUser = localStorage.getItem('user');
         if (getUser) {
-            let productId = e.target.closest('.product-item').id;
-            productId = parseInt(productId);
-    
             const isWishlistItem = wishlist.includes(productId);
-    
             let updatedWishlist = [];
             if (isWishlistItem) {
                 updatedWishlist = wishlist.filter(id => id !== productId);
             } else {
-
                 updatedWishlist = [...wishlist, productId];
             }
-    
+
             localStorage.setItem('wishlist', JSON.stringify(updatedWishlist));
             setWishlist(updatedWishlist);
-    
-            setModalMessage(isWishlistItem ? 'Removed from wishlist!' : 'Added to wishlist!');
+
+            setModalMessage(isWishlistItem ? 'Đã xóa khỏi danh sách yêu thích!' : 'Đã thêm vào danh sách yêu thích!');
             setShowModal(true);
         } else {
-            alert('Please login to use this feature!');
+            alert('Vui lòng đăng nhập để sử dụng tính năng này!');
             navigater('/login');
         }
-    };
+    }
+
+    function renderProducts(items) {
+        if (!items || items.length === 0) return null;
+        return items.map((item) => (
+            <div className="col" key={item.id}>
+                <ProductItem
+                    item={item}
+                    isWishlist={wishlist.includes(item.id)}
+                    onWishlistToggle={handleWishlistToggle}
+                    onAddToCart={handleAddToCart}
+                />
+            </div>
+        ));
+    }
+
     const handleChanges = (e) => {
         const newOrder = e.target.value;
         sorting(newOrder);
-    }
+    };
+
     const sorting = (sortOrder) => {
         let sorted;
         if (sortOrder === 'name_a_z') {
@@ -128,6 +116,7 @@ function Shop(props) {
         }
         setRecords(sorted);
     };
+
     useEffect(() => {
         if (showModal) {
             const timer = setTimeout(() => {
@@ -145,11 +134,11 @@ function Shop(props) {
             <section className="py-5 mb-5" style={{ background: `url(${backgroundPattern})` }}>
                 <div className="container-fluid">
                     <div className="d-flex justify-content-between">
-                        <h1 className="page-title pb-2">Shop</h1>
+                        <h1 className="page-title pb-2">Cửa hàng</h1>
                         <nav className="breadcrumb fs-6">
-                            <Link className="breadcrumb-item nav-link" to="/">Home</Link>
-                            <Link className="breadcrumb-item nav-link" to="/shop">Pages</Link>
-                            <span className="breadcrumb-item active" aria-current="page">Shop</span>
+                            <Link className="breadcrumb-item nav-link" to="/">Trang chủ</Link>
+                            <Link className="breadcrumb-item nav-link" to="/shop">Trang</Link>
+                            <span className="breadcrumb-item active" aria-current="page">Cửa hàng</span>
                         </nav>
                     </div>
                 </div>
@@ -157,65 +146,47 @@ function Shop(props) {
             <div className="shopify-grid">
                 <div className="container-fluid">
                     <div className="row g-5">
-                        <aside className="col-md-2">
-                            <SideBar searchFilter={searchFilter} />
-                        </aside>
-                        <main className="col-md-10">
+                        <main className="main-content">
                             <div className="filter-shop d-flex justify-content-between">
                                 <div className="showing-product">
-                                    <p>Showing <span className="text-primary">{records.length}</span> of {products.length} results</p>
+                                    <p>Hiển thị 1–{records.length} trên {products.length} kết quả</p>
                                 </div>
                                 <div className="sort-by">
-                                    <select id="input-sort" name="sort" className="form-control" data-filter-sort data-filter-order onChange={handleChanges}>
-                                        <option value="">Default sorting</option>
-                                        <option value="name_a_z">Name (A - Z)</option>
-                                        <option value="name_z_a">Name (Z - A)</option>
-                                        <option value="price_low_high">Price (Low - High)</option>
-                                        <option value="price_high_low">Price (High - Low)</option>
+                                    <select id="input-sort" className="form-control" data-filter-sort="sortOrder" data-filter-order="desc" onChange={handleChanges}>
+                                        <option value="">Thứ tự mặc định</option>
+                                        <option value="name_a_z">Tên (A - Z)</option>
+                                        <option value="name_z_a">Tên (Z - A)</option>
+                                        <option value="price_low_high">Giá (Thấp - Cao)</option>
+                                        <option value="price_high_low">Giá (Cao - Thấp)</option>
                                     </select>
                                 </div>
                             </div>
-                            {/* / product-grid */}
-                            {/* <nav className="navigation paging-navigation text-center py-4" role="navigation">
-                                <div className="pagination loop-pagination d-flex justify-content-center align-items-center"></div>
-                                    <Link to="#">
-                                        <svg className="chevron-left pe-3">
-                                            <use xlinkHref="#chevron-left" />
-                                        </svg>
-                                    </Link>
-                                    <span aria-current="page" className="page-numbers current pe-3">1</span>
-                                    <Link className="page-numbers pe-3" to="#">2</Link>
-                                    <Link className="page-numbers pe-3" to="#">3</Link>
-                                    <Link className="page-numbers pe-3" to="#">4</Link>
-                                    <Link className="page-numbers" to="#">5</Link>
-                                    <Link to="#">
-                                        <svg className="chevron-right ps-3">
-                                            <use xlinkHref="#chevron-right" />
-                                        </svg>
-                                    </Link>
-                                </div>
-                            </nav> */}
+                            <div className="mb-3">
+                                <input type="text" className="form-control" placeholder="Tìm kiếm sản phẩm theo tên..." onChange={Filter} />
+                            </div>
                             {loading ? (
                                 <div className="text-center py-5">
                                     <div className="spinner-border text-primary" role="status">
-                                        <span className="visually-hidden">Loading products...</span>
+                                        <span className="visually-hidden">Đang tải sản phẩm...</span>
                                     </div>
                                 </div>
                             ) : error ? (
-                                <div className="alert alert-danger" role="alert">{error}</div>
+                                <div className="alert alert-warning" role="alert">{error}</div>
                             ) : records.length === 0 ? (
                                 <div className="empty-state text-center py-5">
-                                    <h3>No products found</h3>
-                                    <p className="text-muted">Try another search term or browse all categories.</p>
+                                    <p className="lead">Không tìm thấy sản phẩm phù hợp với bộ lọc hiện tại.</p>
                                 </div>
                             ) : (
-                                <ShopPagination products={records} renderProducts={renderProducts} />
+                                <div className="product-grid row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-5">
+                                    {renderProducts(records)}
+                                </div>
                             )}
                         </main>
                     </div>
                 </div>
             </div>
         </div>
-    )
+    );
 }
+
 export default Shop;

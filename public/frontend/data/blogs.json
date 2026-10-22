@@ -1,42 +1,52 @@
 [
   {
     "id": 1,
-    "title": "5 Xu Hướng Thời Trang Nổi Bật Mùa Hè 2025",
-    "description": "Khám phá những xu hướng thời trang được yêu thích nhất mùa hè năm nay, từ màu sắc rực rỡ đến các kiểu dáng thoải mái.",
+    "title": "Thịt giăm bông nướng mật ong xá xíu thơm lừng đậm đà",
+    "description": "Năm nay thay vì mua ngoài tiệm đắt đỏ, hãy tự tay làm món thịt giăm bông nướng mật ong xá xíu thơm lừng đậm đà ngay tại gian bếp nhà bạn.",
+    "content": "Món thịt giăm bông nướng mật ong xá xíu là sự kết hợp tuyệt đỉnh giữa ẩm thực truyền thống phương Tây và phong vị Á Đông đậm đà.<br/><br/>Lớp vỏ mật ong rừng tự nhiên kết hợp cùng sốt xá xíu khi nướng ở nhiệt độ chuẩn sẽ tạo nên một lớp caramel vàng óng, giòn nhẹ bên ngoài nhưng bên trong từng thớ thịt vẫn giữ được độ mềm ẩm và mọng nước.<br/><br/>Hãy sử dụng mật ong nguyên chất Amber Jar và thịt đùi heo tươi sạch để món ăn đạt được hương vị thơm ngon và chuẩn vị nhất nhé!",
     "image": "post-thumb-1.jpg",
-    "createdAt": "2025-06-01",
-    "author": "Admin"
+    "createdAt": "2025-06-12",
+    "updatedAt": "2025-06-15",
+    "author": "Bếp trưởng Gordon"
   },
   {
     "id": 2,
-    "title": "Cách Phối Đồ Casual Đẹp Mà Không Cần Tốn Nhiều Tiền",
-    "description": "Hướng dẫn mix-match trang phục casual hàng ngày sao cho vừa đẹp vừa tiết kiệm chi phí.",
+    "title": "Bò hầm sốt vang Osso Buco mềm tan chuẩn vị Ý bằng nồi áp suất",
+    "description": "Công thức nấu bò hầm sốt vang cà chua Osso Buco mềm tan chuẩn vị Ý chỉ với 6 nguyên liệu hữu cơ tươi ngon trong vòng 1 giờ.",
+    "content": "Osso Buco là món ăn trứ danh của vùng Lombardy, nước Ý. Từng miếng bắp bò có gân và tủy xương béo ngậy được hầm mềm nhừ cùng cà chua đỏ hữu cơ, rượu vang và các loại rau củ củ cần tây, cà rốt tươi.<br/><br/>Bí quyết để món bò hầm này thơm ngát chính là một bó thảo mộc tươi gồm hương thảo (rosemary) và cỏ xạ hương tươi được buộc gọn thả vào nồi hầm.<br/><br/>Thưởng thức cùng một ly nước ép cam tươi hoặc lát bánh mì nướng bơ tỏi giòn rụm sẽ là trải nghiệm ẩm thực ấm áp tuyệt vời cho cả gia đình.",
     "image": "post-thumb-2.jpg",
-    "createdAt": "2025-05-20",
-    "author": "Admin"
+    "createdAt": "2025-05-28",
+    "updatedAt": "2025-05-30",
+    "author": "Bếp trưởng Mario"
   },
   {
     "id": 3,
-    "title": "Top 10 Outfit Văn Phòng Thanh Lịch Cho Nữ Công Sở",
-    "description": "Tổng hợp những bộ outfit công sở thanh lịch, chuyên nghiệp mà vẫn thoải mái cho các nàng công sở.",
+    "title": "Bít tết thăn nội bò áp chảo cùng thảo mộc tươi từ nông trại",
+    "description": "Thăn bò bít tết hảo hạng kết hợp hoàn hảo cùng khay gia vị thảo mộc tươi tự nhiên và sốt chấm thủ công tinh tế.",
+    "content": "Thăn nội bò (Beef Tenderloin) là phần thịt mềm nhất, ngọt nhất của chú bò. Khi áp chảo cùng bơ tươi và vài nhánh hương thảo (rosemary) tươi thu hoạch từ vườn rau hữu cơ, hương thơm sẽ ngập tràn căn bếp.<br/><br/>Để giữ được vị ngọt tự nhiên, chỉ cần nêm một chút muối biển và tiêu đen đập dập. Thưởng thức kèm salad dưa leo baby, cà chua chùm đỏ và nước ép sinh tố mát lạnh để cân bằng dinh dưỡng.",
     "image": "post-thumb-3.jpg",
-    "createdAt": "2025-05-10",
-    "author": "Admin"
+    "createdAt": "2025-05-15",
+    "updatedAt": "2025-05-18",
+    "author": "Bếp FoodMart"
   },
   {
     "id": 4,
-    "title": "Bí Quyết Bảo Quản Quần Áo Luôn Như Mới",
-    "description": "Chia sẻ những mẹo đơn giản giúp quần áo của bạn luôn giữ được màu sắc và form dáng đẹp.",
+    "title": "Bí quyết làm khoai tây nướng vàng giòn rụm thơm lừng",
+    "description": "Bí quyết làm khoai tây nướng giòn rụm bên ngoài nhưng bên trong mềm xốp như kem bông chuẩn phong cách ẩm thực Anh Quốc.",
+    "content": "Khoai tây nướng vàng ươm là món ăn kèm kinh điển cho mọi bữa tiệc thịt nướng. Để khoai có lớp vỏ giòn tan mà ruột vẫn mềm mọng, hãy luộc sơ khoai với một chút muối, lắc nhẹ để tạo lớp tinh bột tơi xốp trên bề mặt trước khi rưới dầu ô liu và đem nướng.<br/><br/>Rắc thêm một chút muối biển và ngò tây thái nhỏ ngay khi khoai vừa ra khỏi lò để cảm nhận trọn vẹn vị bùi béo tự nhiên.",
     "image": "post-thumb-1.jpg",
-    "createdAt": "2025-04-28",
-    "author": "Admin"
+    "createdAt": "2025-04-20",
+    "updatedAt": "2025-04-22",
+    "author": "Chuyên gia dinh dưỡng Sarah"
   },
   {
     "id": 5,
-    "title": "Streetwear 2025: Phong Cách Đường Phố Lên Ngôi",
-    "description": "Phong cách streetwear tiếp tục thống trị làng thời trang 2025 với những thiết kế táo bạo và cá tính.",
+    "title": "10 siêu thực phẩm hữu cơ tự nhiên tăng cường hệ miễn dịch",
+    "description": "Khám phá các loại trái cây tươi, mật ong hoa rừng và rau xanh giàu chất chống oxy hóa tự nhiên giúp nâng cao sức khỏe hàng ngày.",
+    "content": "Một chế độ ăn uống lành mạnh bắt đầu từ những nguyên liệu sạch và tự nhiên nhất. Các loại quả mọng như mâm xôi (raspberry), dưa leo, bơ tươi và mật ong tự nhiên chứa hàm lượng dồi dào các vitamin A, C, E cũng như chất béo tốt.<br/><br/>Hãy ghé thăm các quầy thực phẩm tươi sống tại FoodMart mỗi ngày để luôn có sẵn nguồn thực phẩm xanh sạch và an toàn cho gia đình bạn!",
     "image": "post-thumb-2.jpg",
-    "createdAt": "2025-04-15",
-    "author": "Admin"
+    "createdAt": "2025-04-05",
+    "updatedAt": "2025-04-08",
+    "author": "Bác sĩ Emily Green"
   }
 ]

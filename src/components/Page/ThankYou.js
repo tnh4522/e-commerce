@@ -39,12 +39,12 @@ function ThankYou() {
                         <div className="col-md-8">
                             <div className="thank-you-content text-center">
                                 <i className="fa-solid fa-circle-check" style={{ fontSize: '100px', color: '#00bdaa', marginBottom: '20px' }}></i>
-                                <h2 className="mb-4">Thank you for your order!</h2>
-                                <p className="mb-3">Your order has been placed and will be processed as soon as possible.</p>
-                                {orderCode && <p className="mb-3">Make sure you make note of your order number, which is <strong>#{orderCode}</strong></p>}
-                                <p className="mb-3">You will be receiving an <a href="https://mail.google.com/mail/u/0/#inbox" target='_blank' rel='noreferrer'><strong>email</strong></a> shortly with confirmation of your order. <br /> <strong>Estimated delivery time is 4-5 working days.</strong></p>
-                                <p className="mb-3">If you have any questions, please feel free to contact us at <Link to="/contact">Customer Support</Link></p>
-                                <Link to="/" className="btn btn-primary">Back to Home</Link>
+                                <h2 className="mb-4">Cảm ơn bạn đã đặt hàng tại FoodMart!</h2>
+                                <p className="mb-3">Đơn hàng của bạn đã được ghi nhận thành công và đang được chuẩn bị để giao tới bạn trong thời gian sớm nhất.</p>
+                                {orderCode && <p className="mb-3">Mã đơn hàng của bạn là: <strong>#{orderCode}</strong></p>}
+                                <p className="mb-3">Thông tin chi tiết đơn hàng đã được gửi tới hòm thư <a href="https://mail.google.com" target='_blank' rel='noreferrer'><strong>Email</strong></a> của bạn. <br /> <strong>Thời gian giao hàng dự kiến: trong vòng 24 - 48 giờ.</strong></p>
+                                <p className="mb-3">Nếu cần hỗ trợ thêm thông tin, xin vui lòng liên hệ <Link to="/contact">Bộ phận Chăm sóc khách hàng</Link></p>
+                                <Link to="/" className="btn btn-primary px-4 py-2">Quay lại trang chủ</Link>
                             </div>
                         </div>
                     </div>
@@ -57,44 +57,44 @@ function ThankYou() {
                         <div className="col-md-12">
                             <div className="contact-information">
                                 <div className="section-header">
-                                    <h2 className="section-title"><span className="text-primary">Get in</span> Touch</h2>
-                                    <p>We will get back to you as soon as possible.</p>
+                                    <h2 className="section-title"><span className="text-primary">Liên hệ</span> hỗ trợ</h2>
+                                    <p>Đội ngũ tư vấn viên của FoodMart luôn sẵn sàng phục vụ bạn 24/7.</p>
                                 </div>
                                 <div className="row">
                                     <div className="d-flex flex-wrap">
                                         <div className="col-md-6">
                                             <div className="detail">
-                                                <h3>Phones</h3>
+                                                <h3>Hotline CSKH</h3>
                                                 <ul className="list-unstyled">
-                                                    <li><i className="icon icon-phone" />+1650-243-00023</li>
-                                                    <li><i className="icon icon-phone" />+1650-243-00021</li>
+                                                    <li><i className="icon icon-phone" />1900 6868</li>
+                                                    <li><i className="icon icon-phone" />0901 234 567</li>
                                                 </ul>
                                             </div>
                                         </div>
                                         <div className="col-md-6 border-bottom">
                                             <div className="detail">
-                                                <h3>Emails</h3>
+                                                <h3>Hộp thư điện tử</h3>
                                                 <ul className="list-unstyled">
-                                                    <li><i className="icon icon-envelope" /><Link to="mailto:info@yourcompany.com">info@yourcompany.com</Link></li>
+                                                    <li><i className="icon icon-envelope" /><Link to="mailto:support@foodmart.vn">support@foodmart.vn</Link></li>
                                                 </ul>
                                             </div>
                                         </div>
                                         <div className="col-md-6 border-right">
                                             <div className="address detail">
-                                                <h3>Address</h3>
+                                                <h3>Địa chỉ cửa hàng chính</h3>
                                                 <ul className="list-unstyled">
-                                                    <li><i className="icon icon-location" /><span>North Melbourne VIC 3051, Australia</span></li>
+                                                    <li><i className="icon icon-location" /><span>123 Hai Bà Trưng, Phường Bến Nghé, Quận 1, TP. Hồ Chí Minh</span></li>
                                                 </ul>
                                             </div>
                                         </div>
                                         <div className="col-md-6">
                                             <div className="detail">
-                                                <h3>Social Links</h3>
+                                                <h3>Kênh truyền thông</h3>
                                                 <ul className="social-links list-unstyled d-flex">
-                                                    <li><Link to="#" className="icon icon-facebook" /></li>
-                                                    <li><Link to="#" className="icon icon-twitter" /></li>
-                                                    <li><Link to="#" className="icon icon-youtube" /></li>
-                                                    <li><Link to="#" className="icon icon-linkedin-square" /></li>
+                                                    <li><Link to="#" className="icon icon-facebook" aria-label="Facebook" /></li>
+                                                    <li><Link to="#" className="icon icon-twitter" aria-label="Twitter" /></li>
+                                                    <li><Link to="#" className="icon icon-youtube" aria-label="Youtube" /></li>
+                                                    <li><Link to="#" className="icon icon-linkedin-square" aria-label="Linkedin" /></li>
                                                 </ul>
                                             </div>
                                         </div>

@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import dataService from '../../services/dataService';
 import { fallbackImage, getImageSrc } from '../utils/imageUtils';
+
 function RecentBlog() {
     const [getData, setData] = useState([]);
     useEffect(() => {
@@ -21,7 +22,7 @@ function RecentBlog() {
                                 <Link to={"/blog/detail/" + item.id}>
                             <img
                                     src={imageSrc}
-                                    alt="post"
+                                    alt={item.title}
                                     className="card-img-top"
                                     onError={(e) => { e.currentTarget.src = fallbackImage; }}
                                 />
@@ -30,7 +31,6 @@ function RecentBlog() {
                             <div className="card-body" >
                                 <div className="post-meta d-flex text-uppercase gap-3 my-2 align-items-center">
                                 <div className="meta-date"><svg width={16} height={16}><use xlinkHref="#calendar" /></svg>{item.createdAt}</div>
-                                    {/* <div className="meta-categories"><HalfRating idBlog={item.id} /></div> */}
                                 </div>
                                 <div className="post-header"  >
                                     <h3 className="post-title" style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
@@ -50,9 +50,9 @@ function RecentBlog() {
             <div className="container-fluid">
                 <div className="row">
                     <div className="section-header d-flex align-items-center justify-content-between my-5">
-                        <h2 className="section-title">Our Recent Blog</h2>
+                        <h2 className="section-title">Bài viết mới nhất</h2>
                         <div className="btn-wrap align-right">
-                            <Link to="/blog" className="d-flex align-items-center nav-link">Read All Articles <svg width={24} height={24}><use xlinkHref="#arrow-right" /></svg></Link>
+                            <Link to="/blog" className="d-flex align-items-center nav-link">Xem tất cả bài viết <svg width={24} height={24}><use xlinkHref="#arrow-right" /></svg></Link>
                         </div>
                     </div>
                 </div>
